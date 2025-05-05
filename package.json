@@ -4,8 +4,9 @@
   "main": "src/sever.js",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon src/sever.js"
-  },  
+    "start": "nodemon src/sever.js",
+    "search-jobs": "node src/utils/searchJobs.js"
+  },
   "type": "module",
   "types": "module",
   "devDependencies": {

@@ -104,8 +104,10 @@ export class StorageService {
     const isNew = !existing;
     this.jobsMap.set(id, job);
 
-    // Debounce na escrita em disco para poupar CPU/I/O no servidor
-    this.scheduleSave();
+    // Salva em disco de forma assíncrona apenas se for uma vaga realmente nova
+    if (isNew) {
+      this.scheduleSave();
+    }
 
     return { job, isNew };
   }
@@ -442,7 +444,7 @@ export class StorageService {
     this.scheduleSave(0);
   }
 
-  private static scheduleSave(delayMs = 1000): void {
+  private static scheduleSave(delayMs = 3000): void {
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout);
     }

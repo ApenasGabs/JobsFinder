@@ -91,4 +91,25 @@ describe("StorageService", () => {
     assert.equal(page1.pageSize, 5);
     assert.ok(page1.total >= 5);
   });
+
+  it("should return isNew === true on first insert and isNew === false on re-ingestion", () => {
+    const testJob: Omit<Job, "id"> = {
+      title: "Engenheiro de Dados Snowflake",
+      company: "DataCorp Test",
+      location: "Remoto",
+      workModel: "REMOTO",
+      contractType: "CLT",
+      seniorityLevel: "SENIOR",
+      url: "https://datacorp.test/jobs/snowflake-senior",
+      source: "LEVER",
+      stack: ["Snowflake", "SQL", "Python"],
+    };
+
+    const first = StorageService.upsertJob(testJob);
+    assert.equal(first.isNew, true, "Primeira inserção deve retornar isNew === true");
+
+    const second = StorageService.upsertJob(testJob);
+    assert.equal(second.isNew, false, "Reingestão da mesma vaga deve retornar isNew === false");
+    assert.equal(second.job.id, first.job.id, "ID deve ser idêntico");
+  });
 });

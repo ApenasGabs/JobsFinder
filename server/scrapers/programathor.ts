@@ -3,6 +3,7 @@ import { BaseScraper } from './base.js';
 import { Job, ScrapeOptions } from '../types.js';
 import { detectSeniority, detectWorkModel, extractStack } from '../utils/normalizer.js';
 import { StorageService } from '../services/storage.js';
+import { LoggerService } from '../services/logger.js';
 
 export class ProgramathorScraper implements BaseScraper {
   public readonly id = 'PROGRAMATHOR';
@@ -30,7 +31,7 @@ export class ProgramathorScraper implements BaseScraper {
         const url = `https://programathor.com.br/jobs${queryParam}`;
 
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 7000);
+        const timeout = setTimeout(() => controller.abort(), 3500);
 
         const response = await fetch(url, {
           headers: {
@@ -42,9 +43,30 @@ export class ProgramathorScraper implements BaseScraper {
         });
         clearTimeout(timeout);
 
+        if (response.status === 403 || response.status === 429) {
+          LoggerService.warn(
+            'CRAWLER',
+            'SCRAPER_CIRCUIT_BREAK',
+            `Programathor bloqueou requisições (HTTP ${response.status}). Abortando ciclo restante.`,
+            { status: response.status, term }
+          );
+          break;
+        }
+
         if (!response.ok) continue;
 
         const html = await response.text();
+
+        if (html.includes('cf-browser-verification') || html.includes('Just a moment...')) {
+          LoggerService.warn(
+            'CRAWLER',
+            'SCRAPER_CIRCUIT_BREAK',
+            'Programathor retornou desafio Cloudflare. Abortando ciclo restante.',
+            { term }
+          );
+          break;
+        }
+
         const $ = cheerio.load(html);
 
         // Seleciona os cartões de vagas do Programathor
@@ -81,8 +103,24 @@ export class ProgramathorScraper implements BaseScraper {
           onJobFound(job);
           count++;
         });
-      } catch (err) {
-        console.error(`[Programathor] Erro ao buscar "${term}":`, err);
+      } catch (err: any) {
+        const isAbort = err?.name === 'AbortError' || err?.message?.includes('aborted');
+        if (isAbort) {
+          LoggerService.warn(
+            'CRAWLER',
+            'SCRAPER_CIRCUIT_BREAK',
+            `Programathor atingiu timeout (3.5s) na busca de "${term}". Abortando ciclo restante.`,
+            { error: err?.message || String(err), term }
+          );
+        } else {
+          LoggerService.warn(
+            'CRAWLER',
+            'SCRAPER_CIRCUIT_BREAK',
+            `Programathor falhou na conexão para "${term}". Abortando ciclo restante.`,
+            { error: err?.message || String(err), term }
+          );
+        }
+        break;
       }
     }
 

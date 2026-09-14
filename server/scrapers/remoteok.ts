@@ -2,6 +2,7 @@ import { BaseScraper } from './base.js';
 import { Job, ScrapeOptions } from '../types.js';
 import { detectSeniority, extractStack } from '../utils/normalizer.js';
 import { StorageService } from '../services/storage.js';
+import { LoggerService } from '../services/logger.js';
 
 interface RemoteOkItem {
   id?: string | number;
@@ -36,7 +37,7 @@ export class RemoteOKScraper implements BaseScraper {
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
+      const timeout = setTimeout(() => controller.abort(), 4000);
 
       const response = await fetch('https://remoteok.com/api', {
         headers: {
@@ -48,6 +49,12 @@ export class RemoteOKScraper implements BaseScraper {
       clearTimeout(timeout);
 
       if (!response.ok) {
+        LoggerService.warn(
+          'CRAWLER',
+          'SCRAPER_DEGRADED',
+          `RemoteOK retornou HTTP ${response.status}. Pulando.`,
+          { status: response.status }
+        );
         return [];
       }
 
@@ -95,8 +102,23 @@ export class RemoteOKScraper implements BaseScraper {
       if (onProgress) {
         onProgress({ message: `RemoteOK finalizado: ${foundJobs.length} vagas encontradas`, percent: 100 });
       }
-    } catch (err) {
-      console.error('[RemoteOK] Erro na requisição:', err);
+    } catch (err: any) {
+      const isAbort = err?.name === 'AbortError' || err?.message?.includes('aborted');
+      if (isAbort) {
+        LoggerService.warn(
+          'CRAWLER',
+          'SCRAPER_CIRCUIT_BREAK',
+          'RemoteOK API atingiu timeout de 4.0s. Pulando.',
+          { error: err?.message || String(err) }
+        );
+      } else {
+        LoggerService.warn(
+          'CRAWLER',
+          'SCRAPER_CIRCUIT_BREAK',
+          `RemoteOK falhou na requisição: ${err?.message || String(err)}`,
+          { error: err?.message || String(err) }
+        );
+      }
     }
 
     return foundJobs;

@@ -11,8 +11,8 @@ import qrcode from "qrcode";
 import { fileURLToPath } from "url";
 import { TechClassifierService } from "../services/classifier.js";
 import { ConfigService } from "../services/config.js";
-import { StorageService } from "../services/storage.js";
 import { LoggerService } from "../services/logger.js";
+import { StorageService } from "../services/storage.js";
 import { Job, WhatsAppStatus } from "../types.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -454,7 +454,11 @@ export class WhatsAppBot {
           "WHATSAPP",
           "WA_DISPATCH_ERROR",
           `Erro ao enviar mensagem agrupada: ${err?.message || err}`,
-          { target, count: currentBatch.length, error: err?.message || String(err) },
+          {
+            target,
+            count: currentBatch.length,
+            error: err?.message || String(err),
+          },
         );
       }
 

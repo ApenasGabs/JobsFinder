@@ -11,8 +11,8 @@ import { RemoteOKScraper } from "../scrapers/remoteok.js";
 import { WorkableScraper } from "../scrapers/workable.js";
 import { Job, ScrapeOptions, ScrapeProgressEvent } from "../types.js";
 import { TechClassifierService } from "./classifier.js";
-import { StorageService } from "./storage.js";
 import { LoggerService } from "./logger.js";
+import { StorageService } from "./storage.js";
 
 export class CrawlerService {
   private static isRegistered = false;
@@ -98,8 +98,11 @@ export class CrawlerService {
         },
       );
 
+      const scraperStats: Record<string, { jobs: number; durationMs: number; status: 'SUCCESS' | 'ERROR' }> = {};
+
       // Executa os scrapers selecionados em paralelo
       const promises = scrapers.map(async (scraper) => {
+        const scraperStart = Date.now();
         try {
           onProgress({
             type: "progress",
@@ -137,20 +140,38 @@ export class CrawlerService {
             },
           );
 
+          const scraperDuration = Date.now() - scraperStart;
+          scraperStats[scraper.id] = {
+            jobs: jobs.length,
+            durationMs: scraperDuration,
+            status: "SUCCESS",
+          };
+
           onProgress({
             type: "source_done",
             source: scraper.id,
-            message: `${scraper.name} concluído com ${jobs.length} vagas.`,
+            message: `${scraper.name} concluído com ${jobs.length} vagas (${(scraperDuration / 1000).toFixed(1)}s).`,
           });
 
           return jobs;
         } catch (err) {
+          const scraperDuration = Date.now() - scraperStart;
+          scraperStats[scraper.id] = {
+            jobs: 0,
+            durationMs: scraperDuration,
+            status: "ERROR",
+          };
+
           console.error(`[CrawlerService] Erro no scraper ${scraper.id}:`, err);
           LoggerService.error(
             "CRAWLER",
             "SCRAPER_ERROR",
             `Falha no scraper ${scraper.name}: ${(err as any)?.message || err}`,
-            { scraperId: scraper.id, error: (err as any)?.message || String(err) },
+            {
+              scraperId: scraper.id,
+              error: (err as any)?.message || String(err),
+              durationMs: scraperDuration,
+            },
           );
           onProgress({
             type: "error",
@@ -171,7 +192,7 @@ export class CrawlerService {
         "CRAWLER",
         "CRAWL_COMPLETED",
         `Busca finalizada: ${collectedJobs.length} vagas de TI capturadas em ${(durationMs / 1000).toFixed(1)}s`,
-        { totalFound: collectedJobs.length, durationMs },
+        { totalFound: collectedJobs.length, durationMs, scrapers: scraperStats },
       );
       onProgress({
         type: "done",

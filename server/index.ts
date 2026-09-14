@@ -9,9 +9,9 @@ import { ScraperRegistry } from "./scrapers/base.js";
 import { TechClassifierService } from "./services/classifier.js";
 import { ConfigService } from "./services/config.js";
 import { CrawlerService } from "./services/crawler.js";
+import { LogCategory, LoggerService, LogLevel } from "./services/logger.js";
 import { SchedulerService } from "./services/scheduler.js";
 import { StorageService } from "./services/storage.js";
-import { LoggerService, LogCategory, LogLevel } from "./services/logger.js";
 import {
   ContractType,
   ScrapeOptions,

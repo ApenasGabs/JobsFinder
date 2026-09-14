@@ -3,19 +3,19 @@ import {
   Briefcase,
   Building,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Cpu,
+  Download,
   ExternalLink,
+  FileText,
   Layers,
   MapPin,
   MessageSquare,
   Play,
   QrCode,
   Radio,
-  ChevronDown,
-  ChevronUp,
-  Download,
-  FileText,
   RefreshCw,
   Save,
   Search,
@@ -1993,22 +1993,22 @@ export default function App() {
                   const badgeBg = isError
                     ? 'rgba(239, 68, 68, 0.15)'
                     : isWarn
-                    ? 'rgba(245, 158, 11, 0.15)'
-                    : item.category === 'CLASSIFIER'
-                    ? 'rgba(16, 185, 129, 0.15)'
-                    : item.category === 'WHATSAPP'
-                    ? 'rgba(56, 189, 248, 0.15)'
-                    : 'rgba(139, 92, 246, 0.15)';
+                      ? 'rgba(245, 158, 11, 0.15)'
+                      : item.category === 'CLASSIFIER'
+                        ? 'rgba(16, 185, 129, 0.15)'
+                        : item.category === 'WHATSAPP'
+                          ? 'rgba(56, 189, 248, 0.15)'
+                          : 'rgba(139, 92, 246, 0.15)';
 
                   const badgeColor = isError
                     ? '#f87171'
                     : isWarn
-                    ? '#fbbf24'
-                    : item.category === 'CLASSIFIER'
-                    ? '#34d399'
-                    : item.category === 'WHATSAPP'
-                    ? '#38bdf8'
-                    : '#c084fc';
+                      ? '#fbbf24'
+                      : item.category === 'CLASSIFIER'
+                        ? '#34d399'
+                        : item.category === 'WHATSAPP'
+                          ? '#38bdf8'
+                          : '#c084fc';
 
                   return (
                     <div

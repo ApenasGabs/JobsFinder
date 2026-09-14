@@ -1,16 +1,16 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 export type LogCategory =
-  | 'CLASSIFIER'
-  | 'WHATSAPP'
-  | 'CRAWLER'
-  | 'SCHEDULER'
-  | 'STORAGE'
-  | 'USER_ACTION'
-  | 'SYSTEM';
+  | "CLASSIFIER"
+  | "WHATSAPP"
+  | "CRAWLER"
+  | "SCHEDULER"
+  | "STORAGE"
+  | "USER_ACTION"
+  | "SYSTEM";
 
-export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
+export type LogLevel = "INFO" | "WARN" | "ERROR" | "DEBUG";
 
 export interface ActivityLog {
   id: string;
@@ -23,8 +23,8 @@ export interface ActivityLog {
 }
 
 export interface LogFilter {
-  category?: LogCategory | 'ALL';
-  level?: LogLevel | 'ALL';
+  category?: LogCategory | "ALL";
+  level?: LogLevel | "ALL";
   search?: string;
   limit?: number;
   since?: string;
@@ -34,7 +34,7 @@ export class LoggerService {
   private static readonly MAX_RING_BUFFER = 1000;
   private static readonly RETENTION_DAYS = 14;
   private static ringBuffer: ActivityLog[] = [];
-  private static logsDir: string = path.resolve(process.cwd(), 'data', 'logs');
+  private static logsDir: string = path.resolve(process.cwd(), "data", "logs");
   private static isInitialized = false;
 
   private static ensureInitialized() {
@@ -47,22 +47,25 @@ export class LoggerService {
       this.cleanOldLogFiles();
       this.isInitialized = true;
     } catch (err) {
-      console.error('[LoggerService] Erro ao inicializar diretório de logs:', err);
+      console.error(
+        "[LoggerService] Erro ao inicializar diretório de logs:",
+        err,
+      );
     }
   }
 
   private static getTodayLogFilename(): string {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
     return path.join(this.logsDir, `activity-${today}.jsonl`);
   }
 
   private static appendToFile(log: ActivityLog) {
     try {
       const filePath = this.getTodayLogFilename();
-      const line = JSON.stringify(log) + '\n';
-      fs.appendFileSync(filePath, line, 'utf-8');
+      const line = JSON.stringify(log) + "\n";
+      fs.appendFileSync(filePath, line, "utf-8");
     } catch (err) {
-      console.error('[LoggerService] Falha ao persistir log em disco:', err);
+      console.error("[LoggerService] Falha ao persistir log em disco:", err);
     }
   }
 
@@ -71,8 +74,8 @@ export class LoggerService {
       const filePath = this.getTodayLogFilename();
       if (!fs.existsSync(filePath)) return;
 
-      const content = fs.readFileSync(filePath, 'utf-8');
-      const lines = content.trim().split('\n');
+      const content = fs.readFileSync(filePath, "utf-8");
+      const lines = content.trim().split("\n");
       const recent = lines
         .filter((l) => l.trim().length > 0)
         .slice(-this.MAX_RING_BUFFER)
@@ -87,7 +90,10 @@ export class LoggerService {
 
       this.ringBuffer = recent;
     } catch (err) {
-      console.error('[LoggerService] Erro ao carregar logs recentes para buffer:', err);
+      console.error(
+        "[LoggerService] Erro ao carregar logs recentes para buffer:",
+        err,
+      );
     }
   }
 
@@ -99,16 +105,18 @@ export class LoggerService {
       const maxAgeMs = this.RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
       for (const file of files) {
-        if (!file.startsWith('activity-') || !file.endsWith('.jsonl')) continue;
+        if (!file.startsWith("activity-") || !file.endsWith(".jsonl")) continue;
         const filePath = path.join(this.logsDir, file);
         const stats = fs.statSync(filePath);
         if (now - stats.mtimeMs > maxAgeMs) {
           fs.unlinkSync(filePath);
-          console.log(`[LoggerService] Arquivo de log antigo removido: ${file}`);
+          console.log(
+            `[LoggerService] Arquivo de log antigo removido: ${file}`,
+          );
         }
       }
     } catch (err) {
-      console.error('[LoggerService] Erro na rotação de logs antigos:', err);
+      console.error("[LoggerService] Erro na rotação de logs antigos:", err);
     }
   }
 
@@ -117,7 +125,7 @@ export class LoggerService {
     level: LogLevel,
     event: string,
     message: string,
-    details?: Record<string, any>
+    details?: Record<string, any>,
   ): ActivityLog {
     this.ensureInitialized();
 
@@ -128,7 +136,7 @@ export class LoggerService {
       level,
       event,
       message,
-      details: details ? this.sanitizeDetails(details) : undefined
+      details: details ? this.sanitizeDetails(details) : undefined,
     };
 
     // 1. Manter no Ring Buffer em RAM
@@ -141,10 +149,10 @@ export class LoggerService {
     this.appendToFile(entry);
 
     // 3. Imprimir no console caso seja WARN ou ERROR para visibilidade padrão do Docker
-    if (level === 'ERROR') {
-      console.error(`[${category}][${event}] ❌ ${message}`, details || '');
-    } else if (level === 'WARN') {
-      console.warn(`[${category}][${event}] ⚠️ ${message}`, details || '');
+    if (level === "ERROR") {
+      console.error(`[${category}][${event}] ❌ ${message}`, details || "");
+    } else if (level === "WARN") {
+      console.warn(`[${category}][${event}] ⚠️ ${message}`, details || "");
     }
 
     return entry;
@@ -154,36 +162,36 @@ export class LoggerService {
     category: LogCategory,
     event: string,
     message: string,
-    details?: Record<string, any>
+    details?: Record<string, any>,
   ): ActivityLog {
-    return this.log(category, 'INFO', event, message, details);
+    return this.log(category, "INFO", event, message, details);
   }
 
   public static warn(
     category: LogCategory,
     event: string,
     message: string,
-    details?: Record<string, any>
+    details?: Record<string, any>,
   ): ActivityLog {
-    return this.log(category, 'WARN', event, message, details);
+    return this.log(category, "WARN", event, message, details);
   }
 
   public static error(
     category: LogCategory,
     event: string,
     message: string,
-    details?: Record<string, any>
+    details?: Record<string, any>,
   ): ActivityLog {
-    return this.log(category, 'ERROR', event, message, details);
+    return this.log(category, "ERROR", event, message, details);
   }
 
   public static debug(
     category: LogCategory,
     event: string,
     message: string,
-    details?: Record<string, any>
+    details?: Record<string, any>,
   ): ActivityLog {
-    return this.log(category, 'DEBUG', event, message, details);
+    return this.log(category, "DEBUG", event, message, details);
   }
 
   public static getLogs(filter: LogFilter = {}): ActivityLog[] {
@@ -196,14 +204,16 @@ export class LoggerService {
     // mas o ring buffer com 1.000 itens cobre a esmagadora maioria das necessidades interativas.
     if (since) {
       const sinceDate = new Date(since).getTime();
-      result = result.filter((l) => new Date(l.timestamp).getTime() >= sinceDate);
+      result = result.filter(
+        (l) => new Date(l.timestamp).getTime() >= sinceDate,
+      );
     }
 
-    if (category && category !== 'ALL') {
+    if (category && category !== "ALL") {
       result = result.filter((l) => l.category === category);
     }
 
-    if (level && level !== 'ALL') {
+    if (level && level !== "ALL") {
       result = result.filter((l) => l.level === level);
     }
 
@@ -213,7 +223,7 @@ export class LoggerService {
         (l) =>
           l.message.toLowerCase().includes(term) ||
           l.event.toLowerCase().includes(term) ||
-          (l.details && JSON.stringify(l.details).toLowerCase().includes(term))
+          (l.details && JSON.stringify(l.details).toLowerCase().includes(term)),
       );
     }
 
@@ -235,8 +245,8 @@ export class LoggerService {
     const byCategory: Record<string, number> = {};
 
     for (const log of this.ringBuffer) {
-      if (log.level === 'ERROR') errors++;
-      if (log.level === 'WARN') warnings++;
+      if (log.level === "ERROR") errors++;
+      if (log.level === "WARN") warnings++;
       byCategory[log.category] = (byCategory[log.category] || 0) + 1;
     }
 
@@ -246,7 +256,7 @@ export class LoggerService {
       warnings,
       byCategory,
       logsDirectory: this.logsDir,
-      retentionDays: this.RETENTION_DAYS
+      retentionDays: this.RETENTION_DAYS,
     };
   }
 
@@ -260,24 +270,33 @@ export class LoggerService {
     try {
       const todayFile = this.getTodayLogFilename();
       if (fs.existsSync(todayFile)) {
-        fs.writeFileSync(todayFile, '', 'utf-8');
+        fs.writeFileSync(todayFile, "", "utf-8");
       }
     } catch (err) {
-      console.error('[LoggerService] Erro ao limpar logs:', err);
+      console.error("[LoggerService] Erro ao limpar logs:", err);
     }
   }
 
   /**
    * Sanitiza detalhes para evitar gravar credenciais ou IPs sensíveis em arquivos de log
    */
-  private static sanitizeDetails(details: Record<string, any>): Record<string, any> {
+  private static sanitizeDetails(
+    details: Record<string, any>,
+  ): Record<string, any> {
     try {
       const clean = { ...details };
       // Ocultar campos conhecidos de tokens ou credenciais
-      const sensitiveKeys = ['password', 'token', 'secret', 'auth', 'creds', 'authorization'];
+      const sensitiveKeys = [
+        "password",
+        "token",
+        "secret",
+        "auth",
+        "creds",
+        "authorization",
+      ];
       for (const key of Object.keys(clean)) {
         if (sensitiveKeys.some((s) => key.toLowerCase().includes(s))) {
-          clean[key] = '***REDACTED***';
+          clean[key] = "***REDACTED***";
         }
       }
       return clean;

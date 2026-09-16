@@ -8,6 +8,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATA_FILE = path.resolve(__dirname, "../data/jobs.json");
 
+if (typeof process.loadEnvFile === "function") {
+  try {
+    process.loadEnvFile();
+  } catch {
+    try {
+      process.loadEnvFile("/app/.env");
+    } catch {
+      // Ignore
+    }
+  }
+}
+
 const BATCH_SIZE = 100;
 const isDryRun = process.argv.includes("--dry-run");
 

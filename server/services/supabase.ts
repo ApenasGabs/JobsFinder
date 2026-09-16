@@ -23,7 +23,27 @@ export interface SupabaseJobRow {
  * vagas capturadas pelo crawler diretamente com a tabela `jobs` no Supabase.
  */
 export class SupabaseSyncService {
+  private static envLoaded = false;
+
+  private static ensureEnvLoaded(): void {
+    if (this.envLoaded) return;
+    this.envLoaded = true;
+
+    if (!process.env.SUPABASE_URL && typeof process.loadEnvFile === "function") {
+      try {
+        process.loadEnvFile();
+      } catch {
+        try {
+          process.loadEnvFile("/app/.env");
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  }
+
   private static getCredentials(): { url: string; key: string } | null {
+    this.ensureEnvLoaded();
     const url = process.env.SUPABASE_URL?.trim();
     const key = (
       process.env.SUPABASE_SERVICE_ROLE_KEY ||

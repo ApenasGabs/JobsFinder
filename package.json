@@ -10,7 +10,7 @@
     "build": "tsc && vite build",
     "test": "tsx --test tests/**/*.test.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "sync:supabase": "tsx scripts/sync-supabase.ts",
+    "sync:supabase": "npx tsx scripts/sync-supabase.ts",
     "preview": "vite preview"
   },
   "dependencies": {

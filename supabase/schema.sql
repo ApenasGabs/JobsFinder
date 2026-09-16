@@ -46,3 +46,4 @@ CREATE POLICY "Permitir escrita pelo crawler"
   TO service_role
   USING (true)
   WITH CHECK (true);
+

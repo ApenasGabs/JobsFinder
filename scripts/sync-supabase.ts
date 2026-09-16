@@ -88,3 +88,4 @@ main().catch((err) => {
   console.error("❌ Erro fatal durante a sincronização:", err);
   process.exit(1);
 });
+

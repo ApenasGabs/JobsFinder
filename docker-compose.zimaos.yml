@@ -35,6 +35,8 @@ services:
       - CRON_SCHEDULE=*/30 * * * *
       - LIGHTPANDA_HTTP=http://lightpanda:9222
       - LIGHTPANDA_WS=ws://lightpanda:9222
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-}
     command:
       - /bin/sh
       - -c
@@ -67,7 +69,7 @@ services:
         npx tsx server/index.ts
       - --
       - "main"
-      - "https://github.com/ApenasGabs/JobsFinder-client.git"
+      - "https://github.com/ApenasGabs/JobsFinder.git"
     depends_on:
       - lightpanda
 

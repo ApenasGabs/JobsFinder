@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { ContractType, Job, SeniorityLevel, WorkModel } from "../types.js";
 import { TechClassifierService } from "./classifier.js";
 import { LoggerService } from "./logger.js";
+import { SupabaseSyncService } from "./supabase.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -107,6 +108,16 @@ export class StorageService {
     // Salva em disco de forma assíncrona apenas se for uma vaga realmente nova
     if (isNew) {
       this.scheduleSave();
+    }
+
+    // Sincroniza a vaga tech com o Supabase de forma assíncrona e não bloqueante
+    if (job.isTech) {
+      SupabaseSyncService.syncJob(job).catch((err) => {
+        console.warn(
+          "[Storage] Erro silencioso ao sincronizar vaga com Supabase:",
+          err,
+        );
+      });
     }
 
     return { job, isNew };

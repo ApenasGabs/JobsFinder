@@ -59,7 +59,7 @@ export class WhatsAppBot {
         auth: state,
         logger: pino({ level: "silent" }),
         printQRInTerminal: true,
-        browser: ["S-Job-Crawler", "Desktop", "1.0.0"],
+        browser: ["QueroVagas Crawler", "Desktop", "1.0.0"],
       });
 
       this.sock = sock;
@@ -255,7 +255,7 @@ export class WhatsAppBot {
       };
     }
 
-    const testText = `🤖 *S-Job-Crawler Bot* conectado com sucesso!\n\nEste grupo receberá alertas automáticos de novas vagas de emprego em tempo real.`;
+    const testText = `🤖 *QueroVagas Crawler Bot* conectado com sucesso!\n\nEste grupo receberá alertas automáticos de novas vagas de emprego em tempo real.`;
     await this.sock.sendMessage(target, { text: testText });
     return { success: true, message: "Mensagem de teste enviada com sucesso!" };
   }
@@ -592,7 +592,7 @@ export class WhatsAppBot {
     const sources = Array.from(
       new Set(jobs.map((j) => j.source).filter(Boolean)),
     ).join(", ");
-    lines.push(`🤖 _S-Job-Crawler • Coletado via ${sources || "Web"}_`);
+    lines.push(`🤖 _QueroVagas Crawler • Coletado via ${sources || "Web"}_`);
 
     return lines.join("\n");
   }
@@ -636,7 +636,7 @@ export class WhatsAppBot {
       ``,
       `👉 *Candidatar-se:* ${job.url}`,
       `────────────────────`,
-      `🤖 _S-Job-Crawler Bot_`,
+      `🤖 _QueroVagas Crawler Bot_`,
     ].join("\n");
   }
 
@@ -663,7 +663,7 @@ export class WhatsAppBot {
 
     lines.push(``);
     lines.push(`────────────────────`);
-    lines.push(`🤖 _S-Job-Crawler Bot_`);
+    lines.push(`🤖 _QueroVagas Crawler Bot_`);
 
     return lines.join("\n");
   }
@@ -682,7 +682,7 @@ export class WhatsAppBot {
       const mem = process.memoryUsage();
       const stats = StorageService.getStats();
       const reply = [
-        `🤖 *S-Job-Crawler Status*`,
+        `🤖 *QueroVagas Crawler Status*`,
         `📊 *Total de Vagas salvas:* ${stats.totalJobs}`,
         `🏠 *Vagas Remotas:* ${stats.byModel?.REMOTO || 0}`,
         `🧠 *Consumo de RAM:* ${(mem.rss / 1024 / 1024).toFixed(1)} MB`,

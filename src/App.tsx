@@ -685,7 +685,7 @@ export default function App() {
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <h1 className="brand-title">S-Job-Crawler</h1>
+              <h1 className="brand-title">QueroVagas Crawler</h1>
               <span className="brand-badge">HIGH-PERFORMANCE</span>
               <span className="brand-badge">ZIMAOS DOCKER EDITION</span>
             </div>
@@ -1846,7 +1846,7 @@ export default function App() {
 
                 <a
                   href="/api/logs/export"
-                  download="s-job-crawler-logs.json"
+                  download="querovagas-crawler-logs.json"
                   className="btn-action"
                   style={{ fontSize: '0.75rem', padding: '0.4rem 0.65rem', textDecoration: 'none', color: '#f8fafc' }}
                   title="Baixar todos os logs em formato JSON"

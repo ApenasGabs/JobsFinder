@@ -375,7 +375,7 @@ app.get("/api/logs/export", (_req: Request, res: Response) => {
   const logs = LoggerService.exportLogs();
   res.setHeader(
     "Content-Disposition",
-    'attachment; filename="s-job-crawler-logs.json"',
+    'attachment; filename="querovagas-crawler-logs.json"',
   );
   res.setHeader("Content-Type", "application/json");
   res.json(logs);
@@ -397,7 +397,7 @@ if (fs.existsSync(DIST_DIR)) {
 
 app.listen(PORT, HOST, () => {
   console.log(`====================================================`);
-  console.log(`🚀 S-Job-Crawler Engine rodando em http://${HOST}:${PORT}`);
+  console.log(`🚀 QueroVagas Crawler Engine rodando em http://${HOST}:${PORT}`);
   console.log(`📡 SSE Stream: http://${HOST}:${PORT}/api/scrape/stream`);
   console.log(`⚙️  Configuração: http://${HOST}:${PORT}/api/config`);
   console.log(`📊 Estatísticas: http://${HOST}:${PORT}/api/stats`);

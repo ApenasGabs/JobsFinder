@@ -88,7 +88,7 @@ describe("WhatsApp Message Formatter", () => {
     assert.ok(text.includes("📍 *Locais:*"));
 
     // Rodapé único consolidado
-    assert.ok(text.includes("S-Job-Crawler"));
+    assert.ok(text.includes("QueroVagas Crawler"));
     assert.ok(text.includes("GUPY, INHIRE") || text.includes("INHIRE"));
 
     // Não deve conter traços repetidos por vaga

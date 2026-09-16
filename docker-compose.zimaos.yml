@@ -11,10 +11,10 @@ x-casaos:
   tag: Utilities
   developer: Gabs
   author: Gabs
-  icon: https://raw.githubusercontent.com/ApenasGabs/JobsFinder-client/main/public/vite.svg
+  icon: https://raw.githubusercontent.com/ApenasGabs/JobsFinder/main/public/vite.svg
   title:
-    en_us: S-Job-Crawler
-    pt_br: S-Job-Crawler
+    en_us: QueroVagas Crawler
+    pt_br: QueroVagas Crawler
   scheme: http
   index: /
   port_map: "3001"
@@ -65,7 +65,7 @@ services:
           echo "🏗️ Compilando frontend..."
           yarn build
         fi
-        echo "🚀 Iniciando S-Job-Crawler..."
+        echo "🚀 Iniciando QueroVagas Crawler..."
         npx tsx server/index.ts
       - --
       - "main"

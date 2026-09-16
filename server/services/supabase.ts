@@ -101,7 +101,7 @@ export class SupabaseSyncService {
 
     try {
       const row = this.mapJobToRow(job);
-      const endpoint = `${creds.url}/rest/v1/jobs`;
+      const endpoint = `${creds.url}/rest/v1/jobs?on_conflict=url`;
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -158,8 +158,19 @@ export class SupabaseSyncService {
     }
 
     try {
-      const rows = techJobs.map((j) => this.mapJobToRow(j));
-      const endpoint = `${creds.url}/rest/v1/jobs`;
+      // Deduplica em memória pela URL para evitar cardinalidade dupla no mesmo lote
+      const uniqueByUrlMap = new Map<string, (typeof techJobs)[0]>();
+      for (const job of techJobs) {
+        if (job.url) {
+          uniqueByUrlMap.set(job.url, job);
+        } else {
+          uniqueByUrlMap.set(job.id, job);
+        }
+      }
+      const uniqueJobs = Array.from(uniqueByUrlMap.values());
+
+      const rows = uniqueJobs.map((j) => this.mapJobToRow(j));
+      const endpoint = `${creds.url}/rest/v1/jobs?on_conflict=url`;
 
       const response = await fetch(endpoint, {
         method: "POST",

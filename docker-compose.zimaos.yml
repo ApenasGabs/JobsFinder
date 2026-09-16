@@ -1,34 +1,41 @@
-name: s-job-crawler
+name: quero-vagas-crawler
 
-x-casaos:
-  architectures:
-    - amd64
-    - arm64
-  main: s-job-crawler
-  description:
-    en_us: "High-performance job crawler for 134+ companies with Baileys WhatsApp bot."
-    pt_br: "Agregador e crawler de vagas com robô de WhatsApp para grupos e baixo consumo."
-  tag: Utilities
-  developer: Gabs
-  author: Gabs
-  icon: https://raw.githubusercontent.com/ApenasGabs/JobsFinder/main/public/vite.svg
-  title:
-    en_us: QueroVagas Crawler
-    pt_br: QueroVagas Crawler
-  scheme: http
-  index: /
-  port_map: "3001"
+networks:
+  default:
+    name: powerful_tomitaka_default
+    ipam: {}
+    external: false
 
 services:
-  # Aplicação Central: Auto-download do repositório se não existir, build e execução 24/7
-  s-job-crawler:
-    image: node:22-alpine
-    container_name: s-job-crawler
+  lightpanda:
+    container_name: quero-vagas-crawler-browser
+    image: lightpanda/browser:nightly
     restart: unless-stopped
     ports:
-      - "3001:3001"
-    volumes:
-      - /DATA/AppData/s-job-crawler:/app
+      - mode: ingress
+        target: 9222
+        published: "9222"
+        protocol: tcp
+    networks:
+      - default
+    labels:
+      icon: https://raw.githubusercontent.com/ApenasGabs/JobsFinder/main/public/vite.svg
+
+  quero-vagas-crawler:
+    container_name: quero-vagas-crawler
+    image: node:22-alpine
+    restart: unless-stopped
+    ports:
+      - mode: ingress
+        target: 3001
+        published: "3001"
+        protocol: tcp
+    networks:
+      - default
+    depends_on:
+      lightpanda:
+        condition: service_started
+        required: true
     environment:
       - PORT=3001
       - HOST=0.0.0.0
@@ -37,6 +44,12 @@ services:
       - LIGHTPANDA_WS=ws://lightpanda:9222
       - SUPABASE_URL=${SUPABASE_URL:-}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-}
+    volumes:
+      - type: bind
+        source: /DATA/AppData/quero-vagas-crawler
+        target: /app
+        bind:
+          create_host_path: true
     command:
       - /bin/sh
       - -c
@@ -70,14 +83,27 @@ services:
       - --
       - "main"
       - "https://github.com/ApenasGabs/JobsFinder.git"
-    depends_on:
-      - lightpanda
+    labels:
+      icon: https://raw.githubusercontent.com/ApenasGabs/JobsFinder/main/public/vite.svg
 
-  # Navegador Headless Ultraleve Lightpanda (~30MB RAM)
-  # O comando de execução já vem pré-configurado nativamente na imagem oficial
-  lightpanda:
-    image: lightpanda/browser:nightly
-    container_name: s-job-crawler-browser
-    restart: unless-stopped
-    ports:
-      - "9222:9222"
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  author: Gabs
+  developer: Gabs
+  hostname: gabisa.local
+  icon: https://raw.githubusercontent.com/ApenasGabs/JobsFinder/main/public/vite.svg
+  index: /
+  is_uncontrolled: false
+  main: quero-vagas-crawler
+  port_map: "3001"
+  scheme: http
+  tag: Utilities
+  description:
+    en_us: High-performance job crawler for 134+ companies with Baileys WhatsApp bot.
+    pt_br: Agregador e crawler de vagas com robô de WhatsApp para grupos e baixo consumo.
+  title:
+    custom: QueroVagas Crawler
+    en_us: QueroVagas Crawler
+    pt_br: QueroVagas Crawler

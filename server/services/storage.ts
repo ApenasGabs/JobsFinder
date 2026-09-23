@@ -16,6 +16,8 @@ export class StorageService {
   private static jobsMap: Map<string, Job> = new Map();
   private static isInitialized = false;
   private static saveTimeout: NodeJS.Timeout | null = null;
+  private static syncQueue: Map<string, Job> = new Map();
+  private static syncTimeout: NodeJS.Timeout | null = null;
 
   public static initialize(): void {
     if (this.isInitialized) return;
@@ -110,14 +112,9 @@ export class StorageService {
       this.scheduleSave();
     }
 
-    // Sincroniza a vaga tech com o Supabase de forma assíncrona e não bloqueante
+    // Enfileira a vaga tech para sincronização em lote com o Supabase
     if (job.isTech) {
-      SupabaseSyncService.syncJob(job).catch((err) => {
-        console.warn(
-          "[Storage] Erro silencioso ao sincronizar vaga com Supabase:",
-          err,
-        );
-      });
+      this.scheduleSync(job);
     }
 
     return { job, isNew };
@@ -477,5 +474,35 @@ export class StorageService {
     } catch (err) {
       console.error("[Storage] Erro ao salvar arquivo JSON:", err);
     }
+  }
+
+  private static scheduleSync(job: Job, delayMs = 3000): void {
+    this.syncQueue.set(job.id, job);
+    if (this.syncTimeout) {
+      clearTimeout(this.syncTimeout);
+    }
+    this.syncTimeout = setTimeout(() => {
+      this.flushToSupabase();
+    }, delayMs);
+  }
+
+  private static flushToSupabase(): void {
+    if (this.syncQueue.size === 0) return;
+    const jobsToSync = Array.from(this.syncQueue.values());
+    this.syncQueue.clear();
+    
+    SupabaseSyncService.syncBatch(jobsToSync).then((res) => {
+      if (!res.success) {
+        console.warn(`[Storage] ⚠️ Erro ao sincronizar lote com Supabase: ${res.error}`);
+        // Re-enfileira em caso de erro para tentar novamente depois, evitando perda de dados
+        for (const job of jobsToSync) {
+          this.syncQueue.set(job.id, job);
+        }
+      } else if (res.count > 0) {
+        console.log(`[Storage] ✅ ${res.count} vagas sincronizadas com o Supabase em lote.`);
+      }
+    }).catch(err => {
+      console.warn(`[Storage] ⚠️ Exceção ao sincronizar lote com Supabase:`, err);
+    });
   }
 }

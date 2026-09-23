@@ -101,6 +101,7 @@ export class SupabaseSyncService {
 
     try {
       const row = this.mapJobToRow(job);
+      
       const endpoint = `${creds.url}/rest/v1/jobs?on_conflict=url`;
 
       const response = await fetch(endpoint, {
@@ -158,6 +159,8 @@ export class SupabaseSyncService {
     }
 
     try {
+      
+      
       // Deduplica em memória pela URL para evitar cardinalidade dupla no mesmo lote
       const uniqueByUrlMap = new Map<string, (typeof techJobs)[0]>();
       for (const job of techJobs) {

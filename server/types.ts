@@ -41,6 +41,7 @@ export interface ScrapeProgressEvent {
   type: "start" | "progress" | "job" | "source_done" | "done" | "error";
   source?: string;
   job?: Job;
+  isNew?: boolean;
   message?: string;
   totalFound?: number;
   currentCompany?: string;

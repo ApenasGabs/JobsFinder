@@ -81,6 +81,18 @@ Acesse no seu navegador:
 
 ---
 
+## 🔍 Termos de Busca e Contagem Exata de Novas Vagas (Scheduler)
+
+### Recomendações para `searchTerms` (`config/search.config.json`)
+- **Termos Específicos Recomendados:** `java`, `react`, `node`, `typescript`, `fullstack`, `frontend`, `backend`, `python`, `devops`, `estagio`, `junior`.
+- **Termos a Evitar ou Usar com Cautela:** Termos muito genéricos como `software`, `ux`, `designer` costumam retornar grande volume de vagas administrativas, comerciais ou de engenharia civil/industrial (ex: "Engenheiro de Software Embarcado em Trator", "Designer de Interiores", "Consultor Comercial de Software").
+- **Garantia de Qualidade e Contagem de Vagas Novas:**
+  - O Scheduler avalia cada vaga através do `TechClassifierService` com whitelist/blacklist para garantir que apenas vagas legítimas de Tecnologia/TI sejam processadas.
+  - A contagem `"Varredura concluída: X vagas no total, Y novas"` baseia-se exclusivamente em vagas **genuinamente inéditas** (`isNew: true`), nunca antes salvas no banco de dados, descartando reingestões e deduplicando termos que cruzam as mesmas vagas em paralelo.
+  - Ao despachar para o WhatsApp, o Scheduler registra com transparência exatamente quantas vagas foram aceitas pelos filtros de categoria do grupo.
+
+---
+
 ## 🖥️ Arquitetura Flexível: Movendo o Navegador para Outra Máquina (Ubuntu Server)
 
 Caso você queira rodar o crawler no ZimaOS e transferir a carga do navegador headless para uma máquina mais potente com **Ubuntu Server**, o sistema já vem preparado:

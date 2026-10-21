@@ -112,4 +112,97 @@ describe("StorageService", () => {
     assert.equal(second.isNew, false, "Reingestão da mesma vaga deve retornar isNew === false");
     assert.equal(second.job.id, first.job.id, "ID deve ser idêntico");
   });
+
+  it("should discard non-tech jobs returning isNew === false and isTech === false", () => {
+    const nonTechJob: Omit<Job, "id"> = {
+      title: "Auxiliar de Limpeza Hospitalar",
+      company: "Hospital Saúde",
+      location: "São Paulo, SP",
+      workModel: "PRESENCIAL",
+      contractType: "CLT",
+      seniorityLevel: "NAO_INFORMADO",
+      url: "https://hospital.test/vagas/limpeza-1",
+      source: "GUPY",
+      stack: [],
+    };
+
+    const result = StorageService.upsertJob(nonTechJob);
+    assert.equal(result.isNew, false, "Vaga não-tech não deve ser considerada nova");
+    assert.equal(result.job.isTech, false, "Vaga não-tech deve ter isTech === false");
+  });
+
+  it("should accurately collect and deduplicate new tech jobs in scheduler simulation", () => {
+    // Simula eventos de varredura emitidos pelo Crawler
+    const newJobsMap = new Map<string, Job>();
+
+    const jobA: Job = {
+      id: "job-tech-uuid-a",
+      title: "Desenvolvedor Backend Node.js",
+      company: "Tech Solutions",
+      location: "Remoto",
+      workModel: "REMOTO",
+      contractType: "CLT",
+      seniorityLevel: "PLENO",
+      url: "https://tech.test/job/a",
+      source: "GUPY",
+      stack: ["Node.js", "TypeScript"],
+      scrapedAt: new Date().toISOString(),
+      isTech: true,
+    };
+
+    const jobB: Job = {
+      id: "job-tech-uuid-b",
+      title: "Engenheiro Frontend React",
+      company: "WebCorp",
+      location: "Remoto",
+      workModel: "REMOTO",
+      contractType: "PJ",
+      seniorityLevel: "JUNIOR",
+      url: "https://web.test/job/b",
+      source: "ASHBY",
+      stack: ["React"],
+      scrapedAt: new Date().toISOString(),
+      isTech: true,
+    };
+
+    const jobNonTech: Job = {
+      id: "job-nontech-uuid",
+      title: "Analista Financeiro Contábil",
+      company: "FinCorp",
+      location: "São Paulo",
+      workModel: "PRESENCIAL",
+      contractType: "CLT",
+      seniorityLevel: "PLENO",
+      url: "https://fin.test/job/c",
+      source: "GUPY",
+      stack: [],
+      scrapedAt: new Date().toISOString(),
+      isTech: false,
+    };
+
+    const simulatedEvents = [
+      // 1. Vaga A encontrada pela primeira vez sob termo "node" (nova)
+      { type: "job", job: jobA, isNew: true },
+      // 2. Vaga A reencontrada sob termo "backend" (mesmo ID, isNew false)
+      { type: "job", job: jobA, isNew: false },
+      // 3. Vaga B encontrada pela primeira vez (nova)
+      { type: "job", job: jobB, isNew: true },
+      // 4. Vaga B reencontrada sob outro termo com isNew true por duplicate emitter
+      { type: "job", job: jobB, isNew: true },
+      // 5. Vaga Não-Tech
+      { type: "job", job: jobNonTech, isNew: false },
+    ];
+
+    for (const event of simulatedEvents) {
+      if (event.type === "job" && event.job && event.isNew) {
+        if (event.job.isTech !== false) {
+          newJobsMap.set(event.job.id, event.job);
+        }
+      }
+    }
+
+    const collected = Array.from(newJobsMap.values());
+    assert.equal(collected.length, 2, "Apenas as 2 vagas de TI únicas devem ser coletadas");
+    assert.deepEqual(collected.map((j) => j.id).sort(), ["job-tech-uuid-a", "job-tech-uuid-b"].sort());
+  });
 });

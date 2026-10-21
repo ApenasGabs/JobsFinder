@@ -33,7 +33,7 @@ export class LeverScraper implements BaseScraper {
 
   public async scrape(
     options: ScrapeOptions,
-    onJobFound: (job: Job) => void,
+    onJobFound: (job: Job, isNew?: boolean) => void,
     onProgress?: (progress: {
       message: string;
       currentCompany?: string;
@@ -120,9 +120,9 @@ export class LeverScraper implements BaseScraper {
                 description: `Time: ${team || "Engenharia"} | Tipo: ${item.categories?.commitment || "Full-time"}`,
               };
 
-              const { job } = StorageService.upsertJob(jobData);
+              const { job, isNew } = StorageService.upsertJob(jobData);
               foundJobs.push(job);
-              onJobFound(job);
+              onJobFound(job, isNew);
             }
           }
         }

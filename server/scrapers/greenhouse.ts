@@ -29,7 +29,7 @@ export class GreenhouseScraper implements BaseScraper {
 
   public async scrape(
     options: ScrapeOptions,
-    onJobFound: (job: Job) => void,
+    onJobFound: (job: Job, isNew?: boolean) => void,
     onProgress?: (progress: {
       message: string;
       currentCompany?: string;
@@ -103,9 +103,9 @@ export class GreenhouseScraper implements BaseScraper {
               description: `Departamento: ${dept || "Geral"} | ATS: Greenhouse`,
             };
 
-            const { job } = StorageService.upsertJob(jobData);
+            const { job, isNew } = StorageService.upsertJob(jobData);
             foundJobs.push(job);
-            onJobFound(job);
+            onJobFound(job, isNew);
           }
         }
       } catch {

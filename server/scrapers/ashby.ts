@@ -37,7 +37,7 @@ export class AshbyScraper implements BaseScraper {
 
   public async scrape(
     options: ScrapeOptions,
-    onJobFound: (job: Job) => void,
+    onJobFound: (job: Job, isNew?: boolean) => void,
     onProgress?: (progress: {
       message: string;
       currentCompany?: string;
@@ -134,9 +134,9 @@ export class AshbyScraper implements BaseScraper {
               description: `Departamento: ${item.department || "Engenharia"} | Tipo: ${item.employmentType || "FullTime"}`,
             };
 
-            const { job } = StorageService.upsertJob(jobData);
+            const { job, isNew } = StorageService.upsertJob(jobData);
             foundJobs.push(job);
-            onJobFound(job);
+            onJobFound(job, isNew);
           }
         }
       } catch {

@@ -19,6 +19,28 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const AUTH_DIR =
   process.env.AUTH_BAILEYS_DIR || path.resolve(__dirname, "../../auth_baileys");
+const DATA_DIR =
+  process.env.DATA_DIR || path.resolve(__dirname, "../../data");
+const QUEUE_FILE = path.join(DATA_DIR, "whatsapp_queue.json");
+
+// Silencia ruído de sessões e buffers de criptografia do libsignal no stdout
+let isLibsignalSilenced = false;
+function silenceLibsignalLogs(): void {
+  if (isLibsignalSilenced) return;
+  isLibsignalSilenced = true;
+  const originalInfo = console.info;
+  console.info = (...args: any[]) => {
+    const msg = typeof args[0] === "string" ? args[0] : "";
+    if (
+      msg.includes("Closing session") ||
+      msg.includes("Removing old closed session") ||
+      msg.includes("Closing open session")
+    ) {
+      return;
+    }
+    originalInfo.apply(console, args);
+  };
+}
 
 export class WhatsAppBot {
   private static sock: WASocket | null = null;
@@ -31,6 +53,10 @@ export class WhatsAppBot {
   private static isProcessingQueue = false;
   private static nextBatchTimestamp: number | null = null;
   private static batchTimer: NodeJS.Timeout | null = null;
+  private static reconnectAttempts = 0;
+  private static reconnectTimeout: NodeJS.Timeout | null = null;
+  private static hasRunColdStart = false;
+  private static isQueueLoaded = false;
   private static cachedGroups: Array<{
     id: string;
     subject: string;
@@ -41,6 +67,12 @@ export class WhatsAppBot {
   public static async initialize(): Promise<void> {
     if (this.sock || this.isStarting) return;
     this.isStarting = true;
+
+    // Ativa filtragem de ruído de criptografia do libsignal
+    silenceLibsignalLogs();
+
+    // Carrega fila persistida do disco uma única vez
+    this.ensureQueueLoaded();
 
     try {
       if (!fs.existsSync(AUTH_DIR)) {
@@ -86,26 +118,57 @@ export class WhatsAppBot {
         if (connection === "close") {
           const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
           const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-          console.log(
-            `[WhatsApp] Conexão encerrada (código: ${statusCode}). Reconectando em 10s: ${shouldReconnect}`,
-          );
-          LoggerService.warn(
-            "WHATSAPP",
-            "WA_DISCONNECTED",
-            `Conexão encerrada (código: ${statusCode}). Reconectar: ${shouldReconnect}`,
-            { statusCode, shouldReconnect },
-          );
 
           this.status = "disconnected";
           this.sock = null;
           this.qrCodeDataUrl = null;
 
           if (shouldReconnect) {
-            setTimeout(() => this.initialize(), 10000);
+            this.reconnectAttempts++;
+            // Jitter aleatório de até 3 segundos para evitar thundering herd
+            const jitter = Math.floor(Math.random() * 3000);
+            const delayMs = WhatsAppBot.calculateReconnectDelay(
+              this.reconnectAttempts,
+              jitter,
+            );
+
+            console.log(
+              `[WhatsApp] Conexão encerrada (código: ${statusCode}). Reconectando (tentativa ${this.reconnectAttempts}) em ${(delayMs / 1000).toFixed(1)}s`,
+            );
+            LoggerService.warn(
+              "WHATSAPP",
+              "WA_DISCONNECTED",
+              `Conexão encerrada (código: ${statusCode}). Reconectar em ${(delayMs / 1000).toFixed(1)}s (tentativa ${this.reconnectAttempts})`,
+              { statusCode, reconnectAttempts: this.reconnectAttempts, delayMs },
+            );
+
+            if (this.reconnectTimeout) {
+              clearTimeout(this.reconnectTimeout);
+            }
+            this.reconnectTimeout = setTimeout(() => {
+              this.reconnectTimeout = null;
+              this.initialize();
+            }, delayMs);
+          } else {
+            console.log(
+              `[WhatsApp] Conexão encerrada permanentemente (logout). Não haverá reconexão automática.`,
+            );
+            LoggerService.warn(
+              "WHATSAPP",
+              "WA_LOGGED_OUT",
+              "Sessão encerrada por logout do WhatsApp. Necessário novo pareamento.",
+              { statusCode },
+            );
           }
         } else if (connection === "open") {
           this.status = "connected";
           this.qrCodeDataUrl = null;
+          this.reconnectAttempts = 0;
+          if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
+          }
+
           const userJid = sock.user?.id || "";
           this.botNumber = userJid.split(":")[0] || userJid.split("@")[0];
           console.log(
@@ -118,8 +181,22 @@ export class WhatsAppBot {
             { botNumber: this.botNumber },
           );
 
-          // Cold Start Protection: marca vagas anteriores para evitar flood
-          StorageService.markAllExistingAsNotified();
+          // Cold Start Protection: marca vagas anteriores apenas na primeira conexão real do processo
+          if (!this.hasRunColdStart) {
+            StorageService.markAllExistingAsNotified();
+            this.hasRunColdStart = true;
+            console.log(
+              "[WhatsApp] 🛡️ Cold Start Protection executado na inicialização.",
+            );
+          }
+
+          // Se houver vagas na fila restaurada do disco, retoma o envio
+          if (this.messageQueue.length > 0 && !this.isProcessingQueue) {
+            console.log(
+              `[WhatsApp] Retomando envio de ${this.messageQueue.length} vaga(s) restaurada(s) da fila persistida...`,
+            );
+            this.processQueue();
+          }
         }
       });
 
@@ -141,6 +218,7 @@ export class WhatsAppBot {
   }
 
   public static getStatus(): WhatsAppStatus {
+    this.ensureQueueLoaded();
     const config = ConfigService.getConfig();
     return {
       status: this.status,
@@ -323,6 +401,7 @@ export class WhatsAppBot {
    * Adiciona vagas à fila sem duplicar e garantindo que sejam 100% de Tecnologia/TI
    */
   public static enqueueJobs(jobs: Job[]): number {
+    this.ensureQueueLoaded();
     const existingIds = new Set(this.messageQueue.map((j) => j.id));
     let addedCount = 0;
     for (const job of jobs) {
@@ -341,6 +420,7 @@ export class WhatsAppBot {
     }
 
     if (addedCount > 0) {
+      this.saveQueueToDisk();
       LoggerService.info(
         "WHATSAPP",
         "WA_JOBS_ENQUEUED",
@@ -421,6 +501,7 @@ export class WhatsAppBot {
 
       // Pega o lote atual (ex: 4 vagas)
       const currentBatch = this.messageQueue.splice(0, batchSize);
+      this.saveQueueToDisk();
 
       console.log(
         `[WhatsApp] 📨 Enviando mensagem agrupada de ${currentBatch.length} vagas (Restam na fila: ${this.messageQueue.length})...`,
@@ -465,6 +546,9 @@ export class WhatsAppBot {
             error: err?.message || String(err),
           },
         );
+        // Em caso de falha de envio, devolve o lote para a fila e persiste
+        this.messageQueue.unshift(...currentBatch);
+        this.saveQueueToDisk();
       }
 
       // Se ainda sobraram vagas na fila, agenda o próximo bloco consolidado para o intervalo configurado!
@@ -710,5 +794,96 @@ export class WhatsAppBot {
       });
       await this.sock?.sendMessage(from, { text: lines.join("\n") });
     }
+  }
+
+  /**
+   * Garante que a fila persistida seja carregada do disco uma única vez
+   */
+  public static ensureQueueLoaded(): void {
+    if (!this.isQueueLoaded) {
+      this.loadQueueFromDisk();
+      this.isQueueLoaded = true;
+    }
+  }
+
+  /**
+   * Calcula o delay com backoff exponencial para reconexão
+   */
+  public static calculateReconnectDelay(attempt: number, jitter = 0): number {
+    const baseDelay = Math.min(
+      300000,
+      5000 * Math.pow(1.5, Math.min(attempt, 8)),
+    );
+    return Math.round(baseDelay + jitter);
+  }
+
+  /**
+   * Persiste a fila de vagas em disco de forma segura e atômica
+   */
+  public static saveQueueToDisk(): void {
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      const tmpPath = `${QUEUE_FILE}.tmp`;
+      fs.writeFileSync(
+        tmpPath,
+        JSON.stringify(this.messageQueue, null, 2),
+        "utf-8",
+      );
+      fs.renameSync(tmpPath, QUEUE_FILE);
+    } catch (err: any) {
+      console.error(
+        "[WhatsApp] Erro ao salvar fila persistente em disco:",
+        err?.message || err,
+      );
+    }
+  }
+
+  /**
+   * Carrega a fila persistida do disco no boot
+   */
+  public static loadQueueFromDisk(): void {
+    try {
+      this.isQueueLoaded = true;
+      if (fs.existsSync(QUEUE_FILE)) {
+        const raw = fs.readFileSync(QUEUE_FILE, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          this.messageQueue = parsed;
+          console.log(
+            `[WhatsApp] 📥 Fila persistente carregada do disco: ${this.messageQueue.length} vaga(s) pendente(s).`,
+          );
+        }
+      }
+    } catch (err: any) {
+      console.warn(
+        "[WhatsApp] Falha ao carregar fila persistente do disco:",
+        err?.message || err,
+      );
+      this.messageQueue = [];
+    }
+  }
+
+  public static getReconnectAttempts(): number {
+    return this.reconnectAttempts;
+  }
+
+  public static isColdStartExecuted(): boolean {
+    return this.hasRunColdStart;
+  }
+
+  public static resetColdStart(): void {
+    this.hasRunColdStart = false;
+  }
+
+  public static getQueue(): Job[] {
+    this.ensureQueueLoaded();
+    return [...this.messageQueue];
+  }
+
+  public static clearQueue(): void {
+    this.messageQueue = [];
+    this.saveQueueToDisk();
   }
 }

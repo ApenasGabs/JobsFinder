@@ -41,6 +41,7 @@ test("SupabaseSyncService Unit Tests", async (t) => {
   });
 
   await t.test("isConfigured should return false when environment variables are missing", () => {
+    (SupabaseSyncService as any).envLoaded = true;
     const originalUrl = process.env.SUPABASE_URL;
     const originalKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -56,23 +57,35 @@ test("SupabaseSyncService Unit Tests", async (t) => {
   });
 
   await t.test("syncJob should gracefully return false without throwing when not configured", async () => {
-    const mockJob: Job = {
-      id: "abc123md5",
-      title: "Engenheiro de Software",
-      company: "Acme",
-      location: "Remoto",
-      workModel: "REMOTO",
-      contractType: "CLT",
-      seniorityLevel: "SENIOR",
-      url: "https://example.com/job/1",
-      source: "TEST",
-      stack: ["Go"],
-      scrapedAt: new Date().toISOString(),
-      isTech: true,
-    };
+    (SupabaseSyncService as any).envLoaded = true;
+    const originalUrl = process.env.SUPABASE_URL;
+    const originalKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    const result = await SupabaseSyncService.syncJob(mockJob);
-    assert.equal(result, false);
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    try {
+      const mockJob: Job = {
+        id: "abc123md5",
+        title: "Engenheiro de Software",
+        company: "Acme",
+        location: "Remoto",
+        workModel: "REMOTO",
+        contractType: "CLT",
+        seniorityLevel: "SENIOR",
+        url: "https://example.com/job/1",
+        source: "TEST",
+        stack: ["Go"],
+        scrapedAt: new Date().toISOString(),
+        isTech: true,
+      };
+
+      const result = await SupabaseSyncService.syncJob(mockJob);
+      assert.equal(result, false);
+    } finally {
+      if (originalUrl) process.env.SUPABASE_URL = originalUrl;
+      if (originalKey) process.env.SUPABASE_SERVICE_ROLE_KEY = originalKey;
+    }
   });
 });
 

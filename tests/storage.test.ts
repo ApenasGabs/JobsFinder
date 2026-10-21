@@ -93,6 +93,7 @@ describe("StorageService", () => {
   });
 
   it("should return isNew === true on first insert and isNew === false on re-ingestion", () => {
+    const uniqueKey = `snowflake-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const testJob: Omit<Job, "id"> = {
       title: "Engenheiro de Dados Snowflake",
       company: "DataCorp Test",
@@ -100,7 +101,7 @@ describe("StorageService", () => {
       workModel: "REMOTO",
       contractType: "CLT",
       seniorityLevel: "SENIOR",
-      url: "https://datacorp.test/jobs/snowflake-senior",
+      url: `https://datacorp.test/jobs/${uniqueKey}`,
       source: "LEVER",
       stack: ["Snowflake", "SQL", "Python"],
     };
@@ -204,5 +205,71 @@ describe("StorageService", () => {
     const collected = Array.from(newJobsMap.values());
     assert.equal(collected.length, 2, "Apenas as 2 vagas de TI únicas devem ser coletadas");
     assert.deepEqual(collected.map((j) => j.id).sort(), ["job-tech-uuid-a", "job-tech-uuid-b"].sort());
+  });
+
+  it("should not mark storage dirty or enqueue sync when re-ingesting identical job", () => {
+    const uniqueKey = `go-concorrencia-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const identicalJob: Omit<Job, "id"> = {
+      title: "Desenvolvedor Go Concorrência",
+      company: "CloudScale Test",
+      location: "Remoto",
+      workModel: "REMOTO",
+      contractType: "PJ",
+      seniorityLevel: "PLENO",
+      url: `https://cloudscale.test/jobs/${uniqueKey}`,
+      source: "ASHBY",
+      stack: ["Go", "Docker"],
+    };
+
+    // 1. Primeira inserção: deve marcar como novo e dirty
+    const first = StorageService.upsertJob(identicalJob);
+    assert.equal(first.isNew, true);
+    assert.equal(StorageService.isStorageDirty(), true);
+
+    // Salva em disco para limpar o estado de dirty
+    StorageService.flushToDisk();
+    assert.equal(StorageService.isStorageDirty(), false, "Após flushToDisk, storage não deve estar dirty");
+
+    // Limpa a fila para o teste comparativo
+    const initialSync = StorageService.getSyncStatus();
+
+    // 2. Reingestão da exata mesma vaga: não deve ficar dirty nem enfileirar novo sync
+    const second = StorageService.upsertJob(identicalJob);
+    assert.equal(second.isNew, false);
+    assert.equal(StorageService.isStorageDirty(), false, "Reingestão idêntica NÃO deve marcar storage como dirty");
+    const afterSync = StorageService.getSyncStatus();
+    assert.equal(afterSync.queueSize, initialSync.queueSize, "Reingestão idêntica NÃO deve aumentar fila de sync com Supabase");
+  });
+
+  it("should mark storage dirty and enqueue sync when existing job data actually changes", () => {
+    const uniqueKey = `devops-k8s-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const baseJob: Omit<Job, "id"> = {
+      title: "Engenheiro DevOps Kubernetes",
+      company: "InfraCorp Test",
+      location: "Remoto",
+      workModel: "REMOTO",
+      contractType: "CLT",
+      seniorityLevel: "SENIOR",
+      url: `https://infracorp.test/jobs/${uniqueKey}`,
+      source: "LEVER",
+      stack: ["Kubernetes", "AWS"],
+    };
+
+    // Insere vaga base e limpa dirty
+    StorageService.upsertJob(baseJob);
+    StorageService.flushToDisk();
+    assert.equal(StorageService.isStorageDirty(), false);
+
+    // Altera o salário e a stack da vaga existente
+    const modifiedJob: Omit<Job, "id"> = {
+      ...baseJob,
+      salary: "R$ 18.000",
+      stack: ["Kubernetes", "AWS", "Terraform"],
+    };
+
+    const res = StorageService.upsertJob(modifiedJob);
+    assert.equal(res.isNew, false, "Mesmo ID existente, logo isNew deve ser false");
+    assert.equal(StorageService.isStorageDirty(), true, "Mudança de conteúdo DEVE marcar storage como dirty");
+    assert.equal(res.job.salary, "R$ 18.000");
   });
 });

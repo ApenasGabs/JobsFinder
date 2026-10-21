@@ -2,6 +2,7 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { isDeepStrictEqual } from "util";
 import { ContractType, Job, SeniorityLevel, WorkModel } from "../types.js";
 import { TechClassifierService } from "./classifier.js";
 import { LoggerService } from "./logger.js";
@@ -15,9 +16,13 @@ const DATA_FILE = path.join(DATA_DIR, "jobs.json");
 export class StorageService {
   private static jobsMap: Map<string, Job> = new Map();
   private static isInitialized = false;
+  private static isDirty = false;
   private static saveTimeout: NodeJS.Timeout | null = null;
+  private static readonly MAX_SYNC_QUEUE_SIZE = 500;
   private static syncQueue: Map<string, Job> = new Map();
   private static syncTimeout: NodeJS.Timeout | null = null;
+  private static syncRetryCount = 0;
+  private static isSyncing = false;
 
   public static initialize(): void {
     if (this.isInitialized) return;
@@ -96,6 +101,9 @@ export class StorageService {
       };
     }
 
+    const isNew = !existing;
+    const hasChanged = isNew || this.hasJobChanged(existing, jobData);
+
     const job: Job = {
       ...jobData,
       id,
@@ -104,20 +112,40 @@ export class StorageService {
       notifiedAt: existing?.notifiedAt ?? null,
     };
 
-    const isNew = !existing;
     this.jobsMap.set(id, job);
 
-    // Salva em disco de forma assíncrona apenas se for uma vaga realmente nova
-    if (isNew) {
+    // Salva em disco e agenda sincronização apenas se a vaga for nova ou tiver dados alterados
+    if (hasChanged) {
       this.scheduleSave();
-    }
-
-    // Enfileira a vaga tech para sincronização em lote com o Supabase
-    if (job.isTech) {
-      this.scheduleSync(job);
+      if (job.isTech) {
+        this.scheduleSync(job);
+      }
     }
 
     return { job, isNew };
+  }
+
+  private static readonly COMPARABLE_FIELDS: ReadonlyArray<
+    keyof Omit<Job, "id" | "scrapedAt" | "notifiedAt" | "isTech">
+  > = [
+    "title",
+    "company",
+    "location",
+    "workModel",
+    "salary",
+    "contractType",
+    "seniorityLevel",
+    "description",
+    "stack",
+  ];
+
+  /**
+   * Compara os dados cadastrais da vaga para evitar I/O e tráfego de rede desnecessários
+   */
+  private static hasJobChanged(existing: Job, incoming: Omit<Job, "id">): boolean {
+    return this.COMPARABLE_FIELDS.some(
+      (key) => !isDeepStrictEqual(existing[key], incoming[key]),
+    );
   }
 
   public static deleteJob(jobId: string): boolean {
@@ -216,7 +244,8 @@ export class StorageService {
   public static saveToDiskSync(): void {
     try {
       const list = Array.from(this.jobsMap.values());
-      fs.writeFileSync(DATA_FILE, JSON.stringify(list, null, 2), "utf-8");
+      fs.writeFileSync(DATA_FILE, JSON.stringify(list), "utf-8");
+      this.isDirty = false;
     } catch (err) {
       console.error(
         "[Storage] Erro ao gravar dados em disco sincronicamente:",
@@ -452,7 +481,20 @@ export class StorageService {
     this.scheduleSave(0);
   }
 
+  public static isStorageDirty(): boolean {
+    return this.isDirty;
+  }
+
+  public static getSyncStatus(): { queueSize: number; retryCount: number; isSyncing: boolean } {
+    return {
+      queueSize: this.syncQueue.size,
+      retryCount: this.syncRetryCount,
+      isSyncing: this.isSyncing,
+    };
+  }
+
   private static scheduleSave(delayMs = 3000): void {
+    this.isDirty = true;
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout);
     }
@@ -462,12 +504,14 @@ export class StorageService {
   }
 
   public static flushToDisk(): void {
+    if (!this.isDirty) return;
     try {
       if (!fs.existsSync(DATA_DIR)) {
         fs.mkdirSync(DATA_DIR, { recursive: true });
       }
-      const data = JSON.stringify(Array.from(this.jobsMap.values()), null, 2);
+      const data = JSON.stringify(Array.from(this.jobsMap.values()));
       fs.writeFileSync(DATA_FILE, data, "utf-8");
+      this.isDirty = false;
       console.log(
         `[Storage] Persistidas ${this.jobsMap.size} vagas em ${DATA_FILE}`,
       );
@@ -477,32 +521,86 @@ export class StorageService {
   }
 
   private static scheduleSync(job: Job, delayMs = 3000): void {
+    // Limita tamanho da fila para proteção de memória
+    if (this.syncQueue.size >= this.MAX_SYNC_QUEUE_SIZE && !this.syncQueue.has(job.id)) {
+      const oldestKey = this.syncQueue.keys().next().value;
+      if (oldestKey) this.syncQueue.delete(oldestKey);
+    }
+
     this.syncQueue.set(job.id, job);
+
     if (this.syncTimeout) {
-      clearTimeout(this.syncTimeout);
+      return;
     }
     this.syncTimeout = setTimeout(() => {
+      this.syncTimeout = null;
       this.flushToSupabase();
     }, delayMs);
   }
 
   private static flushToSupabase(): void {
-    if (this.syncQueue.size === 0) return;
+    if (this.isSyncing || this.syncQueue.size === 0) return;
+
+    if (!SupabaseSyncService.isConfigured()) {
+      this.syncQueue.clear();
+      this.syncRetryCount = 0;
+      return;
+    }
+
+    this.isSyncing = true;
     const jobsToSync = Array.from(this.syncQueue.values());
     this.syncQueue.clear();
-    
-    SupabaseSyncService.syncBatch(jobsToSync).then((res) => {
-      if (!res.success) {
-        console.warn(`[Storage] ⚠️ Erro ao sincronizar lote com Supabase: ${res.error}`);
-        // Re-enfileira em caso de erro para tentar novamente depois, evitando perda de dados
-        for (const job of jobsToSync) {
-          this.syncQueue.set(job.id, job);
+
+    SupabaseSyncService.syncBatch(jobsToSync)
+      .then((res) => {
+        if (!res.success) {
+          this.syncRetryCount++;
+          const backoffDelay = Math.min(300000, 5000 * Math.pow(2, Math.min(this.syncRetryCount, 6)));
+
+          console.warn(
+            `[Storage] ⚠️ Falha ao sincronizar lote com Supabase (tentativa ${this.syncRetryCount}): ${res.error}. Próxima tentativa em ${(backoffDelay / 1000).toFixed(0)}s`,
+          );
+
+          // Re-enfileira as vagas respeitando o teto de segurança
+          for (const job of jobsToSync) {
+            if (this.syncQueue.size < this.MAX_SYNC_QUEUE_SIZE) {
+              this.syncQueue.set(job.id, job);
+            }
+          }
+
+          if (this.syncTimeout) {
+            clearTimeout(this.syncTimeout);
+          }
+          this.syncTimeout = setTimeout(() => {
+            this.syncTimeout = null;
+            this.flushToSupabase();
+          }, backoffDelay);
+        } else {
+          this.syncRetryCount = 0;
+          if (res.count > 0) {
+            console.log(`[Storage] ✅ ${res.count} vagas sincronizadas com o Supabase em lote.`);
+          }
         }
-      } else if (res.count > 0) {
-        console.log(`[Storage] ✅ ${res.count} vagas sincronizadas com o Supabase em lote.`);
-      }
-    }).catch(err => {
-      console.warn(`[Storage] ⚠️ Exceção ao sincronizar lote com Supabase:`, err);
-    });
+      })
+      .catch((err) => {
+        this.syncRetryCount++;
+        const backoffDelay = Math.min(300000, 5000 * Math.pow(2, Math.min(this.syncRetryCount, 6)));
+        console.warn(`[Storage] ⚠️ Exceção ao sincronizar lote com Supabase:`, err);
+        for (const job of jobsToSync) {
+          if (this.syncQueue.size < this.MAX_SYNC_QUEUE_SIZE) {
+            this.syncQueue.set(job.id, job);
+          }
+        }
+        if (this.syncTimeout) {
+          clearTimeout(this.syncTimeout);
+        }
+        this.syncTimeout = setTimeout(() => {
+          this.syncTimeout = null;
+          this.flushToSupabase();
+        }, backoffDelay);
+      })
+      .finally(() => {
+        this.isSyncing = false;
+      });
   }
 }

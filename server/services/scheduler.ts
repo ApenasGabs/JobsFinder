@@ -2,12 +2,14 @@ import cron, { ScheduledTask } from "node-cron";
 import { WhatsAppBot } from "../bot/whatsapp.js";
 import { Job, ScrapeOptions } from "../types.js";
 import { TechClassifierService } from "./classifier.js";
+import { CompanyAuditorService } from "./company-auditor.js";
 import { ConfigService } from "./config.js";
 import { CrawlerService } from "./crawler.js";
 import { LoggerService } from "./logger.js";
 
 export class SchedulerService {
   private static task: ScheduledTask | null = null;
+  private static auditTask: ScheduledTask | null = null;
   private static isRunningNow = false;
   private static lastRunAt: string | null = null;
 
@@ -30,6 +32,10 @@ export class SchedulerService {
       this.task.stop();
     }
 
+    if (this.auditTask) {
+      this.auditTask.stop();
+    }
+
     console.log(
       `[Scheduler] ⏰ Agendador ativo com expressão cron: "${cronExpression}"`,
     );
@@ -44,6 +50,21 @@ export class SchedulerService {
         "Disparo de varredura periódica programada pelo Scheduler 24/7",
       );
       await this.runScrapeAndNotify();
+    });
+
+    const auditCronExpression = process.env.AUDIT_CRON_SCHEDULE || "0 3 * * 0";
+    console.log(
+      `[Scheduler] 🔍 Auditoria semanal de ATS configurada com cron: "${auditCronExpression}"`,
+    );
+    this.auditTask = cron.schedule(auditCronExpression, async () => {
+      console.log(
+        `[Scheduler] 🔍 Disparando auditoria periódica agendada de empresas ATS [${new Date().toISOString()}]`,
+      );
+      try {
+        await CompanyAuditorService.auditAll({ autoDisableBroken: true });
+      } catch (err) {
+        console.error("[Scheduler] Erro durante auditoria agendada de empresas:", err);
+      }
     });
   }
 
@@ -141,6 +162,19 @@ export class SchedulerService {
       cronSchedule: config.scheduler?.cronSchedule || "*/30 * * * *",
       lastRunAt: this.lastRunAt,
       isRunningNow: this.isRunningNow,
+      isAuditing: CompanyAuditorService.isAuditing(),
+      lastAuditReport: CompanyAuditorService.getLastReport(),
     };
+  }
+
+  public static stop(): void {
+    if (this.task) {
+      this.task.stop();
+      this.task = null;
+    }
+    if (this.auditTask) {
+      this.auditTask.stop();
+      this.auditTask = null;
+    }
   }
 }

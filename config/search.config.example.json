@@ -89,7 +89,6 @@
     { "name": "Nomos", "link": "https://nomos.gupy.io", "slug": "nomos", "enabled": true },
     { "name": "Nomus", "link": "https://nomus.gupy.io", "slug": "nomus", "enabled": true },
     { "name": "Aliare", "link": "https://aliare.gupy.io", "slug": "aliare", "enabled": true },
-    { "name": "Agibank", "link": "https://agibank.gupy.io", "slug": "agibank", "enabled": true },
     { "name": "Vericode", "link": "https://vericode.gupy.io", "slug": "vericode", "enabled": true },
     { "name": "Grupo OLX", "link": "https://vemserolxbrasil.gupy.io", "slug": "vemserolxbrasil", "enabled": true },
     { "name": "Grupo Casas Bahia", "link": "https://tecnologiagrupocasasbahia.gupy.io", "slug": "tecnologiagrupocasasbahia", "enabled": true },
@@ -143,6 +142,25 @@
     { "name": "Teckey Solutions", "link": "https://teckeysolutions.gupy.io", "slug": "teckeysolutions", "enabled": true },
     { "name": "Quero Ser Dev", "link": "https://qsd.gupy.io", "slug": "qsd", "enabled": true },
     { "name": "Elo7", "link": "https://elo7.gupy.io", "slug": "elo7", "enabled": true }
+  ],
+  "greenhouseCompanies": [
+    { "name": "Agibank", "link": "https://boards.greenhouse.io/agibank", "slug": "agibank", "enabled": true },
+    { "name": "Nubank", "link": "https://boards.greenhouse.io/nubank", "slug": "nubank", "enabled": true },
+    { "name": "QuintoAndar", "link": "https://boards.greenhouse.io/quintoandar", "slug": "quintoandar", "enabled": true }
+  ],
+  "leverCompanies": [
+    { "name": "Nubank", "link": "https://jobs.lever.co/nubank", "slug": "nubank", "enabled": true },
+    { "name": "PicPay", "link": "https://jobs.lever.co/picpay", "slug": "picpay", "enabled": true }
+  ],
+  "ashbyCompanies": [
+    { "name": "Linear", "link": "https://jobs.ashbyhq.com/linear", "slug": "linear", "enabled": true },
+    { "name": "Vercel", "link": "https://jobs.ashbyhq.com/vercel", "slug": "vercel", "enabled": true }
+  ],
+  "inhireCompanies": [
+    { "name": "Venturus", "link": "https://venturus.inhire.app", "slug": "venturus", "enabled": true }
+  ],
+  "workableCompanies": [
+    { "name": "Moodle", "link": "https://apply.workable.com/moodle", "slug": "moodle", "enabled": true }
   ],
   "whatsapp": {
     "enabled": false,

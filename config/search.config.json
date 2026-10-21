@@ -433,12 +433,6 @@
       "enabled": true
     },
     {
-      "name": "Agibank",
-      "link": "https://agibank.gupy.io",
-      "slug": "agibank",
-      "enabled": true
-    },
-    {
       "name": "Vericode",
       "link": "https://vericode.gupy.io",
       "slug": "vericode",
@@ -1702,6 +1696,12 @@
     }
   ],
   "greenhouseCompanies": [
+    {
+      "name": "Agibank",
+      "slug": "agibank",
+      "link": "https://boards.greenhouse.io/agibank",
+      "enabled": true
+    },
     {
       "name": "Robinhood",
       "slug": "robinhood",

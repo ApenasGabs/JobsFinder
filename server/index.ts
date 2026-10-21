@@ -7,6 +7,7 @@ import { WhatsAppBot } from "./bot/whatsapp.js";
 import { LightpandaEngine } from "./engines/lightpanda.js";
 import { ScraperRegistry } from "./scrapers/base.js";
 import { TechClassifierService } from "./services/classifier.js";
+import { CompanyAuditorService } from "./services/company-auditor.js";
 import { ConfigService } from "./services/config.js";
 import { CrawlerService } from "./services/crawler.js";
 import { LogCategory, LoggerService, LogLevel } from "./services/logger.js";
@@ -86,6 +87,83 @@ app.put("/api/config", (req: Request, res: Response) => {
     res.json({ success: true, config: updated });
   } catch (err) {
     res.status(400).json({ error: "Erro ao atualizar configuração" });
+  }
+});
+
+// 2.1 Gestão e Auditoria de Empresas Monitoradas
+app.get("/api/companies/audit", (_req: Request, res: Response) => {
+  res.json({
+    isAuditing: CompanyAuditorService.isAuditing(),
+    report: CompanyAuditorService.getLastReport(),
+  });
+});
+
+app.post("/api/companies/audit", async (req: Request, res: Response) => {
+  try {
+    const { ats, autoDisableBroken, concurrency } = req.body || {};
+    const report = await CompanyAuditorService.auditAll({
+      ats,
+      autoDisableBroken: autoDisableBroken ?? false,
+      concurrency: concurrency ? Number(concurrency) : undefined,
+    });
+    res.json({ success: true, report });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: err.message || "Erro durante auditoria" });
+  }
+});
+
+app.post("/api/companies/verify", async (req: Request, res: Response) => {
+  try {
+    const { ats, slug, link } = req.body || {};
+    if (!ats || !slug) {
+      return res.status(400).json({ success: false, error: "ats e slug são obrigatórios" });
+    }
+    const result = await CompanyAuditorService.verifySingle(ats, slug, link);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+app.post("/api/companies", (req: Request, res: Response) => {
+  try {
+    const { ats, company } = req.body || {};
+    if (!ats || !company) {
+      return res.status(400).json({ success: false, error: "ats e company são obrigatórios" });
+    }
+    const result = CompanyAuditorService.addCompany(ats, company);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    res.status(201).json(result);
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.patch("/api/companies/:ats/:slug", (req: Request, res: Response) => {
+  try {
+    const { ats, slug } = req.params;
+    const result = CompanyAuditorService.updateCompany(ats, slug, req.body || {});
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete("/api/companies/:ats/:slug", (req: Request, res: Response) => {
+  try {
+    const { ats, slug } = req.params;
+    const result = CompanyAuditorService.deleteCompany(ats, slug);
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

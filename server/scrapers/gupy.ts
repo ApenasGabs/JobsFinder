@@ -8,6 +8,7 @@ import {
   extractStack,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
+import { resilientFetch } from "../utils/fetch.js";
 import { BaseScraper } from "./base.js";
 
 interface GupyRawJob {
@@ -65,10 +66,10 @@ export class GupyScraper implements BaseScraper {
         const portalUrl = company.link
           ? company.link.replace(/\/$/, "")
           : `https://${company.slug}.gupy.io`;
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6000);
-
-        const response = await fetch(portalUrl, {
+        const response = await resilientFetch(portalUrl, {
+          timeoutMs: 10000,
+          maxRetries: 1,
+          source: 'GUPY',
           headers: {
             "User-Agent":
               "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -76,9 +77,7 @@ export class GupyScraper implements BaseScraper {
               "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
           },
-          signal: controller.signal,
         });
-        clearTimeout(timeout);
 
         if (response.ok) {
           const html = await response.text();

@@ -57,6 +57,7 @@ export class WhatsAppBot {
   private static reconnectTimeout: NodeJS.Timeout | null = null;
   private static hasRunColdStart = false;
   private static isQueueLoaded = false;
+  private static disconnectedSince: number | null = Date.now();
   private static cachedGroups: Array<{
     id: string;
     subject: string;
@@ -120,6 +121,9 @@ export class WhatsAppBot {
           const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
 
           this.status = "disconnected";
+          if (!this.disconnectedSince) {
+            this.disconnectedSince = Date.now();
+          }
           this.sock = null;
           this.qrCodeDataUrl = null;
 
@@ -164,6 +168,7 @@ export class WhatsAppBot {
           this.status = "connected";
           this.qrCodeDataUrl = null;
           this.reconnectAttempts = 0;
+          this.disconnectedSince = null;
           if (this.reconnectTimeout) {
             clearTimeout(this.reconnectTimeout);
             this.reconnectTimeout = null;
@@ -233,6 +238,14 @@ export class WhatsAppBot {
       nextBatchRemainingSeconds: this.nextBatchTimestamp
         ? Math.max(0, Math.round((this.nextBatchTimestamp - Date.now()) / 1000))
         : 0,
+      disconnectedSince:
+        this.status !== "connected" && this.disconnectedSince
+          ? new Date(this.disconnectedSince).toISOString()
+          : null,
+      disconnectedSeconds:
+        this.status !== "connected" && this.disconnectedSince
+          ? Math.max(0, Math.round((Date.now() - this.disconnectedSince) / 1000))
+          : 0,
     };
   }
 
@@ -885,5 +898,15 @@ export class WhatsAppBot {
   public static clearQueue(): void {
     this.messageQueue = [];
     this.saveQueueToDisk();
+  }
+
+  public static setMockDisconnectedSince(ts: number | null): void {
+    this.disconnectedSince = ts;
+  }
+
+  public static setMockStatus(
+    status: "disconnected" | "connecting" | "connected",
+  ): void {
+    this.status = status;
   }
 }

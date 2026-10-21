@@ -1,8 +1,10 @@
 import { BaseScraper } from './base.js';
 import { Job, ScrapeOptions } from '../types.js';
 import { detectSeniority, extractStack } from '../utils/normalizer.js';
+import { resilientFetch } from '../utils/fetch.js';
 import { StorageService } from '../services/storage.js';
 import { LoggerService } from '../services/logger.js';
+import { ScraperHealthService } from '../services/scraper-health.js';
 
 interface RemoteOkItem {
   id?: string | number;
@@ -36,17 +38,24 @@ export class RemoteOKScraper implements BaseScraper {
     }
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 4000);
-
-      const response = await fetch('https://remoteok.com/api', {
+      const response = await resilientFetch('https://remoteok.com/api', {
+        timeoutMs: 10000,
+        maxRetries: 1,
+        source: 'REMOTEOK',
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
           'Accept': 'application/json'
-        },
-        signal: controller.signal
+        }
       });
-      clearTimeout(timeout);
+
+      if (response.status === 403 || response.status === 429) {
+        ScraperHealthService.recordCircuitBreak(
+          'REMOTEOK',
+          `RemoteOK retornou HTTP ${response.status}`,
+          600000
+        );
+        return [];
+      }
 
       if (!response.ok) {
         LoggerService.warn(

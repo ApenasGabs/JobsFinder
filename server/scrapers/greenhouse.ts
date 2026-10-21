@@ -8,6 +8,7 @@ import {
   extractStack,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
+import { resilientFetch } from "../utils/fetch.js";
 import { BaseScraper } from "./base.js";
 
 interface GreenhouseRawJob {
@@ -51,18 +52,16 @@ export class GreenhouseScraper implements BaseScraper {
     await runWithConcurrency(companies, concurrency, async (company) => {
       try {
         const apiUrl = `https://boards-api.greenhouse.io/v1/boards/${company.slug}/jobs?content=true`;
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6000);
-
-        const response = await fetch(apiUrl, {
+        const response = await resilientFetch(apiUrl, {
+          timeoutMs: 10000,
+          maxRetries: 1,
+          source: 'GREENHOUSE',
           headers: {
             Accept: "application/json",
             "User-Agent":
               "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
           },
-          signal: controller.signal,
         });
-        clearTimeout(timeout);
 
         if (response.ok) {
           const data = await response.json();

@@ -1,5 +1,7 @@
 import {
   Activity,
+  AlertCircle,
+  AlertTriangle,
   Briefcase,
   Building,
   CheckCircle2,
@@ -14,6 +16,7 @@ import {
   MapPin,
   MessageSquare,
   Play,
+  Plus,
   QrCode,
   Radio,
   RefreshCw,
@@ -43,17 +46,28 @@ interface Job {
   notifiedAt?: string | null;
 }
 
+interface CompanyConfig {
+  name: string;
+  link: string;
+  slug: string;
+  enabled: boolean;
+  status?: 'healthy' | 'broken_link' | 'unknown';
+  lastAuditedAt?: string;
+  lastAuditStatus?: number;
+  lastAuditError?: string;
+}
+
 interface AppConfig {
   searchTerms: string[];
   seniorityLevels: string[];
   contractTypes: string[];
   sources: Array<{ id: string; name: string; type: string; enabled: boolean }>;
-  gupyCompanies: Array<{ name: string; link: string; slug: string; enabled: boolean }>;
-  inhireCompanies?: Array<{ name: string; link: string; slug: string; enabled: boolean }>;
-  ashbyCompanies?: Array<{ name: string; link: string; slug: string; enabled: boolean }>;
-  leverCompanies?: Array<{ name: string; link: string; slug: string; enabled: boolean }>;
-  greenhouseCompanies?: Array<{ name: string; link: string; slug: string; enabled: boolean }>;
-  workableCompanies?: Array<{ name: string; link: string; slug: string; enabled: boolean }>;
+  gupyCompanies: CompanyConfig[];
+  inhireCompanies?: CompanyConfig[];
+  ashbyCompanies?: CompanyConfig[];
+  leverCompanies?: CompanyConfig[];
+  greenhouseCompanies?: CompanyConfig[];
+  workableCompanies?: CompanyConfig[];
   whatsapp?: {
     enabled: boolean;
     targetGroupJid: string;
@@ -157,8 +171,17 @@ export default function App() {
   }>({ message: 'Pronto para iniciar busca', percent: 0, totalFound: 0 });
 
   const [showConfigModal, setShowConfigModal] = useState(false);
-  const [configModalTab, setConfigModalTab] = useState<'GUPY' | 'INHIRE' | 'ASHBY' | 'LEVER' | 'GREENHOUSE' | 'WORKABLE'>('GUPY');
+  const [configModalTab, setConfigModalTab] = useState<'TODAS' | 'GUPY' | 'INHIRE' | 'ASHBY' | 'LEVER' | 'GREENHOUSE' | 'WORKABLE'>('TODAS');
   const [configSearchTerm, setConfigSearchTerm] = useState('');
+  const [showAddCompanyForm, setShowAddCompanyForm] = useState(false);
+  const [newCompanyAts, setNewCompanyAts] = useState<'GUPY' | 'GREENHOUSE' | 'LEVER' | 'ASHBY' | 'WORKABLE' | 'INHIRE'>('GREENHOUSE');
+  const [newCompanyName, setNewCompanyName] = useState('');
+  const [newCompanySlug, setNewCompanySlug] = useState('');
+  const [newCompanyLink, setNewCompanyLink] = useState('');
+  const [verifyState, setVerifyState] = useState<{ loading: boolean; result?: any; error?: string }>({ loading: false });
+  const [isAuditingCompanies, setIsAuditingCompanies] = useState(false);
+  const [auditFeedback, setAuditFeedback] = useState<string | null>(null);
+  const [testedCompanyStatus, setTestedCompanyStatus] = useState<Record<string, { loading: boolean; ok?: boolean; message?: string }>>({});
   const eventSourceRef = useRef<EventSource | null>(null);
 
   // Carrega dados iniciais
@@ -215,6 +238,151 @@ export default function App() {
       }
     } catch (err) {
       console.error('Erro ao carregar config:', err);
+    }
+  };
+
+  const handleVerifyNewCompany = async () => {
+    if (!newCompanySlug.trim()) {
+      alert('Informe o slug da empresa para validar.');
+      return;
+    }
+    setVerifyState({ loading: true, result: undefined, error: undefined });
+    try {
+      const res = await fetch('/api/companies/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ats: newCompanyAts,
+          slug: newCompanySlug.trim(),
+          link: newCompanyLink.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      setVerifyState({ loading: false, result: data });
+    } catch (err: any) {
+      setVerifyState({ loading: false, error: err.message });
+    }
+  };
+
+  const handleSaveNewCompany = async () => {
+    if (!newCompanyName.trim() || !newCompanySlug.trim()) {
+      alert('Nome da empresa e Slug são obrigatórios.');
+      return;
+    }
+    try {
+      const res = await fetch('/api/companies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ats: newCompanyAts,
+          company: {
+            name: newCompanyName.trim(),
+            slug: newCompanySlug.trim().toLowerCase(),
+            link: newCompanyLink.trim() || undefined,
+            enabled: true,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.error || 'Erro ao salvar empresa.');
+        return;
+      }
+      loadConfig();
+      setShowAddCompanyForm(false);
+      setNewCompanyName('');
+      setNewCompanySlug('');
+      setNewCompanyLink('');
+      setVerifyState({ loading: false });
+      setConfigSearchTerm(newCompanySlug.trim().toLowerCase());
+    } catch (err: any) {
+      alert('Erro ao cadastrar empresa: ' + err.message);
+    }
+  };
+
+  const handleToggleCompany = async (ats: string, company: CompanyConfig) => {
+    try {
+      const res = await fetch(`/api/companies/${ats}/${company.slug}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: !company.enabled }),
+      });
+      if (res.ok) {
+        loadConfig();
+      }
+    } catch (err) {
+      console.error('Erro ao alternar status da empresa:', err);
+    }
+  };
+
+  const handleDeleteCompany = async (ats: string, slug: string, name: string) => {
+    if (!window.confirm(`Deseja realmente remover "${name}" (${ats}) do monitoramento?`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/companies/${ats}/${slug}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        loadConfig();
+      }
+    } catch (err) {
+      console.error('Erro ao excluir empresa:', err);
+    }
+  };
+
+  const handleTestExistingCompany = async (ats: string, slug: string, link?: string) => {
+    const key = `${ats}:${slug}`;
+    setTestedCompanyStatus((prev) => ({ ...prev, [key]: { loading: true } }));
+    try {
+      const res = await fetch('/api/companies/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ats, slug, link }),
+      });
+      const data = await res.json();
+      setTestedCompanyStatus((prev) => ({
+        ...prev,
+        [key]: {
+          loading: false,
+          ok: data.ok,
+          message: data.ok
+            ? `✓ OK (${data.jobsCount ?? 0} vagas)`
+            : `✗ ${data.error || 'Falha'}`,
+        },
+      }));
+    } catch {
+      setTestedCompanyStatus((prev) => ({
+        ...prev,
+        [key]: { loading: false, ok: false, message: '✗ Falha de conexão' },
+      }));
+    }
+  };
+
+  const handleRunAudit = async (autoDisable = false) => {
+    setIsAuditingCompanies(true);
+    setAuditFeedback('Executando auditoria nos endpoints das empresas...');
+    try {
+      const res = await fetch('/api/companies/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ autoDisableBroken: autoDisable }),
+      });
+      const data = await res.json();
+      if (data.success && data.report) {
+        setAuditFeedback(
+          `Auditoria finalizada: ${data.report.totalChecked} checadas | ${data.report.healthyCount} OK | ${data.report.brokenCount} quebradas${
+            data.report.autoDisabledCount ? ` (${data.report.autoDisabledCount} desativadas)` : ''
+          }`
+        );
+        loadConfig();
+      } else {
+        setAuditFeedback('Erro ao concluir auditoria: ' + (data.error || 'Desconhecido'));
+      }
+    } catch (err: any) {
+      setAuditFeedback('Erro ao conectar com servidor: ' + err.message);
+    } finally {
+      setIsAuditingCompanies(false);
     }
   };
 
@@ -1644,8 +1812,9 @@ export default function App() {
       {/* Modal de Configuração Geral / Empresas Monitoradas */}
       {showConfigModal && config && (
         <div className="modal-overlay" onClick={() => setShowConfigModal(false)}>
-          <div className="modal-content" style={{ maxWidth: '750px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div className="modal-content" style={{ maxWidth: '850px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <Building size={22} color="#3b82f6" />
                 <h2 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Empresas & Plataformas Monitoradas</h2>
@@ -1655,27 +1824,131 @@ export default function App() {
               </button>
             </div>
 
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem' }}>
-              Arquivo de configuração ativo: <code style={{ color: '#38bdf8' }}>config/search.config.json</code>
-            </p>
+            {/* Subheader & Audit Bar */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '0.6rem',
+              background: '#0f172a',
+              padding: '0.6rem 0.85rem',
+              borderRadius: '8px',
+              border: '1px solid #1e293b',
+              marginBottom: '1rem'
+            }}>
+              <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+                Total monitorado: <strong style={{ color: '#f8fafc' }}>
+                  {(config.gupyCompanies?.length || 0) + (config.inhireCompanies?.length || 0) + (config.ashbyCompanies?.length || 0) + (config.leverCompanies?.length || 0) + (config.greenhouseCompanies?.length || 0) + (config.workableCompanies?.length || 0)}
+                </strong> empresas
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => handleRunAudit(false)}
+                  disabled={isAuditingCompanies}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    color: '#e2e8f0',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    cursor: isAuditingCompanies ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  <RefreshCw size={13} className={isAuditingCompanies ? 'spin' : ''} />
+                  {isAuditingCompanies ? 'Auditando...' : 'Auditar Links'}
+                </button>
+                <button
+                  onClick={() => handleRunAudit(true)}
+                  disabled={isAuditingCompanies}
+                  title="Audita todas as empresas e desativa automaticamente as que retornarem 404"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    background: '#ef444422',
+                    border: '1px solid #ef444455',
+                    color: '#f87171',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    cursor: isAuditingCompanies ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  <AlertTriangle size={13} />
+                  Auto-Desativar 404s
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddCompanyForm(!showAddCompanyForm);
+                    setVerifyState({ loading: false });
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    background: showAddCompanyForm ? '#334155' : '#3b82f6',
+                    border: 'none',
+                    color: '#fff',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Plus size={14} />
+                  {showAddCompanyForm ? 'Ocultar Formulário' : 'Nova Empresa'}
+                </button>
+              </div>
+            </div>
+
+            {/* Audit Feedback Banner */}
+            {auditFeedback && (
+              <div style={{
+                background: '#1e293b',
+                border: '1px solid #3b82f644',
+                color: '#93c5fd',
+                padding: '0.5rem 0.85rem',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                marginBottom: '1rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span>{auditFeedback}</span>
+                <button
+                  onClick={() => setAuditFeedback(null)}
+                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
 
             {/* ATS Tabs */}
-            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
               {[
-                { id: 'GUPY', label: 'Gupy', count: config.gupyCompanies?.length || 0, color: '#3b82f6' },
-                { id: 'INHIRE', label: 'InHire', count: config.inhireCompanies?.length || 0, color: '#06b6d4' },
-                { id: 'ASHBY', label: 'Ashby', count: config.ashbyCompanies?.length || 0, color: '#8b5cf6' },
-                { id: 'LEVER', label: 'Lever', count: config.leverCompanies?.length || 0, color: '#10b981' },
+                { id: 'TODAS', label: 'Todas', count: (config.gupyCompanies?.length || 0) + (config.inhireCompanies?.length || 0) + (config.ashbyCompanies?.length || 0) + (config.leverCompanies?.length || 0) + (config.greenhouseCompanies?.length || 0) + (config.workableCompanies?.length || 0), color: '#38bdf8' },
                 { id: 'GREENHOUSE', label: 'Greenhouse', count: config.greenhouseCompanies?.length || 0, color: '#f59e0b' },
+                { id: 'GUPY', label: 'Gupy', count: config.gupyCompanies?.length || 0, color: '#3b82f6' },
+                { id: 'LEVER', label: 'Lever', count: config.leverCompanies?.length || 0, color: '#10b981' },
+                { id: 'ASHBY', label: 'Ashby', count: config.ashbyCompanies?.length || 0, color: '#8b5cf6' },
+                { id: 'INHIRE', label: 'InHire', count: config.inhireCompanies?.length || 0, color: '#06b6d4' },
                 { id: 'WORKABLE', label: 'Workable', count: config.workableCompanies?.length || 0, color: '#ec4899' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setConfigModalTab(tab.id as any)}
                   style={{
-                    padding: '0.4rem 0.8rem',
+                    padding: '0.35rem 0.75rem',
                     borderRadius: '8px',
-                    fontSize: '0.82rem',
+                    fontSize: '0.8rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     border: configModalTab === tab.id ? `1px solid ${tab.color}` : '1px solid #334155',
@@ -1692,8 +1965,8 @@ export default function App() {
                     background: configModalTab === tab.id ? tab.color : '#334155',
                     color: '#fff',
                     borderRadius: '12px',
-                    padding: '0.1rem 0.45rem',
-                    fontSize: '0.72rem'
+                    padding: '0.05rem 0.4rem',
+                    fontSize: '0.7rem'
                   }}>
                     {tab.count}
                   </span>
@@ -1701,17 +1974,177 @@ export default function App() {
               ))}
             </div>
 
+            {/* Form de Cadastro / Sugestão de Empresa */}
+            {showAddCompanyForm && (
+              <div style={{
+                background: '#0b1329',
+                border: '1px solid #2563eb55',
+                borderRadius: '8px',
+                padding: '0.85rem',
+                marginBottom: '1rem'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#60a5fa', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Plus size={15} /> Cadastrar Nova Empresa para Monitoramento
+                  </h4>
+                  <button onClick={() => setShowAddCompanyForm(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+                    <X size={15} />
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.6rem', marginBottom: '0.6rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Plataforma ATS</label>
+                    <select
+                      value={newCompanyAts}
+                      onChange={(e) => setNewCompanyAts(e.target.value as any)}
+                      style={{
+                        width: '100%',
+                        padding: '0.45rem',
+                        borderRadius: '6px',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        color: '#f8fafc',
+                        fontSize: '0.82rem'
+                      }}
+                    >
+                      <option value="GREENHOUSE">Greenhouse (Top Tech)</option>
+                      <option value="GUPY">Gupy (Brasil)</option>
+                      <option value="LEVER">Lever (Tech & Startups)</option>
+                      <option value="ASHBY">Ashby (Global Tech)</option>
+                      <option value="INHIRE">InHire (Startups BR)</option>
+                      <option value="WORKABLE">Workable (Global)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Nome da Empresa</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: Agibank"
+                      value={newCompanyName}
+                      onChange={(e) => {
+                        setNewCompanyName(e.target.value);
+                        if (!newCompanySlug || newCompanySlug === newCompanyName.toLowerCase().replace(/[^a-z0-9]/g, '')) {
+                          setNewCompanySlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''));
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '0.45rem',
+                        borderRadius: '6px',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        color: '#f8fafc',
+                        fontSize: '0.82rem'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Slug no ATS</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: agibank"
+                      value={newCompanySlug}
+                      onChange={(e) => setNewCompanySlug(e.target.value.toLowerCase().trim())}
+                      style={{
+                        width: '100%',
+                        padding: '0.45rem',
+                        borderRadius: '6px',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        color: '#f8fafc',
+                        fontSize: '0.82rem'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>URL Portal (Opcional)</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: https://boards.greenhouse.io/agibank"
+                      value={newCompanyLink}
+                      onChange={(e) => setNewCompanyLink(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.45rem',
+                        borderRadius: '6px',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        color: '#f8fafc',
+                        fontSize: '0.82rem'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Resultado da validação do slug */}
+                {verifyState.result && (
+                  <div style={{
+                    padding: '0.45rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.8rem',
+                    marginBottom: '0.6rem',
+                    background: verifyState.result.ok ? '#10b98122' : '#ef444422',
+                    border: verifyState.result.ok ? '1px solid #10b98155' : '1px solid #ef444455',
+                    color: verifyState.result.ok ? '#34d399' : '#f87171'
+                  }}>
+                    {verifyState.result.message}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={handleVerifyNewCompany}
+                    disabled={verifyState.loading}
+                    style={{
+                      padding: '0.4rem 0.8rem',
+                      borderRadius: '6px',
+                      background: '#1e293b',
+                      border: '1px solid #475569',
+                      color: '#cbd5e1',
+                      fontSize: '0.8rem',
+                      cursor: verifyState.loading ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {verifyState.loading ? 'Testando...' : 'Testar Conexão / Slug'}
+                  </button>
+                  <button
+                    onClick={handleSaveNewCompany}
+                    style={{
+                      padding: '0.4rem 0.9rem',
+                      borderRadius: '6px',
+                      background: '#2563eb',
+                      border: 'none',
+                      color: '#fff',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Salvar e Monitorar
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Quick search input */}
             <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
               <Search size={16} color="#64748b" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
-                placeholder={`Buscar empresa em ${configModalTab}...`}
+                placeholder={
+                  configModalTab === 'TODAS'
+                    ? 'Pesquisar empresa cadastrada em todas as plataformas...'
+                    : `Pesquisar empresa em ${configModalTab}...`
+                }
                 value={configSearchTerm}
                 onChange={(e) => setConfigSearchTerm(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.5rem 0.75rem 0.5rem 2.2rem',
+                  padding: '0.55rem 0.75rem 0.55rem 2.2rem',
                   borderRadius: '6px',
                   background: '#0f172a',
                   border: '1px solid #334155',
@@ -1719,95 +2152,301 @@ export default function App() {
                   fontSize: '0.85rem'
                 }}
               />
+              {configSearchTerm && (
+                <button
+                  onClick={() => setConfigSearchTerm('')}
+                  style={{
+                    position: 'absolute',
+                    right: '0.75rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748b',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <X size={15} />
+                </button>
+              )}
             </div>
 
-            {/* Company List */}
+            {/* Company List & Search First Flow */}
             {(() => {
-              const currentList =
-                configModalTab === 'GUPY' ? config.gupyCompanies :
-                  configModalTab === 'INHIRE' ? config.inhireCompanies :
-                    configModalTab === 'ASHBY' ? config.ashbyCompanies :
-                      configModalTab === 'LEVER' ? config.leverCompanies :
-                        configModalTab === 'GREENHOUSE' ? config.greenhouseCompanies :
-                          config.workableCompanies;
+              const allList: Array<{
+                ats: 'GUPY' | 'GREENHOUSE' | 'LEVER' | 'ASHBY' | 'WORKABLE' | 'INHIRE';
+                company: CompanyConfig;
+                color: string;
+              }> = [];
 
-              const filtered = (currentList || []).filter(c =>
-                c.name.toLowerCase().includes(configSearchTerm.toLowerCase()) ||
-                c.slug.toLowerCase().includes(configSearchTerm.toLowerCase())
+              if (configModalTab === 'TODAS' || configModalTab === 'GREENHOUSE') {
+                (config.greenhouseCompanies || []).forEach((c) => allList.push({ ats: 'GREENHOUSE', company: c, color: '#f59e0b' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'GUPY') {
+                (config.gupyCompanies || []).forEach((c) => allList.push({ ats: 'GUPY', company: c, color: '#3b82f6' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'LEVER') {
+                (config.leverCompanies || []).forEach((c) => allList.push({ ats: 'LEVER', company: c, color: '#10b981' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'ASHBY') {
+                (config.ashbyCompanies || []).forEach((c) => allList.push({ ats: 'ASHBY', company: c, color: '#8b5cf6' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'INHIRE') {
+                (config.inhireCompanies || []).forEach((c) => allList.push({ ats: 'INHIRE', company: c, color: '#06b6d4' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'WORKABLE') {
+                (config.workableCompanies || []).forEach((c) => allList.push({ ats: 'WORKABLE', company: c, color: '#ec4899' }));
+              }
+
+              const term = configSearchTerm.toLowerCase().trim();
+              const filtered = allList.filter((item) =>
+                !term ||
+                item.company.name.toLowerCase().includes(term) ||
+                item.company.slug.toLowerCase().includes(term)
               );
 
               return (
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                      Exibindo {filtered.length} de {currentList?.length || 0} empresas
+                <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+                      Exibindo {filtered.length} de {allList.length} empresas
                     </span>
                   </div>
+
                   <div style={{
-                    maxHeight: '320px',
+                    flex: 1,
                     overflowY: 'auto',
                     background: '#0f172a',
                     padding: '0.5rem',
                     borderRadius: '8px',
                     border: '1px solid #334155',
-                    fontSize: '0.82rem'
+                    fontSize: '0.82rem',
+                    maxHeight: '340px'
                   }}>
                     {filtered.length === 0 ? (
-                      <p style={{ color: '#64748b', textAlign: 'center', padding: '1rem' }}>
-                        Nenhuma empresa encontrada com o termo "{configSearchTerm}".
-                      </p>
-                    ) : (
-                      filtered.map((c, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '0.45rem 0.5rem',
-                            borderBottom: i < filtered.length - 1 ? '1px solid #1e293b' : 'none',
-                          }}
-                        >
-                          <div>
-                            <span style={{ fontWeight: 500, color: '#f1f5f9' }}>{c.name}</span>
-                            <span style={{ color: '#64748b', marginLeft: '0.6rem', fontSize: '0.75rem' }}>
-                              ({c.slug})
-                            </span>
+                      configSearchTerm.trim().length >= 2 ? (
+                        /* Empty State com CTA de Cadastro */
+                        <div style={{
+                          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9))',
+                          border: '1px dashed #3b82f6',
+                          borderRadius: '10px',
+                          padding: '1.5rem',
+                          textAlign: 'center',
+                          margin: '0.5rem'
+                        }}>
+                          <div style={{
+                            display: 'inline-flex',
+                            padding: '0.6rem',
+                            borderRadius: '50%',
+                            background: '#3b82f622',
+                            color: '#60a5fa',
+                            marginBottom: '0.6rem'
+                          }}>
+                            <Building size={26} />
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{
-                              fontSize: '0.7rem',
-                              padding: '0.15rem 0.4rem',
-                              borderRadius: '4px',
-                              background: '#10b98122',
-                              color: '#34d399',
-                              border: '1px solid #10b98144'
-                            }}>
-                              Ativa
-                            </span>
-                            {c.link && (
-                              <a
-                                href={c.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title="Abrir página de carreiras"
-                                style={{ color: '#60a5fa', display: 'flex', alignItems: 'center' }}
-                              >
-                                <ExternalLink size={14} />
-                              </a>
-                            )}
-                          </div>
+                          <h4 style={{ fontSize: '0.98rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.3rem' }}>
+                            Nenhuma empresa encontrada com o termo "{configSearchTerm}"
+                          </h4>
+                          <p style={{ fontSize: '0.82rem', color: '#94a3b8', maxWidth: '420px', margin: '0 auto 1rem auto' }}>
+                            Essa empresa ainda não está no monitoramento de vagas. Deseja cadastrá-la agora para iniciar a captura de vagas?
+                          </p>
+                          <button
+                            onClick={() => {
+                              setNewCompanyName(configSearchTerm);
+                              setNewCompanySlug(configSearchTerm.toLowerCase().replace(/[^a-z0-9]/g, ''));
+                              if (configModalTab !== 'TODAS') {
+                                setNewCompanyAts(configModalTab);
+                              }
+                              setShowAddCompanyForm(true);
+                              setVerifyState({ loading: false });
+                            }}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.4rem',
+                              background: '#2563eb',
+                              color: '#fff',
+                              border: 'none',
+                              padding: '0.5rem 1rem',
+                              borderRadius: '6px',
+                              fontSize: '0.82rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <Plus size={15} /> Cadastrar "{configSearchTerm}" para Monitorar
+                          </button>
                         </div>
-                      ))
+                      ) : (
+                        <p style={{ color: '#64748b', textAlign: 'center', padding: '1.5rem' }}>
+                          Nenhuma empresa encontrada nesta seleção. Digite ao menos 2 letras para pesquisar ou cadastrar.
+                        </p>
+                      )
+                    ) : (
+                      filtered.map((item, i) => {
+                        const c = item.company;
+                        const ats = item.ats;
+                        const testKey = `${ats}:${c.slug}`;
+                        const testInfo = testedCompanyStatus[testKey];
+
+                        return (
+                          <div
+                            key={`${ats}-${c.slug}-${i}`}
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: '0.5rem 0.6rem',
+                              borderBottom: i < filtered.length - 1 ? '1px solid #1e293b' : 'none',
+                              opacity: c.enabled === false ? 0.6 : 1,
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                              <span style={{
+                                fontSize: '0.68rem',
+                                padding: '0.1rem 0.4rem',
+                                borderRadius: '4px',
+                                background: `${item.color}22`,
+                                color: item.color,
+                                border: `1px solid ${item.color}44`,
+                                fontWeight: 600
+                              }}>
+                                {ats}
+                              </span>
+                              <span style={{ fontWeight: 500, color: '#f1f5f9' }}>{c.name}</span>
+                              <span style={{ color: '#64748b', fontSize: '0.75rem' }}>
+                                ({c.slug})
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                              {/* Status Badge */}
+                              {c.status === 'broken_link' ? (
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  padding: '0.12rem 0.4rem',
+                                  borderRadius: '4px',
+                                  background: '#ef444422',
+                                  color: '#f87171',
+                                  border: '1px solid #ef444444',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.2rem'
+                                }}>
+                                  <AlertCircle size={10} /> 404 Quebrado
+                                </span>
+                              ) : c.enabled === false ? (
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  padding: '0.12rem 0.4rem',
+                                  borderRadius: '4px',
+                                  background: '#f59e0b22',
+                                  color: '#fbbf24',
+                                  border: '1px solid #f59e0b44'
+                                }}>
+                                  Pausada
+                                </span>
+                              ) : (
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  padding: '0.12rem 0.4rem',
+                                  borderRadius: '4px',
+                                  background: '#10b98122',
+                                  color: '#34d399',
+                                  border: '1px solid #10b98144'
+                                }}>
+                                  Ativa
+                                </span>
+                              )}
+
+                              {/* Test Link Button */}
+                              <button
+                                onClick={() => handleTestExistingCompany(ats, c.slug, c.link)}
+                                disabled={testInfo?.loading}
+                                title="Testar endpoint agora"
+                                style={{
+                                  padding: '0.2rem 0.45rem',
+                                  borderRadius: '4px',
+                                  background: '#1e293b',
+                                  border: '1px solid #334155',
+                                  color: '#94a3b8',
+                                  fontSize: '0.72rem',
+                                  cursor: testInfo?.loading ? 'not-allowed' : 'pointer'
+                                }}
+                              >
+                                {testInfo?.loading ? '...' : 'Testar'}
+                              </button>
+
+                              {testInfo?.message && (
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  color: testInfo.ok ? '#34d399' : '#f87171'
+                                }}>
+                                  {testInfo.message}
+                                </span>
+                              )}
+
+                              {/* Link externo */}
+                              {c.link && (
+                                <a
+                                  href={c.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title="Abrir página de carreiras"
+                                  style={{ color: '#60a5fa', display: 'flex', alignItems: 'center' }}
+                                >
+                                  <ExternalLink size={13} />
+                                </a>
+                              )}
+
+                              {/* Toggle Ativo/Inativo */}
+                              <button
+                                onClick={() => handleToggleCompany(ats, c)}
+                                title={c.enabled !== false ? 'Pausar monitoramento' : 'Ativar monitoramento'}
+                                style={{
+                                  padding: '0.2rem 0.45rem',
+                                  borderRadius: '4px',
+                                  background: c.enabled !== false ? '#334155' : '#10b98133',
+                                  border: '1px solid #475569',
+                                  color: c.enabled !== false ? '#cbd5e1' : '#34d399',
+                                  fontSize: '0.7rem',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {c.enabled !== false ? 'Pausar' : 'Ativar'}
+                              </button>
+
+                              {/* Remover Empresa */}
+                              <button
+                                onClick={() => handleDeleteCompany(ats, c.slug, c.name)}
+                                title="Remover empresa da lista"
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#ef4444aa',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  padding: '0.2rem'
+                                }}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 </div>
               );
             })()}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {/* Modal Footer */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '0.5rem', borderTop: '1px solid #1e293b' }}>
               <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                Total integrado: {(config.gupyCompanies?.length || 0) + (config.inhireCompanies?.length || 0) + (config.ashbyCompanies?.length || 0) + (config.leverCompanies?.length || 0) + (config.greenhouseCompanies?.length || 0) + (config.workableCompanies?.length || 0)} empresas
+                Configuração ativa: <code>config/search.config.json</code>
               </span>
               <button className="btn-action primary" onClick={() => setShowConfigModal(false)}>
                 Fechar

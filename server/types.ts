@@ -159,11 +159,41 @@ export interface SchedulerConfig {
   lastRunAt?: string;
 }
 
+export type CompanyAuditStatus = "OK" | "BROKEN" | "WARNING";
+
+export interface CompanyAuditResult {
+  ats: string;
+  name: string;
+  slug: string;
+  link: string;
+  status: CompanyAuditStatus;
+  httpStatus?: number;
+  error?: string;
+  checkedUrl: string;
+  jobsCount?: number;
+  durationMs: number;
+}
+
+export interface CompanyAuditReport {
+  timestamp: string;
+  totalChecked: number;
+  healthyCount: number;
+  brokenCount: number;
+  warningCount: number;
+  durationMs: number;
+  results: CompanyAuditResult[];
+  autoDisabledCount?: number;
+}
+
 export interface CompanyConfig {
   name: string;
   link: string;
   slug: string;
   enabled: boolean;
+  status?: "healthy" | "broken_link" | "unknown";
+  lastAuditedAt?: string;
+  lastAuditStatus?: number;
+  lastAuditError?: string;
 }
 
 export interface AppConfig {

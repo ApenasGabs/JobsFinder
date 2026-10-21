@@ -263,17 +263,17 @@ export class WhatsAppBot {
   /**
    * Recebe vagas novas do Scraper / Scheduler e enfileira com filtro de categoria
    */
-  public static async notifyNewJobs(newJobs: Job[]): Promise<void> {
+  public static async notifyNewJobs(newJobs: Job[]): Promise<number> {
     const config = ConfigService.getConfig();
     if (!config.whatsapp?.enabled || !config.whatsapp?.targetGroupJid) {
-      return;
+      return 0;
     }
 
     if (!this.sock || this.status !== "connected") {
       console.warn(
         "[WhatsApp] Vagas novas encontradas, mas bot desconectado. Aguardando reconexão...",
       );
-      return;
+      return 0;
     }
 
     const targetCats = config.whatsapp?.targetCategories || ["TODAS"];
@@ -309,9 +309,14 @@ export class WhatsAppBot {
       (j) => j.isTech !== false && TechClassifierService.isTechSync(j.title),
     );
 
-    if (techOnlyJobs.length === 0) return;
+    if (techOnlyJobs.length === 0) {
+      console.log(
+        `[WhatsApp] Das ${newJobs.length} novas vagas recebidas, nenhuma corresponde aos filtros de categoria do grupo (${targetCats.join(", ")}).`,
+      );
+      return 0;
+    }
 
-    this.enqueueJobs(techOnlyJobs);
+    return this.enqueueJobs(techOnlyJobs);
   }
 
   /**

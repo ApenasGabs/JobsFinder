@@ -112,7 +112,7 @@ export class CrawlerService {
 
           const jobs = await scraper.scrape(
             options,
-            (newJob) => {
+            (newJob, isNew) => {
               // Descarta vagas que não sejam de Tecnologia/TI
               if (
                 newJob.isTech === false ||
@@ -126,6 +126,7 @@ export class CrawlerService {
                 type: "job",
                 source: scraper.id,
                 job: newJob,
+                isNew: isNew ?? !newJob.notifiedAt,
                 totalFound: collectedJobs.length,
               });
             },

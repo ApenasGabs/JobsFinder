@@ -25,7 +25,7 @@ export class RemoteOKScraper implements BaseScraper {
 
   public async scrape(
     options: ScrapeOptions,
-    onJobFound: (job: Job) => void,
+    onJobFound: (job: Job, isNew?: boolean) => void,
     onProgress?: (progress: { message: string; percent?: number }) => void
   ): Promise<Job[]> {
     const keywords = (options.keywords || []).map((k) => k.toLowerCase().trim()).filter(Boolean);
@@ -91,9 +91,9 @@ export class RemoteOKScraper implements BaseScraper {
           description: (item.description || '').slice(0, 300)
         };
 
-        const { job } = StorageService.upsertJob(jobData);
+        const { job, isNew } = StorageService.upsertJob(jobData);
         foundJobs.push(job);
-        onJobFound(job);
+        onJobFound(job, isNew);
 
         processed++;
         if (processed >= 50) break; // Limite razoável para não saturar

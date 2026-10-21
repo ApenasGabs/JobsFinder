@@ -8,7 +8,7 @@ export interface BaseScraper {
 
   scrape(
     options: ScrapeOptions,
-    onJobFound: (job: Job) => void,
+    onJobFound: (job: Job, isNew?: boolean) => void,
     onProgress?: (progress: { message: string; currentCompany?: string; percent?: number }) => void
   ): Promise<Job[]>;
 }

@@ -13,7 +13,7 @@ export class GeekHunterScraper implements BaseScraper {
 
   public async scrape(
     options: ScrapeOptions,
-    onJobFound: (job: Job) => void,
+    onJobFound: (job: Job, isNew?: boolean) => void,
     onProgress?: (progress: { message: string; percent?: number }) => void
   ): Promise<Job[]> {
     const keywords = (options.keywords || []).filter(Boolean);
@@ -96,9 +96,9 @@ export class GeekHunterScraper implements BaseScraper {
             description: details.slice(0, 250)
           };
 
-          const { job } = StorageService.upsertJob(jobData);
+          const { job, isNew } = StorageService.upsertJob(jobData);
           foundJobs.push(job);
-          onJobFound(job);
+          onJobFound(job, isNew);
         });
       } catch (err: any) {
         const isAbort = err?.name === 'AbortError' || err?.message?.includes('aborted');

@@ -1,6 +1,7 @@
 import cron, { ScheduledTask } from "node-cron";
 import { WhatsAppBot } from "../bot/whatsapp.js";
 import { Job, ScrapeOptions } from "../types.js";
+import { TechClassifierService } from "./classifier.js";
 import { ConfigService } from "./config.js";
 import { CrawlerService } from "./crawler.js";
 import { LoggerService } from "./logger.js";
@@ -64,7 +65,7 @@ export class SchedulerService {
 
     this.isRunningNow = true;
     this.lastRunAt = new Date().toISOString();
-    const newJobsCollected: Job[] = [];
+    const newJobsMap = new Map<string, Job>();
 
     try {
       const config = ConfigService.getConfig();
@@ -75,11 +76,19 @@ export class SchedulerService {
       };
 
       const result = await CrawlerService.executeScrape(options, (event) => {
-        // Coleta apenas as vagas novas detectadas durante a varredura
-        if (event.type === "job" && event.job && !event.job.notifiedAt) {
-          newJobsCollected.push(event.job);
+        // Coleta apenas as vagas genuinamente novas detectadas durante a varredura
+        if (event.type === "job" && event.job && event.isNew) {
+          // Trava de segurança: garante que é de TI e deduplica por ID
+          if (
+            event.job.isTech !== false &&
+            TechClassifierService.isTechSync(event.job.title)
+          ) {
+            newJobsMap.set(event.job.id, event.job);
+          }
         }
       });
+
+      const newJobsCollected = Array.from(newJobsMap.values());
 
       console.log(
         `[Scheduler] Varredura concluída: ${result.totalFound} vagas no total, ${newJobsCollected.length} novas.`,
@@ -98,7 +107,10 @@ export class SchedulerService {
         console.log(
           `[Scheduler] Despachando ${newJobsCollected.length} novas vagas para o Bot do WhatsApp...`,
         );
-        await WhatsAppBot.notifyNewJobs(newJobsCollected);
+        const enqueued = await WhatsAppBot.notifyNewJobs(newJobsCollected);
+        console.log(
+          `[Scheduler] WhatsApp Bot enfileirou ${enqueued} de ${newJobsCollected.length} novas vagas para envio.`,
+        );
       }
 
       // Atualiza timestamp da última execução

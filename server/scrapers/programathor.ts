@@ -13,7 +13,7 @@ export class ProgramathorScraper implements BaseScraper {
 
   public async scrape(
     options: ScrapeOptions,
-    onJobFound: (job: Job) => void,
+    onJobFound: (job: Job, isNew?: boolean) => void,
     onProgress?: (progress: { message: string; percent?: number }) => void
   ): Promise<Job[]> {
     const keywords = (options.keywords || []).filter(Boolean);
@@ -98,9 +98,9 @@ export class ProgramathorScraper implements BaseScraper {
             description: `${metadata} | Tags: ${badges.join(', ')}`
           };
 
-          const { job } = StorageService.upsertJob(jobData);
+          const { job, isNew } = StorageService.upsertJob(jobData);
           foundJobs.push(job);
-          onJobFound(job);
+          onJobFound(job, isNew);
           count++;
         });
       } catch (err: any) {

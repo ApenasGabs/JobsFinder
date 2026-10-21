@@ -13,7 +13,7 @@ export class Freelas99Scraper implements BaseScraper {
 
   public async scrape(
     options: ScrapeOptions,
-    onJobFound: (job: Job) => void,
+    onJobFound: (job: Job, isNew?: boolean) => void,
     onProgress?: (progress: { message: string; percent?: number }) => void
   ): Promise<Job[]> {
     const keywords = (options.keywords || []).filter(Boolean);
@@ -94,9 +94,9 @@ export class Freelas99Scraper implements BaseScraper {
             description: `${description.slice(0, 300)}... | ${info}`
           };
 
-          const { job } = StorageService.upsertJob(jobData);
+          const { job, isNew } = StorageService.upsertJob(jobData);
           foundJobs.push(job);
-          onJobFound(job);
+          onJobFound(job, isNew);
         });
       } catch (err: any) {
         const isAbort = err?.name === 'AbortError' || err?.message?.includes('aborted');

@@ -2,6 +2,7 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { isDeepStrictEqual } from "util";
 import { ContractType, Job, SeniorityLevel, WorkModel } from "../types.js";
 import { TechClassifierService } from "./classifier.js";
 import { LoggerService } from "./logger.js";
@@ -124,25 +125,27 @@ export class StorageService {
     return { job, isNew };
   }
 
+  private static readonly COMPARABLE_FIELDS: ReadonlyArray<
+    keyof Omit<Job, "id" | "scrapedAt" | "notifiedAt" | "isTech">
+  > = [
+    "title",
+    "company",
+    "location",
+    "workModel",
+    "salary",
+    "contractType",
+    "seniorityLevel",
+    "description",
+    "stack",
+  ];
+
   /**
    * Compara os dados cadastrais da vaga para evitar I/O e tráfego de rede desnecessários
    */
   private static hasJobChanged(existing: Job, incoming: Omit<Job, "id">): boolean {
-    if (existing.title !== incoming.title) return true;
-    if (existing.company !== incoming.company) return true;
-    if (existing.location !== incoming.location) return true;
-    if (existing.workModel !== incoming.workModel) return true;
-    if (existing.salary !== incoming.salary) return true;
-    if (existing.contractType !== incoming.contractType) return true;
-    if (existing.seniorityLevel !== incoming.seniorityLevel) return true;
-    if (existing.description !== incoming.description) return true;
-    if ((existing.stack?.length || 0) !== (incoming.stack?.length || 0)) return true;
-    if (incoming.stack && existing.stack) {
-      for (let i = 0; i < incoming.stack.length; i++) {
-        if (incoming.stack[i] !== existing.stack[i]) return true;
-      }
-    }
-    return false;
+    return this.COMPARABLE_FIELDS.some(
+      (key) => !isDeepStrictEqual(existing[key], incoming[key]),
+    );
   }
 
   public static deleteJob(jobId: string): boolean {

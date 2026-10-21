@@ -68,6 +68,89 @@ export interface WhatsAppStatus {
   queuePendingCount?: number;
   isProcessingQueue?: boolean;
   nextBatchRemainingSeconds?: number;
+  disconnectedSince?: string | null;
+  disconnectedSeconds?: number;
+}
+
+export type ScraperStatusType =
+  | "HEALTHY"
+  | "DEGRADED"
+  | "CIRCUIT_OPEN"
+  | "FAILING";
+
+export interface ScraperRecentError {
+  timestamp: string;
+  message: string;
+  term?: string;
+}
+
+export interface ScraperHealthInfo {
+  id: string;
+  name: string;
+  status: ScraperStatusType;
+  lastRunAt: string | null;
+  lastSuccessAt: string | null;
+  lastJobsFound: number;
+  totalJobsCaptured: number;
+  consecutiveFailures: number;
+  consecutiveZeroRuns: number;
+  circuitBreakerOpen: boolean;
+  circuitBreakerCooldownUntil: string | null;
+  lastError: ScraperRecentError | null;
+  recentErrors: ScraperRecentError[];
+}
+
+export type AlertCode =
+  | "WHATSAPP_DISCONNECTED"
+  | "SOURCE_CIRCUIT_OPEN"
+  | "SOURCE_FAILING"
+  | "SOURCE_NO_JOBS"
+  | "SUPABASE_SYNC_FAILING";
+
+export interface SystemAlert {
+  id: string;
+  code: AlertCode;
+  severity: "warning" | "critical";
+  source?: string;
+  message: string;
+  detectedAt: string;
+  metadata?: Record<string, any>;
+}
+
+export interface SystemHealthReport {
+  status: "ok" | "degraded" | "unhealthy";
+  systemStatus: "healthy" | "degraded" | "unhealthy";
+  uptimeSeconds: number;
+  timestamp: string;
+  memoryUsageMB: {
+    rss: number;
+    heapUsed: number;
+    heapTotal: number;
+  };
+  isScraping: boolean;
+  whatsapp: {
+    enabled: boolean;
+    status: string;
+    botNumber: string | null;
+    disconnectedSince: string | null;
+    disconnectedSeconds: number;
+    alert: boolean;
+  };
+  supabase: {
+    isConfigured: boolean;
+    consecutiveFailures: number;
+    pendingQueueSize: number;
+    isSyncing: boolean;
+    alert: boolean;
+  };
+  scrapers: {
+    total: number;
+    healthy: number;
+    degraded: number;
+    circuitOpen: number;
+    sources: ScraperHealthInfo[];
+  };
+  alerts: SystemAlert[];
 }
 
 export interface SchedulerConfig {

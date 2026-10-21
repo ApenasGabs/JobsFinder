@@ -4,6 +4,11 @@ services:
     build: .
     container_name: s-job-crawler
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
     ports:
       - "3001:3001"
     volumes:
@@ -33,6 +38,11 @@ services:
     image: lightpanda/browser:nightly
     container_name: s-job-crawler-browser
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
     command: ["serve", "--host", "0.0.0.0", "--port", "9222"]
     ports:
       - "9222:9222"

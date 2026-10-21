@@ -2,8 +2,10 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './base.js';
 import { Job, ScrapeOptions } from '../types.js';
 import { detectSeniority, detectWorkModel, extractStack } from '../utils/normalizer.js';
+import { resilientFetch } from '../utils/fetch.js';
 import { StorageService } from '../services/storage.js';
 import { LoggerService } from '../services/logger.js';
+import { ScraperHealthService } from '../services/scraper-health.js';
 
 export class GeekHunterScraper implements BaseScraper {
   public readonly id = 'GEEKHUNTER';
@@ -19,6 +21,7 @@ export class GeekHunterScraper implements BaseScraper {
     const keywords = (options.keywords || []).filter(Boolean);
     const searchTerms = keywords.length > 0 ? keywords : [''];
     const foundJobs: Job[] = [];
+    let consecutiveTermErrors = 0;
 
     for (const term of searchTerms) {
       if (onProgress) {
@@ -29,39 +32,38 @@ export class GeekHunterScraper implements BaseScraper {
         const queryParam = term ? `?q=${encodeURIComponent(term)}` : '';
         const url = `https://www.geekhunter.com.br/vagas${queryParam}`;
 
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 3500);
-
-        const response = await fetch(url, {
+        const response = await resilientFetch(url, {
+          timeoutMs: 10000,
+          maxRetries: 1,
+          source: 'GEEKHUNTER',
           headers: {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'pt-BR,pt;q=0.9'
-          },
-          signal: controller.signal
+          }
         });
-        clearTimeout(timeout);
 
         if (response.status === 403 || response.status === 429) {
-          LoggerService.warn(
-            'CRAWLER',
-            'SCRAPER_CIRCUIT_BREAK',
-            `GeekHunter bloqueou requisições (HTTP ${response.status}). Abortando ciclo restante.`,
-            { status: response.status, term }
+          ScraperHealthService.recordCircuitBreak(
+            'GEEKHUNTER',
+            `GeekHunter bloqueou requisições (HTTP ${response.status})`,
+            600000
           );
           break;
         }
 
-        if (!response.ok) continue;
+        if (!response.ok) {
+          consecutiveTermErrors++;
+          continue;
+        }
 
         const html = await response.text();
 
         if (html.includes('cf-browser-verification') || html.includes('Just a moment...')) {
-          LoggerService.warn(
-            'CRAWLER',
-            'SCRAPER_CIRCUIT_BREAK',
-            'GeekHunter retornou desafio Cloudflare. Abortando ciclo restante.',
-            { term }
+          ScraperHealthService.recordCircuitBreak(
+            'GEEKHUNTER',
+            'GeekHunter retornou desafio Cloudflare',
+            600000
           );
           break;
         }
@@ -100,24 +102,32 @@ export class GeekHunterScraper implements BaseScraper {
           foundJobs.push(job);
           onJobFound(job, isNew);
         });
+
+        consecutiveTermErrors = 0;
       } catch (err: any) {
+        consecutiveTermErrors++;
         const isAbort = err?.name === 'AbortError' || err?.message?.includes('aborted');
-        if (isAbort) {
-          LoggerService.warn(
-            'CRAWLER',
-            'SCRAPER_CIRCUIT_BREAK',
-            `GeekHunter atingiu timeout (3.5s) na busca de "${term}". Abortando ciclo restante.`,
-            { error: err?.message || String(err), term }
+        const reason = isAbort ? 'Timeout (10s)' : err?.message || String(err);
+
+        ScraperHealthService.recordTermError('GEEKHUNTER', term, reason);
+
+        LoggerService.warn(
+          'CRAWLER',
+          'SCRAPER_TERM_ERROR',
+          `GeekHunter falhou na busca de "${term}" (${reason}). Continuando demais termos.`,
+          { error: reason, term, consecutiveTermErrors }
+        );
+
+        if (consecutiveTermErrors >= 3) {
+          ScraperHealthService.recordCircuitBreak(
+            'GEEKHUNTER',
+            `3 termos consecutivos falharam (último: ${term} - ${reason})`,
+            600000
           );
-        } else {
-          LoggerService.warn(
-            'CRAWLER',
-            'SCRAPER_CIRCUIT_BREAK',
-            `GeekHunter falhou na conexão para "${term}". Abortando ciclo restante.`,
-            { error: err?.message || String(err), term }
-          );
+          break;
         }
-        break;
+
+        continue;
       }
     }
 

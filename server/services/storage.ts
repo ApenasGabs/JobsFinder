@@ -538,6 +538,24 @@ export class StorageService {
     }, delayMs);
   }
 
+  public static getSupabaseSyncStatus(): {
+    isConfigured: boolean;
+    consecutiveFailures: number;
+    pendingQueueSize: number;
+    isSyncing: boolean;
+  } {
+    return {
+      isConfigured: SupabaseSyncService.isConfigured(),
+      consecutiveFailures: this.syncRetryCount,
+      pendingQueueSize: this.syncQueue.size,
+      isSyncing: this.isSyncing,
+    };
+  }
+
+  public static setMockSyncFailures(count: number): void {
+    this.syncRetryCount = count;
+  }
+
   private static flushToSupabase(): void {
     if (this.isSyncing || this.syncQueue.size === 0) return;
 

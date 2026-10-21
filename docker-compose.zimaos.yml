@@ -11,6 +11,11 @@ services:
     container_name: quero-vagas-crawler-browser
     image: lightpanda/browser:nightly
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
     ports:
       - mode: ingress
         target: 9222
@@ -25,6 +30,11 @@ services:
     container_name: quero-vagas-crawler
     image: node:22-alpine
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
     ports:
       - mode: ingress
         target: 3001

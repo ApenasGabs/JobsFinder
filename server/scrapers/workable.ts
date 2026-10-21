@@ -8,6 +8,7 @@ import {
   extractStack,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
+import { resilientFetch } from "../utils/fetch.js";
 import { BaseScraper } from "./base.js";
 
 interface WorkableRawJob {
@@ -54,11 +55,11 @@ export class WorkableScraper implements BaseScraper {
     await runWithConcurrency(companies, concurrency, async (company) => {
       try {
         const apiUrl = `https://apply.workable.com/api/v2/accounts/${company.slug}/jobs`;
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6000);
-
-        const response = await fetch(apiUrl, {
+        const response = await resilientFetch(apiUrl, {
           method: "POST",
+          timeoutMs: 10000,
+          maxRetries: 1,
+          source: 'WORKABLE',
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -66,9 +67,7 @@ export class WorkableScraper implements BaseScraper {
               "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
           },
           body: JSON.stringify({}),
-          signal: controller.signal,
         });
-        clearTimeout(timeout);
 
         if (response.ok) {
           const data = await response.json();

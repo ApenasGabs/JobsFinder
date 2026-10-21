@@ -9,6 +9,7 @@ import {
   slugifyInHire,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
+import { resilientFetch } from "../utils/fetch.js";
 import { BaseScraper } from "./base.js";
 
 interface InHireRawJob {
@@ -49,10 +50,10 @@ export class InHireScraper implements BaseScraper {
     await runWithConcurrency(companies, concurrency, async (company) => {
       try {
         const apiUrl = "https://api.inhire.app/job-posts/public/pages";
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6000);
-
-        const response = await fetch(apiUrl, {
+        const response = await resilientFetch(apiUrl, {
+          timeoutMs: 10000,
+          maxRetries: 1,
+          source: 'INHIRE',
           headers: {
             Accept: "application/json",
             "X-Tenant": company.slug,
@@ -61,9 +62,7 @@ export class InHireScraper implements BaseScraper {
             "User-Agent":
               "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
           },
-          signal: controller.signal,
         });
-        clearTimeout(timeout);
 
         if (response.ok) {
           const data = await response.json();

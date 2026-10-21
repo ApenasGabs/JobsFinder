@@ -12,6 +12,7 @@ import { WorkableScraper } from "../scrapers/workable.js";
 import { Job, ScrapeOptions, ScrapeProgressEvent } from "../types.js";
 import { TechClassifierService } from "./classifier.js";
 import { LoggerService } from "./logger.js";
+import { ScraperHealthService } from "./scraper-health.js";
 import { StorageService } from "./storage.js";
 
 export class CrawlerService {
@@ -20,6 +21,8 @@ export class CrawlerService {
 
   public static initialize(): void {
     if (this.isRegistered) return;
+
+    ScraperHealthService.initialize();
 
     ScraperRegistry.register(new GupyScraper());
     ScraperRegistry.register(new InHireScraper());
@@ -102,7 +105,27 @@ export class CrawlerService {
 
       // Executa os scrapers selecionados em paralelo
       const promises = scrapers.map(async (scraper) => {
+        // Verifica se o Circuit Breaker está ativo com cooldown
+        if (ScraperHealthService.isCircuitOpen(scraper.id)) {
+          console.warn(
+            `[CrawlerService] ⏳ Scraper ${scraper.name} ignorado neste ciclo devido ao Circuit Breaker ativo (cooldown).`,
+          );
+          onProgress({
+            type: "progress",
+            source: scraper.id,
+            message: `${scraper.name} em cooldown (Circuit Breaker). Pulando...`,
+          });
+          scraperStats[scraper.id] = {
+            jobs: 0,
+            durationMs: 0,
+            status: "ERROR",
+          };
+          return [];
+        }
+
         const scraperStart = Date.now();
+        ScraperHealthService.recordStart(scraper.id, scraper.name);
+
         try {
           onProgress({
             type: "progress",
@@ -148,6 +171,12 @@ export class CrawlerService {
             status: "SUCCESS",
           };
 
+          ScraperHealthService.recordSuccess(
+            scraper.id,
+            jobs.length,
+            scraperDuration,
+          );
+
           onProgress({
             type: "source_done",
             source: scraper.id,
@@ -162,6 +191,11 @@ export class CrawlerService {
             durationMs: scraperDuration,
             status: "ERROR",
           };
+
+          ScraperHealthService.recordFailure(
+            scraper.id,
+            (err as any)?.message || String(err),
+          );
 
           console.error(`[CrawlerService] Erro no scraper ${scraper.id}:`, err);
           LoggerService.error(

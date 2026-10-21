@@ -11,6 +11,7 @@ import { ConfigService } from "./services/config.js";
 import { CrawlerService } from "./services/crawler.js";
 import { LogCategory, LoggerService, LogLevel } from "./services/logger.js";
 import { SchedulerService } from "./services/scheduler.js";
+import { ScraperHealthService } from "./services/scraper-health.js";
 import { StorageService } from "./services/storage.js";
 import {
   ContractType,
@@ -38,6 +39,7 @@ app.use(express.json());
 // Inicializa os serviços
 // Inicializa os serviços centrais
 StorageService.initialize();
+ScraperHealthService.initialize();
 CrawlerService.initialize();
 SchedulerService.initialize();
 
@@ -49,19 +51,26 @@ WhatsAppBot.initialize().catch((err) => {
   );
 });
 
-// 1. Health check & estatísticas de baixo consumo
+// 1. Health check avançado, telemetria e estatísticas de integridade
 app.get("/api/health", (_req: Request, res: Response) => {
-  const mem = process.memoryUsage();
-  res.json({
-    status: "ok",
-    uptimeSeconds: Math.round(process.uptime()),
-    memoryUsageMB: {
-      rss: Math.round(mem.rss / 1024 / 1024),
-      heapUsed: Math.round(mem.heapUsed / 1024 / 1024),
-      heapTotal: Math.round(mem.heapTotal / 1024 / 1024),
-    },
-    isScraping: CrawlerService.isScraping(),
-  });
+  const report = ScraperHealthService.getHealthReport(
+    CrawlerService.isScraping(),
+  );
+  const statusCode = report.status === "unhealthy" ? 503 : 200;
+  res.status(statusCode).json(report);
+});
+
+// Endpoint dedicado de saúde e métricas detalhadas por fonte de vagas
+app.get("/api/scrapers/health", (_req: Request, res: Response) => {
+  const sources = ScraperHealthService.getAllScrapersHealth();
+  res.json({ sources, count: sources.length });
+});
+
+// Endpoint de alertas ativos para monitoramento (Uptime Kuma, Grafana, etc.)
+app.get("/api/health/alerts", (_req: Request, res: Response) => {
+  const alerts = ScraperHealthService.getActiveAlerts();
+  const hasCritical = alerts.some((a) => a.severity === "critical");
+  res.status(hasCritical ? 503 : 200).json({ alerts, count: alerts.length });
 });
 
 // 2. Configuração centralizada (Leitura e Atualização)

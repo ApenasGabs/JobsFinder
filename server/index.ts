@@ -8,6 +8,7 @@ import { LightpandaEngine } from "./engines/lightpanda.js";
 import { ScraperRegistry } from "./scrapers/base.js";
 import { TechClassifierService } from "./services/classifier.js";
 import { CompanyAuditorService } from "./services/company-auditor.js";
+import { SheetImporterService } from "./services/sheet-importer.js";
 import { ConfigService } from "./services/config.js";
 import { CrawlerService } from "./services/crawler.js";
 import { LogCategory, LoggerService, LogLevel } from "./services/logger.js";
@@ -138,6 +139,27 @@ app.post("/api/companies", (req: Request, res: Response) => {
     res.status(201).json(result);
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post("/api/companies/import-sheet", async (req: Request, res: Response) => {
+  try {
+    const { source, dryRun, probe, limitTabs } = req.body || {};
+    if (!source) {
+      return res.status(400).json({
+        success: false,
+        error: "source (URL do Google Sheets ou caminho do arquivo) é obrigatório.",
+      });
+    }
+    const result = await SheetImporterService.import({
+      source,
+      dryRun: dryRun ?? false,
+      probe: probe ?? true,
+      limitTabs,
+    });
+    res.json({ success: true, result });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message || "Erro durante importação da planilha" });
   }
 });
 

@@ -38,3 +38,5 @@ AGENTS.md
 data/*_report.json
 data/sheet_import_report.json
 
+data/empresas_extraidas_planilha.json
+

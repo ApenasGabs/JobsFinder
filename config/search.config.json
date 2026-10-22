@@ -26,42 +26,42 @@
   "sources": [
     {
       "id": "GUPY",
-      "name": "Gupy (183 Empresas)",
+      "name": "Gupy (322 Empresas)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
     },
     {
       "id": "INHIRE",
-      "name": "InHire (104 Startups BR)",
+      "name": "InHire (164 Startups BR)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
     },
     {
       "id": "ASHBY",
-      "name": "Ashby (43 Global Tech)",
+      "name": "Ashby (44 Global Tech)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
     },
     {
       "id": "LEVER",
-      "name": "Lever (28 Tech & Startups)",
+      "name": "Lever (30 Tech & Startups)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
     },
     {
       "id": "GREENHOUSE",
-      "name": "Greenhouse (17 Top Tech)",
+      "name": "Greenhouse (23 Top Tech)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
     },
     {
       "id": "WORKABLE",
-      "name": "Workable (22 Global)",
+      "name": "Workable (23 Empresas)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
@@ -103,9 +103,21 @@
       "enabled": true
     },
     {
+      "name": "+A Educação",
+      "slug": "maisaedu",
+      "link": "https://maisaedu.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "+A Educação Tech",
       "link": "https://maisaedu-tech.gupy.io",
       "slug": "maisaedu-tech",
+      "enabled": true
+    },
+    {
+      "name": "1Doc",
+      "slug": "1doc",
+      "link": "https://1doc.gupy.io",
       "enabled": true
     },
     {
@@ -157,6 +169,12 @@
       "enabled": true
     },
     {
+      "name": "A3Data",
+      "slug": "a3data",
+      "link": "https://a3data.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "AACD",
       "link": "https://aacd.gupy.io",
       "slug": "aacd",
@@ -175,15 +193,45 @@
       "enabled": true
     },
     {
+      "name": "Adtail",
+      "slug": "adtail",
+      "link": "https://adtail.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Aegro",
       "slug": "aegro",
       "link": "https://aegro.gupy.io",
       "enabled": true
     },
     {
+      "name": "Aevo",
+      "slug": "aevo",
+      "link": "https://aevo.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Afinz",
+      "slug": "afinz",
+      "link": "https://afinz.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Afya",
       "link": "https://afya.gupy.io",
       "slug": "afya",
+      "enabled": true
+    },
+    {
+      "name": "Agenda Edu",
+      "slug": "vagasagendalovers",
+      "link": "https://vagasagendalovers.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Agendor",
+      "slug": "agendor",
+      "link": "https://agendor.gupy.io",
       "enabled": true
     },
     {
@@ -211,9 +259,27 @@
       "enabled": true
     },
     {
+      "name": "Alpargatas",
+      "slug": "alpargatas",
+      "link": "https://alpargatas.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Ambev",
       "link": "https://programasambev.gupy.io",
       "slug": "programasambev",
+      "enabled": true
+    },
+    {
+      "name": "Anota AI",
+      "slug": "anotaai",
+      "link": "https://anotaai.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Aoop Cloud Solutions",
+      "slug": "aoop",
+      "link": "https://aoop.gupy.io",
       "enabled": true
     },
     {
@@ -229,9 +295,27 @@
       "enabled": true
     },
     {
+      "name": "Aramis",
+      "slug": "aramis",
+      "link": "https://aramis.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "arcca",
+      "slug": "arcca",
+      "link": "https://arcca.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Arcos Dorados",
       "slug": "corporativomc",
       "link": "https://corporativomc.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Arttha (Empresa Recrutadora)",
+      "slug": "arttha",
+      "link": "https://arttha.gupy.io",
       "enabled": true
     },
     {
@@ -247,6 +331,30 @@
       "enabled": true
     },
     {
+      "name": "Assessoria VIP",
+      "slug": "assessoriavip",
+      "link": "https://assessoriavip.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Atlas Governance",
+      "slug": "atlas-governance",
+      "link": "https://atlas-governance.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "ATS Jornada by nstech",
+      "slug": "atslog",
+      "link": "https://atslog.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Atua by nstech",
+      "slug": "atua",
+      "link": "https://atua.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Aurum",
       "link": "https://aurum.gupy.io",
       "slug": "aurum",
@@ -259,9 +367,45 @@
       "enabled": true
     },
     {
+      "name": "AUVP",
+      "slug": "auvpcapital",
+      "link": "https://auvpcapital.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Banco Mercantil",
       "slug": "mercantil",
       "link": "https://mercantil.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "BeerOrCoffee | Woba",
+      "slug": "beerorcoffee",
+      "link": "https://beerorcoffee.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Bemobi",
+      "slug": "bemobi",
+      "link": "https://bemobi.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Benner",
+      "slug": "vemserbenner",
+      "link": "https://vemserbenner.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Bernhöft",
+      "slug": "vemserbern-grt",
+      "link": "https://vemserbern-grt.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Bernoulli Educação",
+      "slug": "bernoullieducacao",
+      "link": "https://bernoullieducacao.gupy.io",
       "enabled": true
     },
     {
@@ -277,9 +421,33 @@
       "enabled": true
     },
     {
+      "name": "Blip",
+      "slug": "blip",
+      "link": "https://blip.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Branddi",
+      "slug": "brandmonitor",
+      "link": "https://brandmonitor.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Brasil TecPar",
       "slug": "vagasbrasiltecpar",
       "link": "https://vagasbrasiltecpar.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "BRK Tecnologia",
+      "slug": "brktecnologia",
+      "link": "https://brktecnologia.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Buonny",
+      "slug": "buonny",
+      "link": "https://buonny.gupy.io",
       "enabled": true
     },
     {
@@ -301,9 +469,33 @@
       "enabled": true
     },
     {
+      "name": "Caju",
+      "slug": "caju",
+      "link": "https://caju.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Capemisa",
+      "slug": "capemisa",
+      "link": "https://capemisa.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Carbel Auto Group",
+      "slug": "grupocarbel",
+      "link": "https://grupocarbel.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Carreiras nScreen",
       "link": "https://nscreen.gupy.io",
       "slug": "nscreen",
+      "enabled": true
+    },
+    {
+      "name": "Celcoin",
+      "slug": "celcoin",
+      "link": "https://celcoin.gupy.io",
       "enabled": true
     },
     {
@@ -325,15 +517,33 @@
       "enabled": true
     },
     {
+      "name": "Cidadania4u",
+      "slug": "cidadania4u",
+      "link": "https://cidadania4u.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Cielo",
       "link": "https://cielo.gupy.io",
       "slug": "cielo",
       "enabled": true
     },
     {
+      "name": "CIGAM",
+      "slug": "vempracigam",
+      "link": "https://vempracigam.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Claretiano - Rede de Educação",
       "slug": "claretianocolegio",
       "link": "https://claretianocolegio.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Clarke Energia",
+      "slug": "clarke",
+      "link": "https://clarke.gupy.io",
       "enabled": true
     },
     {
@@ -349,9 +559,21 @@
       "enabled": true
     },
     {
+      "name": "ClearSale",
+      "slug": "clearsale",
+      "link": "https://clearsale.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Clicksign",
       "slug": "clicksign",
       "link": "https://clicksign.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Cobmax",
+      "slug": "vemsermax",
+      "link": "https://vemsermax.gupy.io",
       "enabled": true
     },
     {
@@ -367,21 +589,33 @@
       "enabled": true
     },
     {
-      "name": "Colliers",
-      "slug": "colliers",
-      "link": "https://colliers.gupy.io",
-      "enabled": true
-    },
-    {
       "name": "Colégio Ábaco",
       "link": "https://abaco.gupy.io",
       "slug": "abaco",
       "enabled": true
     },
     {
+      "name": "Colliers",
+      "slug": "colliers",
+      "link": "https://colliers.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Comerc Energia",
+      "slug": "comerc",
+      "link": "https://comerc.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Compass.UOL",
       "link": "https://compass.gupy.io",
       "slug": "compass",
+      "enabled": true
+    },
+    {
+      "name": "Conexa",
+      "slug": "conexasaude",
+      "link": "https://conexasaude.gupy.io",
       "enabled": true
     },
     {
@@ -397,6 +631,18 @@
       "enabled": true
     },
     {
+      "name": "Conquer",
+      "slug": "conquer",
+      "link": "https://conquer.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Construct IN",
+      "slug": "constructin",
+      "link": "https://constructin.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Conta Simples",
       "slug": "contasimples",
       "link": "https://contasimples.gupy.io",
@@ -406,6 +652,18 @@
       "name": "Contajá",
       "slug": "trabalhenacontaja",
       "link": "https://trabalhenacontaja.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Convenia",
+      "slug": "convenia",
+      "link": "https://convenia.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Conviso",
+      "slug": "convisoappsec",
+      "link": "https://convisoappsec.gupy.io",
       "enabled": true
     },
     {
@@ -427,6 +685,18 @@
       "enabled": true
     },
     {
+      "name": "Cortex",
+      "slug": "cortex",
+      "link": "https://cortex.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Cuattro Live & Digital",
+      "slug": "cuattro",
+      "link": "https://cuattro.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Cuponomia",
       "link": "https://cuponomia.gupy.io",
       "slug": "cuponomia",
@@ -439,9 +709,45 @@
       "enabled": true
     },
     {
+      "name": "CVC Corp",
+      "slug": "cvccorp",
+      "link": "https://cvccorp.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Datahub Big Data & Analytics",
+      "slug": "datahub",
+      "link": "https://datahub.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "DB | CRESCER com propósito!",
       "link": "https://db.gupy.io",
       "slug": "db",
+      "enabled": true
+    },
+    {
+      "name": "Deliver IT",
+      "slug": "deliverit",
+      "link": "https://deliverit.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Descomplica",
+      "slug": "vempradescomplica",
+      "link": "https://vempradescomplica.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Doc9",
+      "slug": "doc9",
+      "link": "https://doc9.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Dock",
+      "slug": "dock",
+      "link": "https://dock.gupy.io",
       "enabled": true
     },
     {
@@ -460,6 +766,18 @@
       "name": "DWS Brazil",
       "link": "https://dwsbrazil.gupy.io",
       "slug": "dwsbrazil",
+      "enabled": true
+    },
+    {
+      "name": "Edify",
+      "slug": "edifyeducation",
+      "link": "https://edifyeducation.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Effecti",
+      "slug": "effecti",
+      "link": "https://effecti.gupy.io",
       "enabled": true
     },
     {
@@ -493,6 +811,18 @@
       "enabled": true
     },
     {
+      "name": "eSales",
+      "slug": "esales",
+      "link": "https://esales.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Escale",
+      "slug": "vemserescale",
+      "link": "https://vemserescale.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Escola do Mecânico",
       "link": "https://escoladomecanico.gupy.io",
       "slug": "escoladomecanico",
@@ -502,6 +832,12 @@
       "name": "Estágio Tempest",
       "link": "https://estagiotempest.gupy.io",
       "slug": "estagiotempest",
+      "enabled": true
+    },
+    {
+      "name": "Estante Mágica",
+      "slug": "estante-magica",
+      "link": "https://estante-magica.gupy.io",
       "enabled": true
     },
     {
@@ -523,9 +859,51 @@
       "enabled": true
     },
     {
+      "name": "Fluency",
+      "slug": "fluencyacademy",
+      "link": "https://fluencyacademy.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Frete Rápido",
+      "slug": "freterapido",
+      "link": "https://freterapido.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Funcional Health Tech",
+      "slug": "funcionalhealthtech",
+      "link": "https://funcionalhealthtech.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Futurai",
       "link": "https://futurai.gupy.io",
       "slug": "futurai",
+      "enabled": true
+    },
+    {
+      "name": "Future Dojo",
+      "slug": "ace",
+      "link": "https://ace.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Gaudium",
+      "slug": "gaudium",
+      "link": "https://gaudium.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Gedanken",
+      "slug": "gedanken",
+      "link": "https://gedanken.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Genial Investimentos",
+      "slug": "genial",
+      "link": "https://genial.gupy.io",
       "enabled": true
     },
     {
@@ -553,6 +931,12 @@
       "enabled": true
     },
     {
+      "name": "Global Hub",
+      "slug": "somosglobal",
+      "link": "https://somosglobal.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Globo",
       "link": "https://globo.gupy.io",
       "slug": "globo",
@@ -574,6 +958,18 @@
       "name": "Governança Brasil",
       "slug": "governancabrasil",
       "link": "https://governancabrasil.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Grafeno",
+      "slug": "grafeno",
+      "link": "https://grafeno.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Great Schools",
+      "slug": "sejagreat",
+      "link": "https://sejagreat.gupy.io",
       "enabled": true
     },
     {
@@ -601,15 +997,39 @@
       "enabled": true
     },
     {
+      "name": "Grupo Farmax",
+      "slug": "vagasfarmax",
+      "link": "https://vagasfarmax.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "GRUPO GR",
       "slug": "vemsergr",
       "link": "https://vemsergr.gupy.io",
       "enabled": true
     },
     {
+      "name": "Grupo Massa",
+      "slug": "grupomassa",
+      "link": "https://grupomassa.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Med+",
+      "slug": "medmais",
+      "link": "https://medmais.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Grupo OLX",
       "link": "https://vemserolxbrasil.gupy.io",
       "slug": "vemserolxbrasil",
+      "enabled": true
+    },
+    {
+      "name": "Grupo OLX",
+      "slug": "vemsergrupoolx",
+      "link": "https://vemsergrupoolx.gupy.io",
       "enabled": true
     },
     {
@@ -631,15 +1051,33 @@
       "enabled": true
     },
     {
+      "name": "Grupo TecnoSpeed",
+      "slug": "grupotecnospeed",
+      "link": "https://grupotecnospeed.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "GrupoSC",
       "link": "https://gruposc.gupy.io",
       "slug": "gruposc",
       "enabled": true
     },
     {
+      "name": "Gupy",
+      "slug": "vempra",
+      "link": "https://vempra.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Gupy Tech",
       "link": "https://tech-career.gupy.io",
       "slug": "tech-career",
+      "enabled": true
+    },
+    {
+      "name": "Hand Talk",
+      "slug": "handtalk",
+      "link": "https://handtalk.gupy.io",
       "enabled": true
     },
     {
@@ -661,15 +1099,39 @@
       "enabled": true
     },
     {
+      "name": "Ilegra",
+      "slug": "ilegra",
+      "link": "https://ilegra.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Inmetrics S/A",
       "link": "https://inmetrics.gupy.io",
       "slug": "inmetrics",
       "enabled": true
     },
     {
+      "name": "Innuvem Consultoria",
+      "slug": "innuvem",
+      "link": "https://innuvem.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Instituto Eldorado",
       "link": "https://institutoeldorado.gupy.io",
       "slug": "institutoeldorado",
+      "enabled": true
+    },
+    {
+      "name": "Instituto Infnet",
+      "slug": "vagas-infnet",
+      "link": "https://vagas-infnet.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Intelia",
+      "slug": "intelia",
+      "link": "https://intelia.gupy.io",
       "enabled": true
     },
     {
@@ -682,6 +1144,18 @@
       "name": "Ipsos in Latin America",
       "slug": "ipsosbrasil",
       "link": "https://ipsosbrasil.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "It4us Cyber Security",
+      "slug": "vemprait4us",
+      "link": "https://vemprait4us.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Ita Corretora de Seguros",
+      "slug": "itaseguros",
+      "link": "https://itaseguros.gupy.io",
       "enabled": true
     },
     {
@@ -703,15 +1177,45 @@
       "enabled": true
     },
     {
+      "name": "Join Creative Tech",
+      "slug": "jointecnologia",
+      "link": "https://jointecnologia.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Jornada Bemobi",
       "link": "https://jornadabemobi.gupy.io",
       "slug": "jornadabemobi",
       "enabled": true
     },
     {
+      "name": "JusCash",
+      "slug": "juscash",
+      "link": "https://juscash.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "keeggo",
       "link": "https://keeggo.gupy.io",
       "slug": "keeggo",
+      "enabled": true
+    },
+    {
+      "name": "Keep Simple",
+      "slug": "keepsimple",
+      "link": "https://keepsimple.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Knewin",
+      "slug": "knewin",
+      "link": "https://knewin.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Korp",
+      "slug": "korp",
+      "link": "https://korp.gupy.io",
       "enabled": true
     },
     {
@@ -727,9 +1231,45 @@
       "enabled": true
     },
     {
+      "name": "Logithink",
+      "slug": "logothink",
+      "link": "https://logothink.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "LWSA + Melhor Envio",
+      "slug": "lwsa",
+      "link": "https://lwsa.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Mark Up",
+      "slug": "markup",
+      "link": "https://markup.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "MCassab Distribuição",
       "slug": "mcassabdistribuicao",
       "link": "https://mcassabdistribuicao.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Meetime",
+      "slug": "meetime",
+      "link": "https://meetime.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Melhor Envio",
+      "slug": "melhorenvio",
+      "link": "https://melhorenvio.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Méliuz",
+      "slug": "meliuz",
+      "link": "https://meliuz.gupy.io",
       "enabled": true
     },
     {
@@ -745,9 +1285,21 @@
       "enabled": true
     },
     {
+      "name": "Mercado Bitcoin",
+      "slug": "mb",
+      "link": "https://mb.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Mercafacil",
       "slug": "mercafacil",
       "link": "https://mercafacil.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Mercos",
+      "slug": "mercos",
+      "link": "https://mercos.gupy.io",
       "enabled": true
     },
     {
@@ -775,6 +1327,12 @@
       "enabled": true
     },
     {
+      "name": "Monks",
+      "slug": "brmonks",
+      "link": "https://brmonks.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "MRV&CO",
       "slug": "vagas-mrveco",
       "link": "https://vagas-mrveco.gupy.io",
@@ -787,6 +1345,24 @@
       "enabled": true
     },
     {
+      "name": "Nasajon",
+      "slug": "nasajon",
+      "link": "https://nasajon.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Necxt",
+      "slug": "necxt",
+      "link": "https://necxt.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Nefex",
+      "slug": "nefex",
+      "link": "https://nefex.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Nelogica",
       "link": "https://nelogica.gupy.io",
       "slug": "nelogica",
@@ -796,6 +1372,24 @@
       "name": "Neogrid Carreiras",
       "link": "https://neogridcarreiras.gupy.io",
       "slug": "neogridcarreiras",
+      "enabled": true
+    },
+    {
+      "name": "Netshow.me",
+      "slug": "netshowme",
+      "link": "https://netshowme.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Nexa Tecnologia",
+      "slug": "nexatecnologia",
+      "link": "https://nexatecnologia.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Nola",
+      "slug": "nola",
+      "link": "https://nola.gupy.io",
       "enabled": true
     },
     {
@@ -823,15 +1417,33 @@
       "enabled": true
     },
     {
+      "name": "Oinc Filmes",
+      "slug": "oincfilmes",
+      "link": "https://oincfilmes.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Omie",
       "link": "https://carreirasomie.gupy.io",
       "slug": "carreirasomie",
       "enabled": true
     },
     {
+      "name": "Omnibees",
+      "slug": "omnibeesmx",
+      "link": "https://omnibeesmx.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Onfly",
       "link": "https://onfly.gupy.io",
       "slug": "onfly",
+      "enabled": true
+    },
+    {
+      "name": "Ontex",
+      "slug": "ontex",
+      "link": "https://ontex.gupy.io",
       "enabled": true
     },
     {
@@ -853,6 +1465,12 @@
       "enabled": true
     },
     {
+      "name": "Pagaleve",
+      "slug": "pagaleve",
+      "link": "https://pagaleve.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "PagBank",
       "link": "https://pagseguro.gupy.io",
       "slug": "pagseguro",
@@ -865,15 +1483,39 @@
       "enabled": true
     },
     {
+      "name": "Página de EuroChem",
+      "link": "https://carreiras.gupy.io",
+      "slug": "carreiras",
+      "enabled": true
+    },
+    {
       "name": "PhizChat",
       "slug": "phiz",
       "link": "https://phiz.gupy.io",
       "enabled": true
     },
     {
+      "name": "Piperz",
+      "slug": "piperz",
+      "link": "https://piperz.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Pixeon",
+      "slug": "vemprapixeon",
+      "link": "https://vemprapixeon.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Ploomes",
       "link": "https://ploomes.gupy.io",
       "slug": "ploomes",
+      "enabled": true
+    },
+    {
+      "name": "PM3",
+      "slug": "cursospm3",
+      "link": "https://cursospm3.gupy.io",
       "enabled": true
     },
     {
@@ -886,6 +1528,12 @@
       "name": "Pontotel",
       "link": "https://pontotel.gupy.io",
       "slug": "pontotel",
+      "enabled": true
+    },
+    {
+      "name": "Portábilis",
+      "slug": "portabilis",
+      "link": "https://portabilis.gupy.io",
       "enabled": true
     },
     {
@@ -907,6 +1555,12 @@
       "enabled": true
     },
     {
+      "name": "Praxian",
+      "slug": "praxianbusiness",
+      "link": "https://praxianbusiness.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Praxio",
       "link": "https://praxio.gupy.io",
       "slug": "praxio",
@@ -919,9 +1573,9 @@
       "enabled": true
     },
     {
-      "name": "Página de EuroChem",
-      "link": "https://carreiras.gupy.io",
-      "slug": "carreiras",
+      "name": "Pulsus",
+      "slug": "pulsus",
+      "link": "https://pulsus.gupy.io",
       "enabled": true
     },
     {
@@ -955,15 +1609,63 @@
       "enabled": true
     },
     {
+      "name": "Reservia",
+      "slug": "befly",
+      "link": "https://befly.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "rhello RH",
+      "slug": "eccotalent",
+      "link": "https://eccotalent.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Riachuelo",
       "link": "https://riachuelo.gupy.io",
       "slug": "riachuelo",
       "enabled": true
     },
     {
+      "name": "RPO Solutions",
+      "slug": "rposolutions",
+      "link": "https://rposolutions.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "S.I.N. Implant System",
+      "slug": "vemprasin",
+      "link": "https://vemprasin.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Saipos",
+      "slug": "saipos",
+      "link": "https://saipos.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Sales Leaders Group",
+      "slug": "salesleadersgroup",
+      "link": "https://salesleadersgroup.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Sami",
+      "slug": "oisami",
+      "link": "https://oisami.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "SEEDZ",
       "link": "https://seedz.gupy.io",
       "slug": "seedz",
+      "enabled": true
+    },
+    {
+      "name": "Sem Parar",
+      "slug": "semparar",
+      "link": "https://semparar.gupy.io",
       "enabled": true
     },
     {
@@ -997,6 +1699,12 @@
       "enabled": true
     },
     {
+      "name": "Sigga Technologies",
+      "slug": "onesigga",
+      "link": "https://onesigga.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Simples Dental",
       "slug": "recursoshumanos",
       "link": "https://recursoshumanos.gupy.io",
@@ -1009,9 +1717,51 @@
       "enabled": true
     },
     {
+      "name": "Skill Consultoria",
+      "slug": "skillconsultoria",
+      "link": "https://skillconsultoria.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Smart NX",
+      "slug": "smartnx",
+      "link": "https://smartnx.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Smarthis",
+      "slug": "smarthis",
+      "link": "https://smarthis.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "SoftExpert",
+      "slug": "softexpert",
+      "link": "https://softexpert.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Softplan",
+      "slug": "softplan",
+      "link": "https://softplan.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Soluparts",
+      "slug": "soluparts",
+      "link": "https://soluparts.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Solutis",
       "link": "https://solutis.gupy.io",
       "slug": "solutis",
+      "enabled": true
+    },
+    {
+      "name": "SolvePlan",
+      "slug": "solveplan",
+      "link": "https://solveplan.gupy.io",
       "enabled": true
     },
     {
@@ -1021,9 +1771,27 @@
       "enabled": true
     },
     {
+      "name": "Spark",
+      "slug": "vemsersparker",
+      "link": "https://vemsersparker.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "SPC Brasil",
       "link": "https://spcbrasil.gupy.io",
       "slug": "spcbrasil",
+      "enabled": true
+    },
+    {
+      "name": "Spread Tecnologia",
+      "slug": "spread",
+      "link": "https://spread.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Starian",
+      "slug": "starian",
+      "link": "https://starian.gupy.io",
       "enabled": true
     },
     {
@@ -1042,6 +1810,12 @@
       "name": "Strada",
       "link": "https://strada.gupy.io",
       "slug": "strada",
+      "enabled": true
+    },
+    {
+      "name": "Suno",
+      "slug": "gruposunojobs",
+      "link": "https://gruposunojobs.gupy.io",
       "enabled": true
     },
     {
@@ -1081,6 +1855,12 @@
       "enabled": true
     },
     {
+      "name": "Teletex",
+      "slug": "teletex",
+      "link": "https://teletex.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Tempo",
       "slug": "tempo",
       "link": "https://tempo.gupy.io",
@@ -1090,6 +1870,12 @@
       "name": "The Bridge",
       "link": "https://thebridgesocial.gupy.io",
       "slug": "thebridgesocial",
+      "enabled": true
+    },
+    {
+      "name": "The Cloud Bootcamp",
+      "slug": "thecloudbootcamp",
+      "link": "https://thecloudbootcamp.gupy.io",
       "enabled": true
     },
     {
@@ -1111,6 +1897,12 @@
       "enabled": true
     },
     {
+      "name": "TrueChange",
+      "slug": "truechange",
+      "link": "https://truechange.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Unimed Nacional",
       "link": "https://unimednacional.gupy.io",
       "slug": "unimednacional",
@@ -1120,6 +1912,18 @@
       "name": "v(dev)",
       "link": "https://vdev.gupy.io",
       "slug": "vdev",
+      "enabled": true
+    },
+    {
+      "name": "Valid",
+      "slug": "validcarreiras-comercial",
+      "link": "https://validcarreiras-comercial.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "VC-X Solutions",
+      "slug": "vcxsolutions",
+      "link": "https://vcxsolutions.gupy.io",
       "enabled": true
     },
     {
@@ -1150,6 +1954,12 @@
       "name": "Viaflow",
       "link": "https://viaflow.gupy.io",
       "slug": "viaflow",
+      "enabled": true
+    },
+    {
+      "name": "Vitascience",
+      "slug": "vitascience",
+      "link": "https://vitascience.gupy.io",
       "enabled": true
     },
     {
@@ -1189,9 +1999,33 @@
       "enabled": true
     },
     {
+      "name": "Werecruiter  (Empresa Recrutadora)",
+      "slug": "werecruiter",
+      "link": "https://werecruiter.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "Yampi",
       "link": "https://yampi.gupy.io",
       "slug": "yampi",
+      "enabled": true
+    },
+    {
+      "name": "Zeev",
+      "slug": "zeev",
+      "link": "https://zeev.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Zenvia",
+      "slug": "zenvia",
+      "link": "https://zenvia.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "ZG Soluções",
+      "slug": "zgteam",
+      "link": "https://zgteam.gupy.io",
       "enabled": true
     }
   ],
@@ -1313,6 +2147,12 @@
       "enabled": true
     },
     {
+      "name": "Ailu",
+      "slug": "ailu",
+      "link": "https://cidadaniaja.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Akad Seguros",
       "slug": "akadseguros",
       "link": "https://akadseguros.inhire.app",
@@ -1427,6 +2267,12 @@
       "enabled": true
     },
     {
+      "name": "Alura",
+      "slug": "alura",
+      "link": "https://alun.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Alura Fiap Pm3",
       "slug": "alura-fiap-pm3",
       "link": "https://alura-fiap-pm3.inhire.app",
@@ -1505,9 +2351,39 @@
       "enabled": true
     },
     {
+      "name": "Auvo Tecnologia",
+      "slug": "auvotecnologia",
+      "link": "https://auvotecnologia.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Azos",
+      "slug": "azos",
+      "link": "https://azos.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Banco Toyota do Brasil",
       "slug": "bancotoyota",
       "link": "https://bancotoyota.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "Bankme",
+      "slug": "bankme",
+      "link": "https://bankme.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Beyond Co.",
+      "slug": "beyond",
+      "link": "https://extremegroup.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Bionexo",
+      "slug": "bionexo",
+      "link": "https://bionexo.inhire.app",
       "enabled": true
     },
     {
@@ -1517,9 +2393,69 @@
       "enabled": true
     },
     {
+      "name": "Board Academy",
+      "slug": "board",
+      "link": "https://board.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Bom Controle",
+      "slug": "bom-controle",
+      "link": "https://milvus.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Brivia",
+      "slug": "brivia",
+      "link": "https://brivia.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Bússola Social",
+      "slug": "bussola",
+      "link": "https://bussola.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Caf",
+      "slug": "caf",
+      "link": "https://caf.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Cappta",
+      "slug": "cappta",
+      "link": "https://cappta.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Certta",
+      "slug": "certta",
+      "link": "https://certta.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "ChatGuru",
+      "slug": "chatguru",
+      "link": "https://chatguru.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Cidadania Já",
+      "slug": "cidadaniaja",
+      "link": "https://cidadaniaja.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Cielo",
       "slug": "cielo",
       "link": "https://cielo.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "Coaktion",
+      "slug": "coaktion",
+      "link": "https://coaktion.inhire.app",
       "enabled": true
     },
     {
@@ -1529,9 +2465,21 @@
       "enabled": true
     },
     {
+      "name": "Codeart",
+      "slug": "codeart",
+      "link": "https://codeart.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Contabilizei",
       "slug": "contabilizei",
       "link": "https://contabilizei.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "Cora",
+      "slug": "cora",
+      "link": "https://cora.inhire.app",
       "enabled": true
     },
     {
@@ -1547,6 +2495,24 @@
       "enabled": true
     },
     {
+      "name": "Digital Influencers",
+      "slug": "digital-influencers",
+      "link": "https://rankmyapp.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "DOT Digital Group",
+      "slug": "dotgroup",
+      "link": "https://dotgroup.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Econodata",
+      "slug": "econodata-trial",
+      "link": "https://econodata-trial.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Educbank",
       "slug": "educbank",
       "link": "https://educbank.inhire.app/vagas/",
@@ -1559,9 +2525,21 @@
       "enabled": true
     },
     {
+      "name": "Expert Integrado",
+      "slug": "expertintegrado",
+      "link": "https://expertintegrado.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Familhão",
       "slug": "familhao",
       "link": "https://familhao.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "Fretadão",
+      "slug": "fretadao",
+      "link": "https://fretadao.inhire.app",
       "enabled": true
     },
     {
@@ -1571,9 +2549,21 @@
       "enabled": true
     },
     {
+      "name": "GEX",
+      "slug": "gex",
+      "link": "https://gex.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Gogroup Brasil",
       "slug": "gogroup",
       "link": "https://gogroup.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Ável",
+      "slug": "avel",
+      "link": "https://avel.inhire.app/vagas/",
       "enabled": true
     },
     {
@@ -1592,12 +2582,6 @@
       "name": "Grupo Taking",
       "slug": "grupotaking",
       "link": "https://grupotaking.inhire.app",
-      "enabled": true
-    },
-    {
-      "name": "Grupo Ável",
-      "slug": "avel",
-      "link": "https://avel.inhire.app/vagas/",
       "enabled": true
     },
     {
@@ -1625,6 +2609,12 @@
       "enabled": true
     },
     {
+      "name": "Huggy",
+      "slug": "huggy",
+      "link": "https://grupogopwr.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Iconit",
       "slug": "iconit",
       "link": "https://iconit.inhire.app",
@@ -1643,6 +2633,12 @@
       "enabled": true
     },
     {
+      "name": "Imagem Geosistemas",
+      "slug": "imagemgeosistemas",
+      "link": "https://atmisgestao.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Importe Melhor",
       "slug": "importemelhor",
       "link": "https://importemelhor.inhire.app/vagas/",
@@ -1655,9 +2651,33 @@
       "enabled": true
     },
     {
+      "name": "Infleet",
+      "slug": "infleet",
+      "link": "https://infleet.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "InHire",
+      "slug": "carreiras",
+      "link": "https://carreiras.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Insider",
+      "slug": "insiderstore",
+      "link": "https://insiderstore.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Inteli - Instituto de Tecnologia e Liderança",
       "slug": "inteli",
       "link": "https://inteli.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "INTERA",
+      "slug": "intera",
+      "link": "https://intera.inhire.app",
       "enabled": true
     },
     {
@@ -1679,6 +2699,12 @@
       "enabled": true
     },
     {
+      "name": "Kiwify",
+      "slug": "kiwify",
+      "link": "https://kiwify.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Knewin",
       "slug": "knewin",
       "link": "https://knewin.inhire.app/vagas/",
@@ -1691,21 +2717,63 @@
       "enabled": true
     },
     {
-      "name": "Liora",
-      "slug": "lioraenergia",
-      "link": "https://lioraenergia.inhire.app/vagas/",
-      "enabled": true
-    },
-    {
       "name": "Líber",
       "slug": "liber",
       "link": "https://liber.inhire.app/vagas/",
       "enabled": true
     },
     {
+      "name": "Liora",
+      "slug": "lioraenergia",
+      "link": "https://lioraenergia.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "Luby",
+      "slug": "luby",
+      "link": "https://luby.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Lyncas",
+      "slug": "lyncas",
+      "link": "https://lyncas.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Makasí",
+      "slug": "makasi",
+      "link": "https://makasi.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Medway",
+      "slug": "medway",
+      "link": "https://medway.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "MeetRox",
+      "slug": "meetrox",
+      "link": "https://meetrox.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Milvus",
+      "slug": "milvus",
+      "link": "https://milvus.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Mottu",
       "slug": "mottu",
       "link": "https://mottu.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Nomad",
+      "slug": "nomadglobal",
+      "link": "https://nomadglobal.inhire.app",
       "enabled": true
     },
     {
@@ -1718,6 +2786,18 @@
       "name": "Nuvemshop",
       "slug": "nuvemshop-tiendanube",
       "link": "https://nuvemshop-tiendanube.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "Nuvidio",
+      "slug": "nuvidio",
+      "link": "https://nuvidio.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Octafy",
+      "slug": "octafy",
+      "link": "https://octafy.inhire.app",
       "enabled": true
     },
     {
@@ -1745,9 +2825,45 @@
       "enabled": true
     },
     {
+      "name": "Poliedro Educação",
+      "slug": "poliedroeducacao",
+      "link": "https://poliedroeducacao.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Prizma Mídia",
+      "slug": "prizmamidia",
+      "link": "https://prizmamidia.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "PRORADIS",
+      "slug": "dhg",
+      "link": "https://dhg.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Qive",
       "slug": "qive",
       "link": "https://qive.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "Quero Passagem",
+      "slug": "queropassagem",
+      "link": "https://queropassagem.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Radix",
+      "slug": "radix",
+      "link": "https://radix.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "RankMyApp",
+      "slug": "rankmyapp",
+      "link": "https://rankmyapp.inhire.app",
       "enabled": true
     },
     {
@@ -1769,6 +2885,12 @@
       "enabled": true
     },
     {
+      "name": "Rotik",
+      "slug": "rotik",
+      "link": "https://grupogopwr.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Rpo Xpinc",
       "slug": "rpo-xpinc",
       "link": "https://rpo-xpinc.inhire.app",
@@ -1781,9 +2903,39 @@
       "enabled": true
     },
     {
+      "name": "Sallve",
+      "slug": "sallve",
+      "link": "https://sallve.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Seazone",
+      "slug": "seazone",
+      "link": "https://seazone.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Skopia",
+      "slug": "skopiadigital",
+      "link": "https://skopiadigital.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Spun Mídia",
       "slug": "spun",
       "link": "https://spun.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Stone",
+      "slug": "stone",
+      "link": "https://stone.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Suflex",
+      "slug": "suflex",
+      "link": "https://suflex.inhire.app",
       "enabled": true
     },
     {
@@ -1793,9 +2945,27 @@
       "enabled": true
     },
     {
+      "name": "Tech6",
+      "slug": "tech6group",
+      "link": "https://tech6group.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Tera",
+      "slug": "tera",
+      "link": "https://tera.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "TownSq",
       "slug": "townsq",
       "link": "https://townsq.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "Trampay",
+      "slug": "trampay",
+      "link": "https://trampay.inhire.app",
       "enabled": true
     },
     {
@@ -1805,15 +2975,33 @@
       "enabled": true
     },
     {
+      "name": "Ubots",
+      "slug": "ubots",
+      "link": "https://ubots.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "Unico Skill",
       "slug": "unicoskill",
       "link": "https://unicoskill.inhire.app/vagas/",
       "enabled": true
     },
     {
+      "name": "V360",
+      "slug": "v360",
+      "link": "https://v360.inhire.app",
+      "enabled": true
+    },
+    {
       "name": "V4 Company",
       "slug": "v4company",
       "link": "https://v4company.inhire.app",
+      "enabled": true
+    },
+    {
+      "name": "Vatto Aceleradora Comercial",
+      "slug": "vatto",
+      "link": "https://vatto.inhire.app",
       "enabled": true
     },
     {
@@ -1832,6 +3020,12 @@
       "name": "Welucci",
       "slug": "welucci",
       "link": "https://welucci.inhire.app/vagas/",
+      "enabled": true
+    },
+    {
+      "name": "Winnin",
+      "slug": "winnin",
+      "link": "https://winnin.inhire.app",
       "enabled": true
     }
   ],
@@ -1930,6 +3124,12 @@
       "name": "Decagon",
       "slug": "decagon",
       "link": "https://jobs.ashbyhq.com/decagon",
+      "enabled": true
+    },
+    {
+      "name": "Deel",
+      "slug": "Deel",
+      "link": "https://jobs.ashbyhq.com/Deel",
       "enabled": true
     },
     {
@@ -2097,6 +3297,12 @@
   ],
   "leverCompanies": [
     {
+      "name": "ActiveCampaign",
+      "slug": "activecampaign",
+      "link": "https://jobs.lever.co/activecampaign",
+      "enabled": true
+    },
+    {
       "name": "Aleph",
       "slug": "aleph",
       "link": "https://jobs.lever.co/aleph",
@@ -2124,6 +3330,12 @@
       "name": "Emburse",
       "slug": "emburse",
       "link": "https://jobs.lever.co/emburse",
+      "enabled": true
+    },
+    {
+      "name": "Flash",
+      "slug": "flashapp",
+      "link": "https://jobs.lever.co/flashapp",
       "enabled": true
     },
     {
@@ -2273,6 +3485,12 @@
       "enabled": true
     },
     {
+      "name": "Agilize",
+      "slug": "agilize",
+      "link": "https://boards.greenhouse.io/agilize",
+      "enabled": true
+    },
+    {
       "name": "Arco Educação",
       "slug": "arcoeducacao",
       "link": "https://boards.greenhouse.io/arcoeducacao",
@@ -2315,6 +3533,18 @@
       "enabled": true
     },
     {
+      "name": "ília",
+      "slug": "ilia",
+      "link": "https://boards.greenhouse.io/ilia",
+      "enabled": true
+    },
+    {
+      "name": "Isaac",
+      "slug": "isaac",
+      "link": "https://boards.greenhouse.io/isaac",
+      "enabled": true
+    },
+    {
       "name": "Kavak",
       "slug": "kavak",
       "link": "https://boards.greenhouse.io/kavak",
@@ -2324,6 +3554,12 @@
       "name": "KnowBe4",
       "slug": "knowbe4",
       "link": "https://boards.greenhouse.io/knowbe4",
+      "enabled": true
+    },
+    {
+      "name": "Linx",
+      "slug": "linx",
+      "link": "https://boards.greenhouse.io/linx",
       "enabled": true
     },
     {
@@ -2357,9 +3593,21 @@
       "enabled": true
     },
     {
+      "name": "RD Station",
+      "slug": "rdstation",
+      "link": "https://boards.greenhouse.io/rdstation",
+      "enabled": true
+    },
+    {
       "name": "Robinhood",
       "slug": "robinhood",
       "link": "https://boards.greenhouse.io/robinhood",
+      "enabled": true
+    },
+    {
+      "name": "VTEX",
+      "slug": "vtex",
+      "link": "https://boards.greenhouse.io/vtex",
       "enabled": true
     },
     {
@@ -2371,99 +3619,9 @@
   ],
   "workableCompanies": [
     {
-      "name": "Future Publishing",
-      "slug": "futureplc",
-      "link": "https://apply.workable.com/futureplc",
-      "enabled": true
-    },
-    {
-      "name": "ProNexus",
-      "slug": "pronexus-1",
-      "link": "https://apply.workable.com/pronexus-1",
-      "enabled": true
-    },
-    {
-      "name": "NineTwoThree AI Studio",
-      "slug": "ninetwothree-ai-studio",
-      "link": "https://apply.workable.com/ninetwothree-ai-studio",
-      "enabled": true
-    },
-    {
-      "name": "DC Thomson",
-      "slug": "dcthomson",
-      "link": "https://apply.workable.com/dcthomson",
-      "enabled": true
-    },
-    {
-      "name": "Weekday AI",
-      "slug": "weekday-1",
-      "link": "https://apply.workable.com/weekday-1",
-      "enabled": true
-    },
-    {
-      "name": "Simply TV",
-      "slug": "simply-tv",
-      "link": "https://apply.workable.com/simply-tv",
-      "enabled": true
-    },
-    {
-      "name": "CoverGo",
-      "slug": "covergo",
-      "link": "https://apply.workable.com/covergo",
-      "enabled": true
-    },
-    {
-      "name": "Rokt",
-      "slug": "rokt",
-      "link": "https://apply.workable.com/rokt",
-      "enabled": true
-    },
-    {
-      "name": "pony.ai",
-      "slug": "pony-dot-ai",
-      "link": "https://apply.workable.com/pony-dot-ai",
-      "enabled": true
-    },
-    {
-      "name": "CVector - Industrial AI",
-      "slug": "cvector",
-      "link": "https://apply.workable.com/cvector",
-      "enabled": true
-    },
-    {
-      "name": "TWG Global AI",
-      "slug": "twgai",
-      "link": "https://apply.workable.com/twgai",
-      "enabled": true
-    },
-    {
-      "name": "Greenlife Healthcare Staffing",
-      "slug": "greenlife-healthcare-staffing-1",
-      "link": "https://apply.workable.com/greenlife-healthcare-staffing-1",
-      "enabled": true
-    },
-    {
-      "name": "Dable",
-      "slug": "dable",
-      "link": "https://apply.workable.com/dable",
-      "enabled": true
-    },
-    {
       "name": "Altom Transport",
       "slug": "altom-transport",
       "link": "https://apply.workable.com/altom-transport",
-      "enabled": true
-    },
-    {
-      "name": "Papier",
-      "slug": "papier",
-      "link": "https://apply.workable.com/papier",
-      "enabled": true
-    },
-    {
-      "name": "Falcomm",
-      "slug": "falcomm",
-      "link": "https://apply.workable.com/falcomm",
       "enabled": true
     },
     {
@@ -2473,15 +3631,33 @@
       "enabled": true
     },
     {
-      "name": "Homey",
-      "slug": "homey",
-      "link": "https://apply.workable.com/homey",
+      "name": "CoverGo",
+      "slug": "covergo",
+      "link": "https://apply.workable.com/covergo",
       "enabled": true
     },
     {
-      "name": "WallStreetQuants",
-      "slug": "wallstreetquants",
-      "link": "https://apply.workable.com/wallstreetquants",
+      "name": "CVector - Industrial AI",
+      "slug": "cvector",
+      "link": "https://apply.workable.com/cvector",
+      "enabled": true
+    },
+    {
+      "name": "Dable",
+      "slug": "dable",
+      "link": "https://apply.workable.com/dable",
+      "enabled": true
+    },
+    {
+      "name": "DC Thomson",
+      "slug": "dcthomson",
+      "link": "https://apply.workable.com/dcthomson",
+      "enabled": true
+    },
+    {
+      "name": "Falcomm",
+      "slug": "falcomm",
+      "link": "https://apply.workable.com/falcomm",
       "enabled": true
     },
     {
@@ -2491,15 +3667,93 @@
       "enabled": true
     },
     {
+      "name": "Future Publishing",
+      "slug": "futureplc",
+      "link": "https://apply.workable.com/futureplc",
+      "enabled": true
+    },
+    {
+      "name": "Greenlife Healthcare Staffing",
+      "slug": "greenlife-healthcare-staffing-1",
+      "link": "https://apply.workable.com/greenlife-healthcare-staffing-1",
+      "enabled": true
+    },
+    {
+      "name": "Homey",
+      "slug": "homey",
+      "link": "https://apply.workable.com/homey",
+      "enabled": true
+    },
+    {
       "name": "Junglee Games",
       "slug": "junglee-games",
       "link": "https://apply.workable.com/junglee-games",
       "enabled": true
     },
     {
+      "name": "NineTwoThree AI Studio",
+      "slug": "ninetwothree-ai-studio",
+      "link": "https://apply.workable.com/ninetwothree-ai-studio",
+      "enabled": true
+    },
+    {
+      "name": "Papier",
+      "slug": "papier",
+      "link": "https://apply.workable.com/papier",
+      "enabled": true
+    },
+    {
+      "name": "pony.ai",
+      "slug": "pony-dot-ai",
+      "link": "https://apply.workable.com/pony-dot-ai",
+      "enabled": true
+    },
+    {
+      "name": "ProNexus",
+      "slug": "pronexus-1",
+      "link": "https://apply.workable.com/pronexus-1",
+      "enabled": true
+    },
+    {
+      "name": "Rokt",
+      "slug": "rokt",
+      "link": "https://apply.workable.com/rokt",
+      "enabled": true
+    },
+    {
+      "name": "Simply TV",
+      "slug": "simply-tv",
+      "link": "https://apply.workable.com/simply-tv",
+      "enabled": true
+    },
+    {
       "name": "Talent Trader Group",
       "slug": "talent-trader-group",
       "link": "https://apply.workable.com/talent-trader-group",
+      "enabled": true
+    },
+    {
+      "name": "TWG Global AI",
+      "slug": "twgai",
+      "link": "https://apply.workable.com/twgai",
+      "enabled": true
+    },
+    {
+      "name": "WallStreetQuants",
+      "slug": "wallstreetquants",
+      "link": "https://apply.workable.com/wallstreetquants",
+      "enabled": true
+    },
+    {
+      "name": "Wati",
+      "slug": "wati-dot-i-o",
+      "link": "https://apply.workable.com/wati-dot-i-o",
+      "enabled": true
+    },
+    {
+      "name": "Weekday AI",
+      "slug": "weekday-1",
+      "link": "https://apply.workable.com/weekday-1",
       "enabled": true
     }
   ]

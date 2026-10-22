@@ -33,3 +33,8 @@ AGENTS.md
 .env
 .env.*
 !.env.example
+
+# Relatórios e dumps temporários de importação
+data/*_report.json
+data/sheet_import_report.json
+

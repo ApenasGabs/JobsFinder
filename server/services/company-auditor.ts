@@ -98,13 +98,15 @@ export class CompanyAuditorService {
           body: JSON.stringify({}),
         };
       case "INHIRE": {
-        const portalUrl = link?.trim()
-          ? link.replace(/\/$/, "")
-          : `https://${cleanSlug}.inhire.app`;
         return {
-          url: portalUrl,
+          url: "https://api.inhire.app/job-posts/public/pages",
           method: "GET",
-          headers: defaultHeaders,
+          headers: {
+            ...defaultHeaders,
+            "X-Tenant": cleanSlug,
+            Origin: `https://${cleanSlug}.inhire.app`,
+            Referer: `https://${cleanSlug}.inhire.app/`,
+          },
         };
       }
     }
@@ -171,10 +173,23 @@ export class CompanyAuditorService {
             jobsCount = data.length;
           } else if (Array.isArray(data?.jobs)) {
             jobsCount = data.jobs.length;
+          } else if (Array.isArray(data?.jobsPage)) {
+            jobsCount = data.jobsPage.length;
           } else if (Array.isArray(data?.results)) {
             jobsCount = data.results.length;
           } else if (typeof data?.total === "number") {
             jobsCount = data.total;
+          }
+
+          if (ats === "INHIRE" && (!data?.tenantName || jobsCount === 0)) {
+            return {
+              ok: false,
+              httpStatus: 404,
+              error: "Tenant inativo ou sem vagas",
+              message: `Tenant "${slugInput}" no InHire não possui vagas ativas.`,
+              checkedUrl: endpoint.url,
+              durationMs,
+            };
           }
         }
       } catch {
@@ -273,10 +288,23 @@ export class CompanyAuditorService {
             jobsCount = data.length;
           } else if (Array.isArray(data?.jobs)) {
             jobsCount = data.jobs.length;
+          } else if (Array.isArray(data?.jobsPage)) {
+            jobsCount = data.jobsPage.length;
           } else if (Array.isArray(data?.results)) {
             jobsCount = data.results.length;
           } else if (typeof data?.total === "number") {
             jobsCount = data.total;
+          }
+
+          if (ats === "INHIRE" && (!data?.tenantName || jobsCount === 0)) {
+            return {
+              ok: false,
+              httpStatus: 404,
+              error: "Tenant inativo ou sem vagas",
+              message: `Tenant "${slugInput}" no InHire não possui vagas ativas.`,
+              checkedUrl: endpoint.url,
+              durationMs,
+            };
           }
         }
       } catch {

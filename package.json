@@ -10,6 +10,8 @@
     "build": "tsc && vite build",
     "test": "tsx --test tests/**/*.test.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "import:sheet": "tsx scripts/import-sheet-companies.ts",
+    "import:sheet:docker": "./scripts/run-import-docker.sh",
     "sync:supabase": "npx tsx scripts/sync-supabase.ts",
     "preview": "vite preview"
   },
@@ -17,6 +19,7 @@
     "@whiskeysockets/baileys": "^7.0.0-rc14",
     "cheerio": "^1.2.0",
     "cors": "^2.8.6",
+    "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "lucide-react": "^1.42.0",
     "node-cron": "^4.6.0",
@@ -27,6 +30,7 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
+    "@types/exceljs": "^0.5.3",
     "@types/express": "^5.0.6",
     "@types/node": "^26.5.0",
     "@types/node-cron": "^3.0.11",

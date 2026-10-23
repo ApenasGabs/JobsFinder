@@ -150,6 +150,19 @@ export class SheetImporterService {
     for (const sheet of tabsToProcess) {
       if (sheet.rowCount === 0) continue;
 
+      const sheetNameLower = sheet.name.toLowerCase();
+      // Ignora abas que não contenham lista de empresas (resumos, métricas, notas, etc.)
+      if (
+        sheetNameLower.includes("resumo") ||
+        sheetNameLower.includes("métrica") ||
+        sheetNameLower.includes("metrica") ||
+        sheetNameLower.includes("notas") ||
+        sheetNameLower.includes("readme") ||
+        sheetNameLower.includes("dashboard")
+      ) {
+        continue;
+      }
+
       // 1. Detectar cabeçalho nas primeiras 10 linhas
       let headerRowIndex = -1;
       let colCompany = -1;
@@ -166,24 +179,31 @@ export class SheetImporterService {
           const { text } = extractCellContent(cell);
           const lower = text.toLowerCase();
 
-          if (lower.includes("empresa")) {
+          if (lower.includes("empresa") && !lower.includes("tóxica") && !lower.includes("métrica")) {
             headerRowIndex = r;
             colCompany = colNumber;
-          } else if (lower.includes("vaga") || lower.includes("título") || lower.includes("nome da vaga")) {
-            colTitle = colNumber;
-          } else if (lower.includes("categoria") || lower.includes("área")) {
-            colCategory = colNumber;
-          } else if (lower.includes("link") || lower.includes("candidatura") || lower.includes("url")) {
+          } else if (
+            lower.includes("página de carreira") ||
+            lower.includes("pagina de carreira") ||
+            lower.includes("carreira principal") ||
+            lower.includes("portal de vagas")
+          ) {
             colLink = colNumber;
           } else if (lower.includes("site") || lower.includes("website")) {
             colWebsite = colNumber;
-          } else if (lower.includes("menções") || lower.includes("mencoes") || lower.includes("quantidade")) {
+          } else if (lower.includes("link") || lower.includes("candidatura") || lower.includes("url")) {
+            if (colLink === -1) colLink = colNumber;
+          } else if (lower.includes("menções") || lower.includes("mencoes") || lower.includes("quantidade") || lower.includes("total vagas")) {
             colMentions = colNumber;
+          } else if (lower.includes("vaga") || lower.includes("título") || lower.includes("nome da vaga")) {
+            if (colTitle === -1) colTitle = colNumber;
+          } else if (lower.includes("categoria") || lower.includes("área")) {
+            colCategory = colNumber;
           }
         });
 
-        if (colCompany !== -1 && (colTitle !== -1 || colWebsite !== -1 || colMentions !== -1)) {
-          if (colWebsite !== -1 || colMentions !== -1) {
+        if (colCompany !== -1 && (colTitle !== -1 || colLink !== -1 || colWebsite !== -1 || colMentions !== -1)) {
+          if (colWebsite !== -1 || colMentions !== -1 || colLink !== -1) {
             isCompanyDirectory = true;
           }
           break;
@@ -192,11 +212,15 @@ export class SheetImporterService {
 
       // Se não achou cabeçalho padrão, assume formato convencional da planilha de vagas (B=Empresa, C=Vaga, D=Categoria, E=Link)
       if (colCompany === -1) {
-        colCompany = 2; // B
-        colTitle = 3;   // C
-        colCategory = 4;// D
-        colLink = 5;    // E
-        headerRowIndex = 4;
+        if (sheet.columnCount >= 4) {
+          colCompany = 2; // B
+          colTitle = 3;   // C
+          colCategory = 4;// D
+          colLink = 5;    // E
+          headerRowIndex = 4;
+        } else {
+          continue;
+        }
       }
 
       const startRow = headerRowIndex > 0 ? headerRowIndex + 1 : 1;
@@ -288,6 +312,16 @@ export class SheetImporterService {
       WORKABLE: new Set<string>((searchConfig.workableCompanies || []).map((c: any) => c.slug.toLowerCase())),
     };
 
+    const existingUrls = new Set<string>();
+    for (const key of Object.keys(existingSlugs) as SupportedAts[]) {
+      const prop = `${key.toLowerCase()}Companies` as keyof typeof searchConfig;
+      for (const item of ((searchConfig as any)[prop] || [])) {
+        if (item.link) {
+          existingUrls.add(item.link.toLowerCase().trim().replace(/\/+$/, ""));
+        }
+      }
+    }
+
     const discoveredCompanies: DiscoveredCompany[] = [];
     const byAts: Record<SupportedAts, { new: number; existing: number }> = {
       GUPY: { new: 0, existing: 0 },
@@ -319,7 +353,8 @@ export class SheetImporterService {
         matchedCount++;
         const ats = match.ats;
         const slug = match.slug.toLowerCase();
-        const isExisting = existingSlugs[ats].has(slug);
+        const normUrl = match.portalUrl.toLowerCase().trim().replace(/\/+$/, "");
+        const isExisting = existingSlugs[ats].has(slug) || existingUrls.has(normUrl);
 
         if (isExisting) {
           alreadyExistingCount++;
@@ -338,6 +373,7 @@ export class SheetImporterService {
           newAddedCount++;
           byAts[ats].new++;
           existingSlugs[ats].add(slug); // Evitar duplicar no mesmo lote
+          existingUrls.add(normUrl);
 
           discoveredCompanies.push({
             name: comp.name,

@@ -290,7 +290,7 @@ export async function probeSlug(
     }
   } catch {}
 
-  // 5. InHire
+  // 5. InHire (valida que o título HTML pertence a uma empresa real e não é o shell padrão SPA)
   try {
     const res = await resilientFetch(`https://${slug}.inhire.app`, {
       timeoutMs: 4000,
@@ -303,11 +303,20 @@ export async function probeSlug(
     });
     if (res.ok) {
       const html = await res.text();
-      if (!html.includes("Página não encontrada") && !html.includes("404")) {
+      const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
+      const title = titleMatch ? titleMatch[1].trim() : "";
+      const isGenericInhire =
+        !title ||
+        title.toLowerCase() === "inhire" ||
+        title.toLowerCase() === "inhire - recrutamento" ||
+        title.toLowerCase().startsWith("inhire ");
+
+      if (!isGenericInhire && !html.includes("Página não encontrada") && !html.includes("404")) {
         return {
           ats: "INHIRE",
           slug,
           portalUrl: `https://${slug}.inhire.app`,
+          companyName: title,
           source: "probed",
           confidence: 0.9,
         };
@@ -346,12 +355,58 @@ export async function probeSlug(
 }
 
 /**
+ * Inspeciona o website institucional da empresa buscando links de carreiras que apontem para ATSs
+ */
+export async function findCareersFromWebsite(websiteUrl: string): Promise<AtsMatch | null> {
+  if (!websiteUrl) return null;
+  try {
+    const rawUrl = websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`;
+    const res = await resilientFetch(rawUrl, {
+      timeoutMs: 4500,
+      maxRetries: 0,
+      source: "WEBSITE_CRAWLER",
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const finalUrl = new URL(res.url);
+
+    const hrefMatches = html.matchAll(/href=[\x27\"]([^\x27\"#\s]+)[\x27\"]/gi);
+    for (const m of hrefMatches) {
+      const href = m[1].trim();
+      try {
+        const resolved = new URL(href, finalUrl).toString();
+        const atsMatch = extractAtsFromUrl(resolved);
+        if (atsMatch) {
+          return {
+            ...atsMatch,
+            source: "probed",
+            confidence: 0.95,
+          };
+        }
+      } catch {}
+    }
+  } catch {}
+  return null;
+}
+
+/**
  * Tenta resolver a ATS de uma empresa a partir do nome e website
  */
 export async function findCompanyAts(
   companyName: string,
   website?: string
 ): Promise<AtsMatch | null> {
+  // 1. Se possui website, primeiro tenta extrair ATS diretamente de links do site
+  if (website) {
+    const siteMatch = await findCareersFromWebsite(website);
+    if (siteMatch) return siteMatch;
+  }
+
+  // 2. Sondagem de slugs candidatos nas APIs públicas
   const candidateSlugs = generateCandidateSlugs(companyName, website);
 
   for (const slug of candidateSlugs) {

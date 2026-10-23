@@ -115,5 +115,18 @@ describe("Sheet Importer & Company Finder - Unit Tests", () => {
       assert.ok(result.totalRowsProcessed > 0);
       assert.equal(result.newAddedCount, 0); // dry-run deve reportar 0 novas adicionadas no config
     });
+
+    it("should parse the centralized spreadsheet correctly ignoring summary tabs", async () => {
+      const centralizedFile = "/workspace/busca-vagas/empresas_carreiras_centralizadas.xlsx";
+      const result = await SheetImporterService.import({
+        source: centralizedFile,
+        dryRun: true,
+        probe: false,
+      });
+
+      assert.ok(result.totalUniqueCompanies > 2000);
+      assert.ok(result.totalRowsProcessed > 2000);
+      assert.ok(result.matchedCount > 500);
+    });
   });
 });

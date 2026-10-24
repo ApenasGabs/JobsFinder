@@ -204,6 +204,16 @@ export default function App() {
   const [testedCompanyStatus, setTestedCompanyStatus] = useState<Record<string, { loading: boolean; ok?: boolean; message?: string }>>({});
   const eventSourceRef = useRef<EventSource | null>(null);
 
+  // Auto-Update no Restart (Issue #24)
+  const [autoUpdateStatus, setAutoUpdateStatus] = useState<{
+    currentSha: string;
+    builtSha: string | null;
+    remoteSha: string | null;
+    hasUpdate: boolean;
+    autoUpdateOnStart: boolean;
+  } | null>(null);
+  const [isUpdatingSystem, setIsUpdatingSystem] = useState(false);
+
   // Carrega dados iniciais
   useEffect(() => {
     loadHealth();
@@ -212,6 +222,7 @@ export default function App() {
     loadStats();
     loadWhatsAppStatus();
     loadLogStats();
+    loadAutoUpdateStatus();
 
     const interval = setInterval(() => {
       loadHealth();
@@ -221,6 +232,55 @@ export default function App() {
 
     return () => clearInterval(interval);
   }, []);
+
+  const loadAutoUpdateStatus = async (checkRemote = false) => {
+    try {
+      const res = await fetch(`/api/system/auto-update${checkRemote ? '?check=true' : ''}`);
+      if (res.ok) {
+        setAutoUpdateStatus(await res.json());
+      }
+    } catch {
+      // ignora silenciosamente
+    }
+  };
+
+  const handleToggleAutoUpdate = async (enabled: boolean) => {
+    try {
+      const res = await fetch('/api/system/auto-update/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ autoUpdateOnStart: enabled }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status) setAutoUpdateStatus(data.status);
+      }
+    } catch (err) {
+      console.error('Erro ao salvar preferência de auto-update:', err);
+    }
+  };
+
+  const handleTriggerAutoUpdate = async () => {
+    if (
+      !window.confirm(
+        'Deseja buscar a versão mais recente da branch main no GitHub, recompilar o frontend e reiniciar o container automaticamente?'
+      )
+    ) {
+      return;
+    }
+    setIsUpdatingSystem(true);
+    try {
+      const res = await fetch('/api/system/auto-update/trigger', { method: 'POST' });
+      const data = await res.json();
+      alert(data.message || 'Atualizando e reiniciando container...');
+      setTimeout(() => {
+        window.location.reload();
+      }, 4000);
+    } catch (err: any) {
+      alert('Erro ao atualizar: ' + (err?.message || err));
+      setIsUpdatingSystem(false);
+    }
+  };
 
   const loadHealth = async () => {
     try {
@@ -943,6 +1003,59 @@ export default function App() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#94a3b8', background: '#1e293b', padding: '0.4rem 0.8rem', borderRadius: '8px' }}>
               <Cpu size={14} color="#10b981" />
               <span>RAM: {health.memoryUsageMB?.rss || 0} MB</span>
+            </div>
+          )}
+
+          {/* Controle de Auto-Update no Restart (Issue #24) */}
+          {autoUpdateStatus && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.55rem',
+                fontSize: '0.78rem',
+                color: '#e2e8f0',
+                background: '#1e293b',
+                border: '1px solid #334155',
+                padding: '0.35rem 0.7rem',
+                borderRadius: '8px',
+              }}
+              title="Quando marcado, sempre que você reiniciar o container ele fará pull da main e recompilará o frontend automaticamente preservando seus dados"
+            >
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={autoUpdateStatus.autoUpdateOnStart}
+                  onChange={(e) => handleToggleAutoUpdate(e.target.checked)}
+                  style={{ accentColor: '#10b981', cursor: 'pointer' }}
+                />
+                <span>Auto-Update no Restart</span>
+              </label>
+              <span style={{ color: '#64748b' }}>|</span>
+              <code style={{ color: '#38bdf8', fontSize: '0.74rem' }}>
+                {autoUpdateStatus.currentSha?.slice(0, 7) || 'main'}
+              </code>
+              <button
+                type="button"
+                onClick={handleTriggerAutoUpdate}
+                disabled={isUpdatingSystem}
+                style={{
+                  background: 'rgba(59, 130, 246, 0.15)',
+                  border: '1px solid rgba(59, 130, 246, 0.35)',
+                  color: '#93c5fd',
+                  borderRadius: '6px',
+                  padding: '0.18rem 0.5rem',
+                  fontSize: '0.74rem',
+                  cursor: isUpdatingSystem ? 'wait' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                }}
+                title="Puxar última versão da main, compilar frontend e reiniciar container agora"
+              >
+                <RefreshCw size={12} className={isUpdatingSystem ? 'animate-spin' : ''} />
+                {isUpdatingSystem ? 'Atualizando...' : 'Pull & Restart'}
+              </button>
             </div>
           )}
 

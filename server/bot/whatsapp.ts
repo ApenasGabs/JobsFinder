@@ -800,12 +800,15 @@ export class WhatsAppBot {
    */
   public static previewCustomDigest(input: CustomDigestFilterInput): {
     candidatesCount: number;
+    totalCandidates: number;
+    includedCount: number;
     text: string;
     includedIds: string[];
     omitted: number;
     expiredIds: string[];
     charCount: number;
     maxChars: number;
+    headerTitle: string;
   } {
     const runtimeCfg = getDigestRuntimeConfig();
     const seniorities = Array.isArray(input.seniorities)
@@ -848,6 +851,7 @@ export class WhatsAppBot {
         ? DIGESTS.senior.options.title
         : "VAGAS DE TI SELECIONADAS";
     const defaultEmoji = isOnlyEntry ? "🎓" : "🚀";
+    const headerTitle = input.title?.trim() || defaultTitle;
 
     const maxChars =
       typeof input.maxChars === "number" && input.maxChars >= 500
@@ -855,7 +859,7 @@ export class WhatsAppBot {
         : runtimeCfg.maxChars;
 
     const result = buildDigest(candidates, {
-      title: input.title?.trim() || defaultTitle,
+      title: headerTitle,
       emoji: input.emoji?.trim() || defaultEmoji,
       radarUrl: runtimeCfg.radarUrl,
       maxPerSection: runtimeCfg.maxPerSection,
@@ -869,23 +873,29 @@ export class WhatsAppBot {
     if (!result) {
       return {
         candidatesCount: candidates.length,
+        totalCandidates: candidates.length,
+        includedCount: 0,
         text: "",
         includedIds: [],
         omitted: 0,
         expiredIds: [],
         charCount: 0,
         maxChars,
+        headerTitle,
       };
     }
 
     return {
       candidatesCount: candidates.length,
+      totalCandidates: candidates.length,
+      includedCount: result.includedIds.length,
       text: result.text,
       includedIds: result.includedIds,
       omitted: result.omitted,
       expiredIds: result.expiredIds,
       charCount: result.text.length,
       maxChars,
+      headerTitle,
     };
   }
 

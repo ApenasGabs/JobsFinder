@@ -310,6 +310,11 @@ export class SheetImporterService {
       LEVER: new Set<string>((searchConfig.leverCompanies || []).map((c: any) => c.slug.toLowerCase())),
       ASHBY: new Set<string>((searchConfig.ashbyCompanies || []).map((c: any) => c.slug.toLowerCase())),
       WORKABLE: new Set<string>((searchConfig.workableCompanies || []).map((c: any) => c.slug.toLowerCase())),
+      SOLIDES: new Set<string>((searchConfig.solidesCompanies || []).map((c: any) => c.slug.toLowerCase())),
+      WORKDAY: new Set<string>((searchConfig.workdayCompanies || []).map((c: any) => c.slug.toLowerCase())),
+      QUICKIN: new Set<string>((searchConfig.quickinCompanies || []).map((c: any) => c.slug.toLowerCase())),
+      CUSTOM_SITE: new Set<string>((searchConfig.customSiteCompanies || []).map((c: any) => c.slug.toLowerCase())),
+      LINKEDIN: new Set<string>((searchConfig.linkedinCompanies || []).map((c: any) => c.slug.toLowerCase())),
     };
 
     const existingUrls = new Set<string>();
@@ -330,6 +335,11 @@ export class SheetImporterService {
       LEVER: { new: 0, existing: 0 },
       ASHBY: { new: 0, existing: 0 },
       WORKABLE: { new: 0, existing: 0 },
+      SOLIDES: { new: 0, existing: 0 },
+      WORKDAY: { new: 0, existing: 0 },
+      QUICKIN: { new: 0, existing: 0 },
+      CUSTOM_SITE: { new: 0, existing: 0 },
+      LINKEDIN: { new: 0, existing: 0 },
     };
 
     let matchedCount = 0;
@@ -349,9 +359,44 @@ export class SheetImporterService {
         match = await findCompanyAts(comp.name, comp.website);
       }
 
+      // Se ainda não deu match, resolve para Site Próprio ou LinkedIn Search
+      if (!match) {
+        const candidateUrl = comp.sampleLink || comp.website;
+        let isCustomSite = false;
+        if (candidateUrl) {
+          try {
+            const p = new URL(candidateUrl.startsWith("http") ? candidateUrl : `https://${candidateUrl}`);
+            if (/^(carreiras|careers|jobs|trabalheconosco|talentos)\./i.test(p.hostname) || p.pathname.includes("/carreira") || p.pathname.includes("/vagas") || p.pathname.includes("/jobs")) {
+              isCustomSite = true;
+            }
+          } catch {}
+        }
+
+        if (isCustomSite && candidateUrl) {
+          match = {
+            ats: "CUSTOM_SITE",
+            slug: normalizeString(comp.name),
+            portalUrl: candidateUrl.startsWith("http") ? candidateUrl : `https://${candidateUrl}`,
+            source: "direct_link",
+            confidence: 0.85
+          };
+        } else {
+          match = {
+            ats: "LINKEDIN",
+            slug: normalizeString(comp.name),
+            portalUrl: `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(comp.name)}&location=Brasil`,
+            source: "direct_link",
+            confidence: 0.8
+          };
+        }
+      }
+
       if (match) {
         matchedCount++;
         const ats = match.ats;
+        if (ats === "LINKEDIN" || ats === "CUSTOM_SITE") {
+          match.slug = normalizeString(comp.name) || match.slug;
+        }
         const slug = match.slug.toLowerCase();
         const normUrl = match.portalUrl.toLowerCase().trim().replace(/\/+$/, "");
         const isExisting = existingSlugs[ats].has(slug) || existingUrls.has(normUrl);
@@ -395,12 +440,40 @@ export class SheetImporterService {
               enabled: true,
             };
 
-            if (ats === "GUPY") searchConfig.gupyCompanies.push(companyEntry);
-            else if (ats === "INHIRE") searchConfig.inhireCompanies.push(companyEntry);
-            else if (ats === "GREENHOUSE") searchConfig.greenhouseCompanies.push(companyEntry);
-            else if (ats === "LEVER") searchConfig.leverCompanies.push(companyEntry);
-            else if (ats === "ASHBY") searchConfig.ashbyCompanies.push(companyEntry);
-            else if (ats === "WORKABLE") searchConfig.workableCompanies.push(companyEntry);
+            if (ats === "GUPY") {
+              searchConfig.gupyCompanies = searchConfig.gupyCompanies || [];
+              searchConfig.gupyCompanies.push(companyEntry);
+            } else if (ats === "INHIRE") {
+              searchConfig.inhireCompanies = searchConfig.inhireCompanies || [];
+              searchConfig.inhireCompanies.push(companyEntry);
+            } else if (ats === "GREENHOUSE") {
+              searchConfig.greenhouseCompanies = searchConfig.greenhouseCompanies || [];
+              searchConfig.greenhouseCompanies.push(companyEntry);
+            } else if (ats === "LEVER") {
+              searchConfig.leverCompanies = searchConfig.leverCompanies || [];
+              searchConfig.leverCompanies.push(companyEntry);
+            } else if (ats === "ASHBY") {
+              searchConfig.ashbyCompanies = searchConfig.ashbyCompanies || [];
+              searchConfig.ashbyCompanies.push(companyEntry);
+            } else if (ats === "WORKABLE") {
+              searchConfig.workableCompanies = searchConfig.workableCompanies || [];
+              searchConfig.workableCompanies.push(companyEntry);
+            } else if (ats === "SOLIDES") {
+              searchConfig.solidesCompanies = searchConfig.solidesCompanies || [];
+              searchConfig.solidesCompanies.push(companyEntry);
+            } else if (ats === "WORKDAY") {
+              searchConfig.workdayCompanies = searchConfig.workdayCompanies || [];
+              searchConfig.workdayCompanies.push(companyEntry);
+            } else if (ats === "QUICKIN") {
+              searchConfig.quickinCompanies = searchConfig.quickinCompanies || [];
+              searchConfig.quickinCompanies.push(companyEntry);
+            } else if (ats === "CUSTOM_SITE") {
+              searchConfig.customSiteCompanies = searchConfig.customSiteCompanies || [];
+              searchConfig.customSiteCompanies.push(companyEntry);
+            } else if (ats === "LINKEDIN") {
+              searchConfig.linkedinCompanies = searchConfig.linkedinCompanies || [];
+              searchConfig.linkedinCompanies.push(companyEntry);
+            }
           }
         }
       } else {
@@ -430,14 +503,39 @@ export class SheetImporterService {
       searchConfig.workableCompanies?.sort(sortFn);
 
       // Atualizar contadores no array sources
-      for (const src of searchConfig.sources || []) {
-        if (src.id === "GUPY") src.name = `Gupy (${searchConfig.gupyCompanies.length} Empresas)`;
-        else if (src.id === "INHIRE") src.name = `InHire (${searchConfig.inhireCompanies.length} Startups BR)`;
-        else if (src.id === "GREENHOUSE") src.name = `Greenhouse (${searchConfig.greenhouseCompanies.length} Top Tech)`;
-        else if (src.id === "LEVER") src.name = `Lever (${searchConfig.leverCompanies.length} Tech & Startups)`;
-        else if (src.id === "ASHBY") src.name = `Ashby (${searchConfig.ashbyCompanies.length} Global Tech)`;
-        else if (src.id === "WORKABLE") src.name = `Workable (${searchConfig.workableCompanies.length} Empresas)`;
-      }
+      searchConfig.solidesCompanies?.sort(sortFn);
+      searchConfig.workdayCompanies?.sort(sortFn);
+      searchConfig.quickinCompanies?.sort(sortFn);
+      searchConfig.customSiteCompanies?.sort(sortFn);
+      searchConfig.linkedinCompanies?.sort(sortFn);
+
+      const ensureSource = (id: string, name: string, count: number) => {
+        searchConfig.sources = searchConfig.sources || [];
+        const existing = searchConfig.sources.find((s: any) => s.id === id);
+        if (existing) {
+          existing.name = `${name} (${count} Empresas)`;
+        } else {
+          searchConfig.sources.push({
+            id,
+            name: `${name} (${count} Empresas)`,
+            type: "CLT",
+            enabled: true,
+            fastMode: true,
+          });
+        }
+      };
+
+      ensureSource("GUPY", "Gupy", searchConfig.gupyCompanies?.length || 0);
+      ensureSource("INHIRE", "InHire", searchConfig.inhireCompanies?.length || 0);
+      ensureSource("GREENHOUSE", "Greenhouse", searchConfig.greenhouseCompanies?.length || 0);
+      ensureSource("LEVER", "Lever", searchConfig.leverCompanies?.length || 0);
+      ensureSource("ASHBY", "Ashby", searchConfig.ashbyCompanies?.length || 0);
+      ensureSource("WORKABLE", "Workable", searchConfig.workableCompanies?.length || 0);
+      ensureSource("SOLIDES", "Solides", searchConfig.solidesCompanies?.length || 0);
+      ensureSource("WORKDAY", "Workday", searchConfig.workdayCompanies?.length || 0);
+      ensureSource("QUICKIN", "Quickin", searchConfig.quickinCompanies?.length || 0);
+      ensureSource("CUSTOM_SITE", "Sites Próprios", searchConfig.customSiteCompanies?.length || 0);
+      ensureSource("LINKEDIN", "LinkedIn Jobs", searchConfig.linkedinCompanies?.length || 0);
 
       // Gravar configuração atualizada
       fs.writeFileSync(CONFIG_FILE, JSON.stringify(searchConfig, null, 2) + "\n", "utf-8");

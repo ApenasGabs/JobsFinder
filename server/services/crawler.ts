@@ -9,6 +9,11 @@ import { LeverScraper } from "../scrapers/lever.js";
 import { ProgramathorScraper } from "../scrapers/programathor.js";
 import { RemoteOKScraper } from "../scrapers/remoteok.js";
 import { WorkableScraper } from "../scrapers/workable.js";
+import { SolidesScraper } from "../scrapers/solides.js";
+import { WorkdayScraper } from "../scrapers/workday.js";
+import { QuickinScraper } from "../scrapers/quickin.js";
+import { CustomSiteScraper } from "../scrapers/custom-site.js";
+import { LinkedInJobsScraper } from "../scrapers/linkedin-jobs.js";
 import { Job, ScrapeOptions, ScrapeProgressEvent } from "../types.js";
 import { TechClassifierService } from "./classifier.js";
 import { LoggerService } from "./logger.js";
@@ -34,11 +39,16 @@ export class CrawlerService {
     ScraperRegistry.register(new ProgramathorScraper());
     ScraperRegistry.register(new Freelas99Scraper());
     ScraperRegistry.register(new GeekHunterScraper());
+    ScraperRegistry.register(new SolidesScraper());
+    ScraperRegistry.register(new WorkdayScraper());
+    ScraperRegistry.register(new QuickinScraper());
+    ScraperRegistry.register(new CustomSiteScraper());
+    ScraperRegistry.register(new LinkedInJobsScraper());
 
     StorageService.initialize();
     this.isRegistered = true;
     console.log(
-      "[CrawlerService] Todos os 10 scrapers registrados com sucesso.",
+      "[CrawlerService] Todos os 15 scrapers registrados com sucesso.",
     );
   }
 
@@ -81,6 +91,11 @@ export class CrawlerService {
               "PROGRAMATHOR",
               "FREELAS_99",
               "GEEKHUNTER",
+              "SOLIDES",
+              "WORKDAY",
+              "QUICKIN",
+              "CUSTOM_SITE",
+              "LINKEDIN",
             ];
 
       const scrapers = selectedSources

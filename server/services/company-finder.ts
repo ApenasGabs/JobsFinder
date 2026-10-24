@@ -1,6 +1,6 @@
 import { resilientFetch } from "../utils/fetch.js";
 
-export type SupportedAts = "GUPY" | "GREENHOUSE" | "LEVER" | "ASHBY" | "INHIRE" | "WORKABLE";
+export type SupportedAts = "GUPY" | "GREENHOUSE" | "LEVER" | "ASHBY" | "INHIRE" | "WORKABLE" | "SOLIDES" | "WORKDAY" | "QUICKIN" | "CUSTOM_SITE" | "LINKEDIN";
 
 export interface AtsMatch {
   ats: SupportedAts;
@@ -194,6 +194,71 @@ export function extractAtsFromUrl(url: string): AtsMatch | null {
         };
       }
     }
+
+    // 7. Solides: https://{slug}.vagas.solides.com.br ou https://{slug}.solides.jobs
+    if (host.includes(".solides.com.br") || host.includes(".solides.jobs")) {
+      const parts = host.split(".");
+      let slug = parts[0];
+      if (slug === "vagas" && parts.length > 3) slug = parts[1];
+      if (slug && slug !== "www" && slug !== "vagas" && slug !== "perfil" && slug !== "auth" && slug !== "staging") {
+        return {
+          ats: "SOLIDES",
+          slug,
+          portalUrl: `https://${slug}.vagas.solides.com.br`,
+          source: "direct_link",
+          confidence: 1.0,
+        };
+      }
+    }
+
+    // 8. Quickin: https://jobs.quickin.io/{slug}
+    if (host === "jobs.quickin.io") {
+      const slug = pathname.split("/").filter(Boolean)[0];
+      if (slug && slug !== "login" && slug !== "apply") {
+        return {
+          ats: "QUICKIN",
+          slug,
+          portalUrl: `https://jobs.quickin.io/${slug}`,
+          source: "direct_link",
+          confidence: 1.0,
+        };
+      }
+    }
+
+    // 9. Workday: https://{subdomain}.myworkdayjobs.com/...
+    if (host.includes(".myworkdayjobs.com")) {
+      const sub = host.split(".")[0];
+      return {
+        ats: "WORKDAY",
+        slug: sub,
+        portalUrl: url,
+        source: "direct_link",
+        confidence: 1.0,
+      };
+    }
+
+    // 10. LinkedIn Jobs
+    if (host.includes("linkedin.com") && (pathname.includes("/jobs") || pathname.includes("/company"))) {
+      return {
+        ats: "LINKEDIN",
+        slug: "linkedin",
+        portalUrl: url,
+        source: "direct_link",
+        confidence: 0.9,
+      };
+    }
+
+    // 11. Custom Portals / Carreiras
+    if (/^(carreiras|careers|jobs|trabalheconosco|talentos)\./i.test(host) || pathname.includes("/carreira") || pathname.includes("/trabalhe-conosco") || pathname.includes("/vagas")) {
+      const cleanSlug = host.replace(/^www\./, "").split(".")[0];
+      return {
+        ats: "CUSTOM_SITE",
+        slug: cleanSlug,
+        portalUrl: url,
+        source: "direct_link",
+        confidence: 0.85,
+      };
+    }
   } catch {}
 
   return null;
@@ -224,6 +289,28 @@ export async function probeSlug(
         source: "probed",
         confidence: 0.95,
       };
+    }
+  } catch {}
+
+  // 1.5. Solides (API JSON de vagas por slug da empresa)
+  try {
+    const res = await resilientFetch(`https://apigw.solides.com.br/jobs/v3/companies/${slug}/vacancies?take=1`, {
+      timeoutMs: 3500,
+      maxRetries: 0,
+      source: "SOLIDES",
+      headers: { Accept: "application/json" },
+    });
+    if (res.ok) {
+      const data = await res.json().catch(() => null);
+      if (data && typeof data.count === "number" && data.count >= 0) {
+        return {
+          ats: "SOLIDES",
+          slug,
+          portalUrl: `https://${slug}.vagas.solides.com.br`,
+          source: "probed",
+          confidence: 0.95,
+        };
+      }
     }
   } catch {}
 

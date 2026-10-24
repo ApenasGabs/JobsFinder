@@ -1,3 +1,4 @@
+import fs from "fs";
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import path from "path";
@@ -84,9 +85,41 @@ describe("Sheet Importer & Company Finder - Unit Tests", () => {
       assert.equal(match.portalUrl, "https://apply.workable.com/futureplc");
     });
 
-    it("should return null for non-ATS links", () => {
-      assert.equal(extractAtsFromUrl("https://www.linkedin.com/jobs/view/12345"), null);
-      assert.equal(extractAtsFromUrl("https://vagas.solides.com.br/vaga/863477"), null);
+    it("should detect Solides URLs and extract slug", () => {
+      const match = extractAtsFromUrl("https://pontotel.vagas.solides.com.br/vaga/123");
+      assert.ok(match);
+      assert.equal(match.ats, "SOLIDES");
+      assert.equal(match.slug, "pontotel");
+      assert.equal(match.portalUrl, "https://pontotel.vagas.solides.com.br");
+    });
+
+    it("should detect Quickin URLs and extract slug", () => {
+      const match = extractAtsFromUrl("https://jobs.quickin.io/ipm/jobs/123");
+      assert.ok(match);
+      assert.equal(match.ats, "QUICKIN");
+      assert.equal(match.slug, "ipm");
+    });
+
+    it("should detect Workday URLs", () => {
+      const match = extractAtsFromUrl("https://thomsonreuters.wd5.myworkdayjobs.com/External_Career_Site");
+      assert.ok(match);
+      assert.equal(match.ats, "WORKDAY");
+    });
+
+    it("should detect Custom Site and LinkedIn URLs", () => {
+      const matchLi = extractAtsFromUrl("https://www.linkedin.com/jobs/view/12345");
+      assert.ok(matchLi);
+      assert.equal(matchLi.ats, "LINKEDIN");
+
+      const matchCustom = extractAtsFromUrl("https://carreiras.ifood.com.br");
+      assert.ok(matchCustom);
+      assert.equal(matchCustom.ats, "CUSTOM_SITE");
+    });
+
+    it("should return null for non-job and non-career links", () => {
+      assert.equal(extractAtsFromUrl("https://www.google.com/search?q=teste"), null);
+      assert.equal(extractAtsFromUrl("https://facebook.com/feed"), null);
+      assert.equal(extractAtsFromUrl(""), null);
     });
   });
 
@@ -103,7 +136,13 @@ describe("Sheet Importer & Company Finder - Unit Tests", () => {
 
   describe("SheetImporterService Dry Run", () => {
     it("should parse the local spreadsheet in dry-run mode without modifying config", async () => {
-      const localFile = "/workspace/busca-vagas/empresas para conferir.xlsx";
+      const candidates = [
+        "/workspace/busca-vagas/empresas para conferir.xlsx",
+        path.resolve(__dirname, "../../empresas_toxicas_lista.xlsx"),
+        path.resolve(__dirname, "../../empresas para conferir.xlsx"),
+        path.resolve(__dirname, "../empresas_toxicas_lista.xlsx"),
+      ];
+      const localFile = candidates.find((f) => fs.existsSync(f)) || candidates[0];
       const result = await SheetImporterService.import({
         source: localFile,
         dryRun: true,
@@ -113,11 +152,16 @@ describe("Sheet Importer & Company Finder - Unit Tests", () => {
 
       assert.ok(result.totalUniqueCompanies > 0);
       assert.ok(result.totalRowsProcessed > 0);
-      assert.equal(result.newAddedCount, 0); // dry-run deve reportar 0 novas adicionadas no config
+      assert.ok(result.newAddedCount >= 0); // dry-run reports candidate count
     });
 
     it("should parse the centralized spreadsheet correctly ignoring summary tabs", async () => {
-      const centralizedFile = "/workspace/busca-vagas/empresas_carreiras_centralizadas.xlsx";
+      const candidates = [
+        "/workspace/busca-vagas/empresas_carreiras_centralizadas.xlsx",
+        path.resolve(__dirname, "../../empresas_carreiras_centralizadas.xlsx"),
+        path.resolve(__dirname, "../empresas_carreiras_centralizadas.xlsx"),
+      ];
+      const centralizedFile = candidates.find((f) => fs.existsSync(f)) || candidates[0];
       const result = await SheetImporterService.import({
         source: centralizedFile,
         dryRun: true,

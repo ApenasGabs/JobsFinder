@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { isDeepStrictEqual } from "util";
 import { ContractType, Job, SeniorityLevel, WorkModel } from "../types.js";
+import { detectSeniority } from "../utils/normalizer.js";
 import { TechClassifierService } from "./classifier.js";
 import { LoggerService } from "./logger.js";
 import { SupabaseSyncService } from "./supabase.js";
@@ -110,6 +111,7 @@ export class StorageService {
       isTech: true,
       scrapedAt: existing ? existing.scrapedAt : new Date().toISOString(),
       notifiedAt: existing?.notifiedAt ?? null,
+      expiredAt: existing?.expiredAt ?? null,
     };
 
     this.jobsMap.set(id, job);
@@ -126,7 +128,7 @@ export class StorageService {
   }
 
   private static readonly COMPARABLE_FIELDS: ReadonlyArray<
-    keyof Omit<Job, "id" | "scrapedAt" | "notifiedAt" | "isTech">
+    keyof Omit<Job, "id" | "scrapedAt" | "notifiedAt" | "expiredAt" | "isTech">
   > = [
     "title",
     "company",
@@ -263,6 +265,42 @@ export class StorageService {
     }
   }
 
+  public static markSent(jobIds: string[]): number {
+    this.initialize();
+    if (!jobIds || jobIds.length === 0) return 0;
+    const now = new Date().toISOString();
+    let count = 0;
+    for (const id of jobIds) {
+      const job = this.jobsMap.get(id);
+      if (job && !job.notifiedAt) {
+        job.notifiedAt = now;
+        count++;
+      }
+    }
+    if (count > 0) {
+      this.scheduleSave();
+    }
+    return count;
+  }
+
+  public static markExpired(jobIds: string[]): number {
+    this.initialize();
+    if (!jobIds || jobIds.length === 0) return 0;
+    const now = new Date().toISOString();
+    let count = 0;
+    for (const id of jobIds) {
+      const job = this.jobsMap.get(id);
+      if (job && !job.expiredAt) {
+        job.expiredAt = now;
+        count++;
+      }
+    }
+    if (count > 0) {
+      this.scheduleSave();
+    }
+    return count;
+  }
+
   public static markAllExistingAsNotified(): void {
     this.initialize();
     let changed = false;
@@ -306,7 +344,7 @@ export class StorageService {
     let jobs = Array.from(this.jobsMap.values());
 
     if (unnotifiedOnly) {
-      jobs = jobs.filter((j) => !j.notifiedAt);
+      jobs = jobs.filter((j) => !j.notifiedAt && !j.expiredAt);
     }
 
     // Trava de segurança: garante que apenas vagas de TI sejam retornadas
@@ -328,7 +366,8 @@ export class StorageService {
           catUpper === "ESTAGIO" &&
           (j.title.toLowerCase().includes("estág") ||
             j.title.toLowerCase().includes("estag") ||
-            j.title.toLowerCase().includes("intern"))
+            j.title.toLowerCase().includes("intern") ||
+            j.title.toLowerCase().includes("trainee"))
         )
           return true;
         if (
@@ -347,6 +386,48 @@ export class StorageService {
 
   public static getUnnotifiedJobs(category?: string): Job[] {
     return this.getJobsByCategory(category, true);
+  }
+
+  public static getUnsentJobs(opts?: {
+    seniorities?: SeniorityLevel[];
+  }): Job[] {
+    this.initialize();
+    let jobs = Array.from(this.jobsMap.values()).filter(
+      (j) =>
+        !j.notifiedAt &&
+        !j.expiredAt &&
+        j.isTech !== false &&
+        TechClassifierService.isTechSync(j.title),
+    );
+
+    if (opts?.seniorities && opts.seniorities.length > 0) {
+      const wanted = new Set(opts.seniorities.map((s) => s.toUpperCase()));
+      jobs = jobs.filter((j) => {
+        const directLevel = (j.seniorityLevel || "").toUpperCase();
+        if (wanted.has(directLevel)) return true;
+        if (wanted.has("ESTAGIO") && j.contractType === "ESTAGIO") return true;
+        const detected = detectSeniority(j.title);
+        return wanted.has(detected);
+      });
+    }
+
+    return jobs;
+  }
+
+  public static getTechJobsCountSince(since: Date): number {
+    this.initialize();
+    const cutoff = since.getTime();
+    let count = 0;
+    for (const job of this.jobsMap.values()) {
+      if (job.isTech === false || !TechClassifierService.isTechSync(job.title)) {
+        continue;
+      }
+      const ts = new Date(job.scrapedAt).getTime();
+      if (!Number.isNaN(ts) && ts >= cutoff) {
+        count++;
+      }
+    }
+    return count;
   }
 
   public static upsertBatch(jobs: Array<Omit<Job, "id">>): {

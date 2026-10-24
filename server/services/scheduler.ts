@@ -1,4 +1,5 @@
 import cron, { ScheduledTask } from "node-cron";
+import { getDigestRuntimeConfig } from "../bot/digest.js";
 import { WhatsAppBot } from "../bot/whatsapp.js";
 import { Job, ScrapeOptions } from "../types.js";
 import { TechClassifierService } from "./classifier.js";
@@ -10,6 +11,9 @@ import { LoggerService } from "./logger.js";
 export class SchedulerService {
   private static task: ScheduledTask | null = null;
   private static auditTask: ScheduledTask | null = null;
+  private static entryDigestTask: ScheduledTask | null = null;
+  private static seniorDigestTask: ScheduledTask | null = null;
+  private static weeklySummaryTask: ScheduledTask | null = null;
   private static isRunningNow = false;
   private static lastRunAt: string | null = null;
 
@@ -21,6 +25,8 @@ export class SchedulerService {
       "*/30 * * * *";
     const isEnabled = config.scheduler?.enabled ?? true;
 
+    this.stop();
+
     if (!isEnabled) {
       console.log(
         "[Scheduler] Agendador automático desativado na configuração.",
@@ -28,44 +34,103 @@ export class SchedulerService {
       return;
     }
 
-    if (this.task) {
-      this.task.stop();
-    }
-
-    if (this.auditTask) {
-      this.auditTask.stop();
-    }
+    const digestCfg = getDigestRuntimeConfig();
 
     console.log(
       `[Scheduler] ⏰ Agendador ativo com expressão cron: "${cronExpression}"`,
     );
 
-    this.task = cron.schedule(cronExpression, async () => {
-      console.log(
-        `[Scheduler] 🔔 Disparando varredura periódica programada [${new Date().toISOString()}]`,
-      );
-      LoggerService.info(
-        "SCHEDULER",
-        "SCHEDULER_TRIGGER",
-        "Disparo de varredura periódica programada pelo Scheduler 24/7",
-      );
-      await this.runScrapeAndNotify();
-    });
+    this.task = cron.schedule(
+      cronExpression,
+      async () => {
+        console.log(
+          `[Scheduler] 🔔 Disparando varredura periódica programada [${new Date().toISOString()}]`,
+        );
+        LoggerService.info(
+          "SCHEDULER",
+          "SCHEDULER_TRIGGER",
+          "Disparo de varredura periódica programada pelo Scheduler 24/7",
+        );
+        await this.runScrapeAndNotify();
+      },
+      { timezone: digestCfg.timezone },
+    );
+
+    console.log(
+      `[Scheduler] 🎓 Digest Estágio/Trainee/Júnior agendado: "${digestCfg.entryCron}" (${digestCfg.timezone})`,
+    );
+    this.entryDigestTask = cron.schedule(
+      digestCfg.entryCron,
+      async () => {
+        console.log(
+          `[Scheduler] 🎓 Disparando digest agendado (entry) [${new Date().toISOString()}]`,
+        );
+        try {
+          await WhatsAppBot.runDigest("entry");
+        } catch (err) {
+          console.error("[Scheduler] Erro ao executar digest entry:", err);
+        }
+      },
+      { timezone: digestCfg.timezone },
+    );
+
+    console.log(
+      `[Scheduler] 🚀 Digest Pleno/Sênior agendado: "${digestCfg.seniorCron}" (${digestCfg.timezone})`,
+    );
+    this.seniorDigestTask = cron.schedule(
+      digestCfg.seniorCron,
+      async () => {
+        console.log(
+          `[Scheduler] 🚀 Disparando digest agendado (senior) [${new Date().toISOString()}]`,
+        );
+        try {
+          await WhatsAppBot.runDigest("senior");
+        } catch (err) {
+          console.error("[Scheduler] Erro ao executar digest senior:", err);
+        }
+      },
+      { timezone: digestCfg.timezone },
+    );
+
+    console.log(
+      `[Scheduler] 📊 Resumo semanal de domingo agendado: "${digestCfg.weeklyCron}" (${digestCfg.timezone})`,
+    );
+    this.weeklySummaryTask = cron.schedule(
+      digestCfg.weeklyCron,
+      async () => {
+        console.log(
+          `[Scheduler] 📊 Disparando resumo semanal da comunidade [${new Date().toISOString()}]`,
+        );
+        try {
+          await WhatsAppBot.runWeeklySummary();
+        } catch (err) {
+          console.error("[Scheduler] Erro ao executar resumo semanal:", err);
+        }
+      },
+      { timezone: digestCfg.timezone },
+    );
 
     const auditCronExpression = process.env.AUDIT_CRON_SCHEDULE || "0 3 * * 0";
     console.log(
       `[Scheduler] 🔍 Auditoria semanal de ATS configurada com cron: "${auditCronExpression}"`,
     );
-    this.auditTask = cron.schedule(auditCronExpression, async () => {
-      console.log(
-        `[Scheduler] 🔍 Disparando auditoria periódica agendada de empresas ATS [${new Date().toISOString()}]`,
-      );
-      try {
-        await CompanyAuditorService.auditAll({ autoDisableBroken: true });
-      } catch (err) {
-        console.error("[Scheduler] Erro durante auditoria agendada de empresas:", err);
-      }
-    });
+    this.auditTask = cron.schedule(
+      auditCronExpression,
+      async () => {
+        console.log(
+          `[Scheduler] 🔍 Disparando auditoria periódica agendada de empresas ATS [${new Date().toISOString()}]`,
+        );
+        try {
+          await CompanyAuditorService.auditAll({ autoDisableBroken: true });
+        } catch (err) {
+          console.error(
+            "[Scheduler] Erro durante auditoria agendada de empresas:",
+            err,
+          );
+        }
+      },
+      { timezone: digestCfg.timezone },
+    );
   }
 
   public static async runScrapeAndNotify(): Promise<{
@@ -126,11 +191,7 @@ export class SchedulerService {
 
       if (newJobsCollected.length > 0) {
         console.log(
-          `[Scheduler] Despachando ${newJobsCollected.length} novas vagas para o Bot do WhatsApp...`,
-        );
-        const enqueued = await WhatsAppBot.notifyNewJobs(newJobsCollected);
-        console.log(
-          `[Scheduler] WhatsApp Bot enfileirou ${enqueued} de ${newJobsCollected.length} novas vagas para envio.`,
+          `[Scheduler] ${newJobsCollected.length} nova(s) vaga(s) de TI aguardando o próximo digest agendado (12h / 18h).`,
         );
       }
 
@@ -157,9 +218,15 @@ export class SchedulerService {
 
   public static getStatus() {
     const config = ConfigService.getConfig();
+    const digestCfg = getDigestRuntimeConfig();
     return {
       enabled: config.scheduler?.enabled ?? true,
       cronSchedule: config.scheduler?.cronSchedule || "*/30 * * * *",
+      entryDigestCron: digestCfg.entryCron,
+      seniorDigestCron: digestCfg.seniorCron,
+      weeklySummaryCron: digestCfg.weeklyCron,
+      timezone: digestCfg.timezone,
+      dryRun: digestCfg.dryRun,
       lastRunAt: this.lastRunAt,
       isRunningNow: this.isRunningNow,
       isAuditing: CompanyAuditorService.isAuditing(),
@@ -171,6 +238,18 @@ export class SchedulerService {
     if (this.task) {
       this.task.stop();
       this.task = null;
+    }
+    if (this.entryDigestTask) {
+      this.entryDigestTask.stop();
+      this.entryDigestTask = null;
+    }
+    if (this.seniorDigestTask) {
+      this.seniorDigestTask.stop();
+      this.seniorDigestTask = null;
+    }
+    if (this.weeklySummaryTask) {
+      this.weeklySummaryTask.stop();
+      this.weeklySummaryTask = null;
     }
     if (this.auditTask) {
       this.auditTask.stop();

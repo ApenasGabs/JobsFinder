@@ -3,29 +3,29 @@ import { describe, it } from "node:test";
 import { WhatsAppBot } from "../server/bot/whatsapp.js";
 import { Job } from "../server/types.js";
 
-describe("WhatsApp Message Formatter", () => {
+describe("WhatsApp Message Formatter (Digest Format)", () => {
   const sampleJobs: Job[] = [
     {
       id: "job-1",
-      title: "Monitor(a) de Estágio – Enfermagem",
+      title: "Estágio em Engenharia de Software",
       company: "Cogna",
       location: "Macapá, AP, BR",
       workModel: "PRESENCIAL",
-      contractType: "CLT",
+      contractType: "ESTAGIO",
       seniorityLevel: "ESTAGIO",
       url: "https://cogna.gupy.io/jobs/12213699",
       source: "GUPY",
-      stack: ["Enfermagem"],
+      stack: ["Geral"],
       scrapedAt: new Date().toISOString(),
     },
     {
       id: "job-2",
-      title: "Pessoa Desenvolvedora Fullstack Pl (React/Python)",
+      title: "Pessoa Desenvolvedora Fullstack Jr (React/Python)",
       company: "Venturus",
       location: "Manaus, AM, BR",
       workModel: "HIBRIDO",
       contractType: "CLT",
-      seniorityLevel: "ESTAGIO",
+      seniorityLevel: "JUNIOR",
       url: "https://venturus.inhire.app/vagas/4682629d/fullstack",
       source: "INHIRE",
       stack: ["React", "Python"],
@@ -33,12 +33,12 @@ describe("WhatsApp Message Formatter", () => {
     },
     {
       id: "job-3",
-      title: "Analista de Desenvolvimento Back-end Java Pl (Remoto)",
+      title: "Analista de Desenvolvimento Back-end Java Jr",
       company: "Venturus",
       location: "Brasil",
       workModel: "REMOTO",
       contractType: "CLT",
-      seniorityLevel: "ESTAGIO",
+      seniorityLevel: "JUNIOR",
       url: "https://venturus.inhire.app/vagas/70bb36c1/java",
       source: "INHIRE",
       stack: ["Java"],
@@ -46,12 +46,12 @@ describe("WhatsApp Message Formatter", () => {
     },
     {
       id: "job-4",
-      title: "Pessoa Desenvolvedora Android Sr",
+      title: "Pessoa Desenvolvedora Android Jr",
       company: "Venturus",
       location: "São Paulo, SP",
       workModel: "REMOTO",
       contractType: "CLT",
-      seniorityLevel: "ESTAGIO",
+      seniorityLevel: "JUNIOR",
       url: "https://venturus.inhire.app/vagas/0b43dbe8/android",
       source: "INHIRE",
       stack: ["Android"],
@@ -59,51 +59,47 @@ describe("WhatsApp Message Formatter", () => {
     },
   ];
 
-  it("should format a batch of 4 jobs into a single consolidated message", () => {
+  it("should format a batch of jobs into the new clean digest format grouped by section", () => {
     const text = WhatsAppBot.formatBatchJobMessage(sampleJobs, "ESTAGIO");
 
-    // Deve ter cabeçalho de lote
-    assert.ok(text.includes("4 NOVAS VAGAS — ESTAGIO"));
+    // Cabeçalho do digest de entrada
+    assert.ok(text.includes("🎓 *ESTÁGIO, TRAINEE E JÚNIOR*"));
+    assert.ok(text.includes("4 vagas novas"));
 
-    // Deve ter numeração por emoji
-    assert.ok(text.includes("1️⃣ *Monitor(a) de Estágio – Enfermagem*"));
+    // CTA comunitário no topo e no rodapé
     assert.ok(
-      text.includes("2️⃣ *Pessoa Desenvolvedora Fullstack Pl (React/Python)*"),
+      text.includes("🙋 *Mais empresas no radar = mais vagas pra todo mundo!*"),
+    );
+    assert.ok(text.includes("➕ Ajude a mapear empresas (leva 10 segundos):"));
+
+    // Seções Remoto e Presencial / Híbrido
+    assert.ok(text.includes("🏠 *Remoto*"));
+    assert.ok(text.includes("📍 *Presencial / Híbrido*"));
+
+    // Vagas formatadas com tag específica e sem [Geral]
+    assert.ok(
+      text.includes(
+        "• Analista de Desenvolvimento Back-end Java Jr [Java] — Venturus",
+      ),
     );
     assert.ok(
       text.includes(
-        "3️⃣ *Analista de Desenvolvimento Back-end Java Pl (Remoto)*",
+        "• Pessoa Desenvolvedora Fullstack Jr (React/Python) [React] — Venturus · Manaus, AM (híbrido)",
       ),
     );
-    assert.ok(text.includes("4️⃣ *Pessoa Desenvolvedora Android Sr*"));
+    assert.ok(!text.includes("[Geral]"));
 
-    // Links diretos
-    assert.ok(text.includes("🔗 https://cogna.gupy.io/jobs/12213699"));
-    assert.ok(
-      text.includes("🔗 https://venturus.inhire.app/vagas/4682629d/fullstack"),
-    );
-
-    // Destaques / skim rápido no topo
-    assert.ok(text.includes("📌 *Foco:*"));
-    assert.ok(text.includes("📍 *Locais:*"));
-
-    // Rodapé único consolidado
-    assert.ok(text.includes("QueroVagas Crawler"));
-    assert.ok(text.includes("GUPY, INHIRE") || text.includes("INHIRE"));
-
-    // Não deve conter traços repetidos por vaga
-    const dashesCount = (text.match(/───/g) || []).length;
-    assert.equal(
-      dashesCount,
-      0,
-      "Não deve conter separadores de traço poluídos",
-    );
+    // Sem assinatura antiga e sem NAO_INFORMADO
+    assert.ok(!text.includes("QueroVagas Crawler"));
+    assert.ok(!text.includes("NAO_INFORMADO"));
   });
 
-  it("should format a single job cleanly when batch size is 1", () => {
+  it("should format a single job cleanly when called directly via formatBatchJobMessage", () => {
     const text = WhatsAppBot.formatBatchJobMessage([sampleJobs[0]], "ESTAGIO");
-    assert.ok(text.includes("1 NOVA VAGA — ESTAGIO"));
-    assert.ok(text.includes("1️⃣ *Monitor(a) de Estágio – Enfermagem*"));
-    assert.ok(text.includes("🔗 https://cogna.gupy.io/jobs/12213699"));
+    assert.ok(text.includes("1 vaga nova"));
+    assert.ok(
+      text.includes("• Estágio em Engenharia de Software — Cogna · Macapá, AP"),
+    );
+    assert.ok(text.includes("https://cogna.gupy.io/jobs/12213699"));
   });
 });

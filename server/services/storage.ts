@@ -42,6 +42,19 @@ export class StorageService {
             job.url = job.url.replace("/job/", "/jobs/");
             hasMigrated = true;
           }
+          const inferredSeniority = detectSeniority(job.title || "");
+          if (!job.seniorityLevel || job.seniorityLevel === "NAO_INFORMADO") {
+            job.seniorityLevel = inferredSeniority;
+            hasMigrated = true;
+          }
+          if (
+            job.contractType === "ESTAGIO" &&
+            inferredSeniority !== "ESTAGIO" &&
+            job.seniorityLevel !== "ESTAGIO"
+          ) {
+            job.contractType = "CLT";
+            hasMigrated = true;
+          }
           this.jobsMap.set(job.id, job);
         }
         if (hasMigrated) {
@@ -355,28 +368,37 @@ export class StorageService {
     if (category && category !== "TODAS" && category !== "ALL") {
       const catUpper = category.toUpperCase().trim();
       jobs = jobs.filter((j) => {
-        // Checa senioridade (ESTAGIO, JUNIOR, PLENO, SENIOR)
-        if (j.seniorityLevel && j.seniorityLevel.toUpperCase() === catUpper)
-          return true;
-        // Checa tipo de contrato (CLT, PJ, FREELANCER, ESTAGIO)
-        if (j.contractType && j.contractType.toUpperCase() === catUpper)
-          return true;
-        // Checa título para palavras-chave (ex: "estágio", "estagio", "internship")
+        const effectiveSeniority =
+          !j.seniorityLevel || j.seniorityLevel === "NAO_INFORMADO"
+            ? detectSeniority(j.title)
+            : j.seniorityLevel.toUpperCase();
+
+        if (catUpper === "ENTRY") {
+          return (
+            effectiveSeniority === "ESTAGIO" || effectiveSeniority === "JUNIOR"
+          );
+        }
+        if (catUpper === "SENIOR_GROUP") {
+          return (
+            effectiveSeniority === "PLENO" ||
+            effectiveSeniority === "SENIOR" ||
+            effectiveSeniority === "ESPECIALISTA"
+          );
+        }
+
+        // Checa senioridade (ESTAGIO, JUNIOR, PLENO, SENIOR, ESPECIALISTA)
+        if (effectiveSeniority === catUpper) return true;
+
+        // Checa tipo de contrato apenas para PJ e FREELANCER (nunca deixa contractType=ESTAGIO puxar vaga Pleno/Senior)
         if (
-          catUpper === "ESTAGIO" &&
-          (j.title.toLowerCase().includes("estág") ||
-            j.title.toLowerCase().includes("estag") ||
-            j.title.toLowerCase().includes("intern") ||
-            j.title.toLowerCase().includes("trainee"))
-        )
+          (catUpper === "PJ" ||
+            catUpper === "FREELANCER" ||
+            catUpper === "CLT") &&
+          j.contractType &&
+          j.contractType.toUpperCase() === catUpper
+        ) {
           return true;
-        if (
-          catUpper === "JUNIOR" &&
-          (j.title.toLowerCase().includes("júnior") ||
-            j.title.toLowerCase().includes("junior") ||
-            j.title.toLowerCase().includes("jr"))
-        )
-          return true;
+        }
         return false;
       });
     }
@@ -391,24 +413,80 @@ export class StorageService {
   public static getUnsentJobs(opts?: {
     seniorities?: SeniorityLevel[];
   }): Job[] {
+    return this.queryDigestCandidates({
+      seniorities: opts?.seniorities,
+      onlyUnsent: true,
+    });
+  }
+
+  public static queryDigestCandidates(opts?: {
+    seniorities?: SeniorityLevel[];
+    workModel?: WorkModel | "ALL" | string;
+    contractType?: ContractType | "ALL" | string;
+    source?: string;
+    search?: string;
+    onlyUnsent?: boolean;
+    maxAgeDays?: number;
+  }): Job[] {
     this.initialize();
+    const onlyUnsent = opts?.onlyUnsent ?? true;
+
     let jobs = Array.from(this.jobsMap.values()).filter(
-      (j) =>
-        !j.notifiedAt &&
-        !j.expiredAt &&
-        j.isTech !== false &&
-        TechClassifierService.isTechSync(j.title),
+      (j) => j.isTech !== false && TechClassifierService.isTechSync(j.title),
     );
+
+    if (onlyUnsent) {
+      jobs = jobs.filter((j) => !j.notifiedAt && !j.expiredAt);
+    }
+
+    if (opts?.maxAgeDays && opts.maxAgeDays > 0) {
+      const cutoff = Date.now() - opts.maxAgeDays * 24 * 60 * 60 * 1000;
+      jobs = jobs.filter((j) => {
+        const ts = new Date(j.scrapedAt).getTime();
+        return Number.isNaN(ts) || ts >= cutoff;
+      });
+    }
 
     if (opts?.seniorities && opts.seniorities.length > 0) {
       const wanted = new Set(opts.seniorities.map((s) => s.toUpperCase()));
       jobs = jobs.filter((j) => {
-        const directLevel = (j.seniorityLevel || "").toUpperCase();
-        if (wanted.has(directLevel)) return true;
-        if (wanted.has("ESTAGIO") && j.contractType === "ESTAGIO") return true;
-        const detected = detectSeniority(j.title);
-        return wanted.has(detected);
+        const effectiveSeniority =
+          !j.seniorityLevel || j.seniorityLevel === "NAO_INFORMADO"
+            ? detectSeniority(j.title)
+            : j.seniorityLevel.toUpperCase();
+        if (wanted.has(effectiveSeniority)) return true;
+        if (wanted.has("PLENO") && effectiveSeniority === "NAO_INFORMADO") {
+          return true;
+        }
+        return false;
       });
+    }
+
+    if (opts?.workModel && opts.workModel !== "ALL") {
+      const wm = opts.workModel.toUpperCase();
+      jobs = jobs.filter((j) => (j.workModel || "").toUpperCase() === wm);
+    }
+
+    if (opts?.contractType && opts.contractType !== "ALL") {
+      const ct = opts.contractType.toUpperCase();
+      jobs = jobs.filter((j) => (j.contractType || "").toUpperCase() === ct);
+    }
+
+    if (opts?.source && opts.source !== "ALL") {
+      const src = opts.source.toUpperCase();
+      jobs = jobs.filter((j) => (j.source || "").toUpperCase() === src);
+    }
+
+    if (opts?.search && opts.search.trim()) {
+      const q = opts.search.toLowerCase().trim();
+      jobs = jobs.filter(
+        (j) =>
+          j.title.toLowerCase().includes(q) ||
+          j.company.toLowerCase().includes(q) ||
+          (Array.isArray(j.stack) &&
+            j.stack.some((s) => s.toLowerCase().includes(q))) ||
+          (j.description && j.description.toLowerCase().includes(q)),
+      );
     }
 
     return jobs;

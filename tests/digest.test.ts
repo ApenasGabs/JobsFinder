@@ -305,6 +305,52 @@ describe("Digest Builder (digest.ts)", () => {
     assert.ok(res.text.includes("• Analista de Dados [Python] — Itaú · São Paulo, SP (híbrido)"));
   });
 
+  it("insere uma linha em branco (\\n\\n) entre uma vaga e outra dentro da mesma seção", () => {
+    const jobs = [
+      makeJob({
+        id: "r1",
+        title: "Desenvolvedor Backend Java",
+        company: "Empresa Um",
+        workModel: "REMOTO",
+        stack: ["Java"],
+        url: "https://empresa1.gupy.io/jobs/1",
+      }),
+      makeJob({
+        id: "r2",
+        title: "Desenvolvedor Frontend React",
+        company: "Empresa Dois",
+        workModel: "REMOTO",
+        stack: ["React"],
+        url: "https://empresa2.gupy.io/jobs/2",
+      }),
+      makeJob({
+        id: "r3",
+        title: "Engenheiro DevOps",
+        company: "Empresa Três",
+        workModel: "REMOTO",
+        stack: ["AWS"],
+        url: "https://empresa3.gupy.io/jobs/3",
+      }),
+    ];
+
+    const res = buildDigest(jobs, {
+      ...DIGESTS.entry.options,
+      minJobs: 1,
+      now: fixedNow,
+    });
+
+    assert.ok(res);
+    assert.ok(
+      res.text.includes(
+        "https://empresa1.gupy.io/jobs/1\n\n• Desenvolvedor Frontend React",
+      ) ||
+        res.text.includes(
+          "https://empresa2.gupy.io/jobs/2\n\n• Desenvolvedor Backend Java",
+        ),
+      "Deve haver uma linha em branco (\\n\\n) separando uma vaga da seguinte",
+    );
+  });
+
   it("classifica corretamente localidades no Brasil vs Exterior (isBrazil)", () => {
     assert.equal(isBrazil("São Paulo, SP"), true);
     assert.equal(isBrazil("Macapá, AP, BR"), true);

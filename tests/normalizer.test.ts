@@ -70,15 +70,20 @@ describe("Normalizer Utility", () => {
       assert.equal(detectSeniority("Dev Jr (Node.js)"), "JUNIOR");
     });
 
-    it("should detect PLENO correctly", () => {
+    it("should detect PLENO correctly (including default when unspecified)", () => {
       assert.equal(detectSeniority("Desenvolvedor Fullstack Pleno"), "PLENO");
       assert.equal(detectSeniority("Mid-level React Engineer"), "PLENO");
+      assert.equal(detectSeniority("Intermediate Python Developer"), "PLENO");
+      assert.equal(detectSeniority("Software Engineer II"), "PLENO");
       assert.equal(
         detectSeniority(
           "[1201] Pessoa Desenvolvedora Fullstack Pl (React/Python)",
         ),
         "PLENO",
       );
+      // Sem senioridade explícita deve assumir PLENO
+      assert.equal(detectSeniority("Software Engineer (Backend)"), "PLENO");
+      assert.equal(detectSeniority("Product Designer"), "PLENO");
     });
 
     it("should detect SENIOR correctly", () => {
@@ -90,6 +95,7 @@ describe("Normalizer Utility", () => {
       );
       assert.equal(detectSeniority("Senior Java Architect"), "SENIOR");
       assert.equal(detectSeniority("Tech Lead / Senior Engineer"), "SENIOR");
+      assert.equal(detectSeniority("Software Engineer III"), "SENIOR");
     });
 
     it("should detect ESPECIALISTA correctly", () => {
@@ -105,9 +111,22 @@ describe("Normalizer Utility", () => {
   });
 
   describe("detectContractType", () => {
-    it("should detect ESTAGIO contract", () => {
+    it("should detect ESTAGIO contract without false-positiving internal/international", () => {
       assert.equal(detectContractType("Vaga de Estágio em TI"), "ESTAGIO");
       assert.equal(detectContractType("Internship 2026"), "ESTAGIO");
+      assert.equal(detectContractType("Software Engineering Intern"), "ESTAGIO");
+      assert.equal(
+        detectContractType("Senior Internal Tools Engineer", "CLT"),
+        "CLT",
+      );
+      assert.equal(
+        detectContractType("International Backend Developer", "CLT"),
+        "CLT",
+      );
+      assert.equal(
+        detectContractType("Internet Banking Software Engineer", "CLT"),
+        "CLT",
+      );
     });
 
     it("should detect PJ contract", () => {

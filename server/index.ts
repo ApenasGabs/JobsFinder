@@ -340,6 +340,31 @@ app.post("/api/whatsapp/dispatch", async (req: Request, res: Response) => {
   res.json(result);
 });
 
+app.post("/api/whatsapp/digest/preview", (req: Request, res: Response) => {
+  try {
+    const result = WhatsAppBot.previewCustomDigest(req.body || {});
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      error: err?.message || "Erro ao gerar preview do digest",
+    });
+  }
+});
+
+app.post("/api/whatsapp/digest/send", async (req: Request, res: Response) => {
+  try {
+    const result = await WhatsAppBot.sendCustomDigest(req.body || {});
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err?.message || "Erro ao enviar digest customizado",
+      count: 0,
+    });
+  }
+});
+
 app.get("/api/whatsapp/groups", async (req: Request, res: Response) => {
   const force = req.query.force === "true";
   const groups = await WhatsAppBot.getParticipatingGroups(force);

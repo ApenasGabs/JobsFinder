@@ -127,17 +127,37 @@ export default function App() {
   const [testSending, setTestSending] = useState(false);
   const [testResultMsg, setTestResultMsg] = useState<string | null>(null);
 
-  // Disparo manual por categoria e controle de fila
-  const [dispatchCategory, setDispatchCategory] = useState('ESTAGIO');
-  const [pendingCategoryCount, setPendingCategoryCount] = useState(0);
+  // Disparo manual e controle de fila
   const [isDispatching, setIsDispatching] = useState(false);
   const [dispatchResultMsg, setDispatchResultMsg] = useState<string | null>(null);
   const [isSavingCategories, setIsSavingCategories] = useState(false);
   const [categorySaveMsg, setCategorySaveMsg] = useState<string | null>(null);
 
+  // Compositor Interativo de Digest (Issue #22)
+  const [composerSeniorities, setComposerSeniorities] = useState<string[]>(['ESTAGIO', 'JUNIOR']);
+  const [composerMaxAgeDays, setComposerMaxAgeDays] = useState<number>(5);
+  const [composerWorkModel, setComposerWorkModel] = useState<string>('ALL');
+  const [composerContractType, setComposerContractType] = useState<string>('ALL');
+  const [composerOnlyUnsent, setComposerOnlyUnsent] = useState<boolean>(true);
+  const [composerUseTableSearch, setComposerUseTableSearch] = useState<boolean>(false);
+  const [composerTargetGroupJid, setComposerTargetGroupJid] = useState<string>('');
+  const [showDigestPreview, setShowDigestPreview] = useState<boolean>(true);
+  const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
+  const [copiedPreview, setCopiedPreview] = useState<boolean>(false);
+  const [digestPreview, setDigestPreview] = useState<{
+    text: string;
+    includedCount: number;
+    totalCandidates: number;
+    omitted: number;
+    charCount: number;
+    maxChars: number;
+    headerTitle: string;
+  } | null>(null);
+
   // Filtros de busca local
   const [searchFilter, setSearchFilter] = useState('');
   const [modelFilter, setModelFilter] = useState('ALL');
+  const [seniorityFilter, setSeniorityFilter] = useState('ALL');
   const [contractFilter, setContractFilter] = useState('ALL');
   const [sourceFilter, setSourceFilter] = useState('ALL');
   const [notifiedFilter, setNotifiedFilter] = useState<'ALL' | 'PENDING' | 'NOTIFIED'>('ALL');
@@ -191,30 +211,16 @@ export default function App() {
     loadJobs();
     loadStats();
     loadWhatsAppStatus();
-    loadPendingCount(dispatchCategory);
     loadLogStats();
 
     const interval = setInterval(() => {
       loadHealth();
       loadWhatsAppStatus();
-      loadPendingCount(dispatchCategory);
       loadLogStats();
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [dispatchCategory]);
-
-  const loadPendingCount = async (cat = dispatchCategory) => {
-    try {
-      const res = await fetch(`/api/jobs/pending-count?category=${encodeURIComponent(cat)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setPendingCategoryCount(data.count ?? 0);
-      }
-    } catch {
-      // Falha silenciosa
-    }
-  };
+  }, []);
 
   const loadHealth = async () => {
     try {
@@ -390,6 +396,7 @@ export default function App() {
     source = sourceFilter,
     search = searchFilter,
     model = modelFilter,
+    seniority = seniorityFilter,
     contract = contractFilter,
     notified = notifiedFilter,
     onlyTech = onlyTechFilter,
@@ -401,6 +408,7 @@ export default function App() {
       if (source && source !== 'ALL') params.append('source', source);
       if (search && search.trim()) params.append('search', search.trim());
       if (model && model !== 'ALL') params.append('workModel', model);
+      if (seniority && seniority !== 'ALL') params.append('seniority', seniority);
       if (contract && contract !== 'ALL') params.append('contractType', contract);
       if (notified && notified !== 'ALL') params.append('notified', notified);
       if (onlyTech) params.append('onlyTech', 'true');
@@ -419,8 +427,8 @@ export default function App() {
   };
 
   useEffect(() => {
-    loadJobs(sourceFilter, searchFilter, modelFilter, contractFilter, notifiedFilter, onlyTechFilter, currentPage, pageSize);
-  }, [sourceFilter, searchFilter, modelFilter, contractFilter, notifiedFilter, onlyTechFilter, currentPage, pageSize]);
+    loadJobs(sourceFilter, searchFilter, modelFilter, seniorityFilter, contractFilter, notifiedFilter, onlyTechFilter, currentPage, pageSize);
+  }, [sourceFilter, searchFilter, modelFilter, seniorityFilter, contractFilter, notifiedFilter, onlyTechFilter, currentPage, pageSize]);
 
   const loadStats = async () => {
     try {
@@ -439,6 +447,7 @@ export default function App() {
         setWaStatus(data);
         if (data.targetGroupJid) {
           setSelectedGroupJid((prev) => prev || data.targetGroupJid || '');
+          setComposerTargetGroupJid((prev) => prev || data.targetGroupJid || '');
         }
         // Carrega grupos apenas uma vez na conexão inicial para não estourar rate limit
         if (data.status === 'connected' && !hasLoadedGroupsRef.current) {
@@ -533,23 +542,89 @@ export default function App() {
     }
   };
 
-  const handleDispatchCategory = async () => {
+  const buildComposerPayload = () => ({
+    seniorities: composerSeniorities,
+    workModel: composerWorkModel,
+    contractType: composerContractType,
+    source: composerUseTableSearch ? sourceFilter : 'ALL',
+    search: composerUseTableSearch ? searchFilter : '',
+    onlyUnsent: composerOnlyUnsent,
+    maxAgeDays: composerMaxAgeDays,
+    targetGroupJid: composerTargetGroupJid || selectedGroupJid || waStatus.targetGroupJid || undefined,
+  });
+
+  const loadDigestPreview = async () => {
+    setIsLoadingPreview(true);
+    try {
+      const res = await fetch('/api/whatsapp/digest/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildComposerPayload()),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDigestPreview(data);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar preview do digest:', err);
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDigestPreview();
+  }, [
+    composerSeniorities,
+    composerMaxAgeDays,
+    composerWorkModel,
+    composerContractType,
+    composerOnlyUnsent,
+    composerUseTableSearch,
+    sourceFilter,
+    searchFilter,
+  ]);
+
+  const toggleComposerSeniority = (level: string) => {
+    setComposerSeniorities((prev) => {
+      if (prev.includes(level)) {
+        if (prev.length <= 1) return prev; // Mantém ao menos 1 selecionada
+        return prev.filter((item) => item !== level);
+      }
+      return [...prev, level];
+    });
+  };
+
+  const handleCopyDigestPreview = async () => {
+    if (!digestPreview?.text) return;
+    try {
+      await navigator.clipboard.writeText(digestPreview.text);
+      setCopiedPreview(true);
+      setTimeout(() => setCopiedPreview(false), 3000);
+    } catch {
+      // Fallback silencioso
+    }
+  };
+
+  const handleSendCustomDigest = async () => {
     setIsDispatching(true);
     setDispatchResultMsg(null);
     try {
-      const res = await fetch('/api/whatsapp/dispatch', {
+      const res = await fetch('/api/whatsapp/digest/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: dispatchCategory })
+        body: JSON.stringify(buildComposerPayload()),
       });
       const data = await res.json();
-      setDispatchResultMsg(data.message || (data.enqueued ? `${data.enqueued} vagas enfileiradas!` : 'Disparo concluído'));
+      setDispatchResultMsg(
+        data.message || (data.enqueued ? `${data.enqueued} vagas enviadas no digest!` : 'Disparo concluído')
+      );
       await loadWhatsAppStatus();
       await loadJobs();
-      await loadPendingCount(dispatchCategory);
-      setTimeout(() => setDispatchResultMsg(null), 8000);
+      await loadDigestPreview();
+      setTimeout(() => setDispatchResultMsg(null), 9000);
     } catch (err: any) {
-      setDispatchResultMsg(`Erro: ${err?.message || 'Falha ao disparar vagas'}`);
+      setDispatchResultMsg(`Erro: ${err?.message || 'Falha ao enviar digest customizado'}`);
     } finally {
       setIsDispatching(false);
     }
@@ -570,7 +645,7 @@ export default function App() {
       if (!res.ok) {
         await loadJobs();
       } else {
-        loadPendingCount(dispatchCategory);
+        loadDigestPreview();
       }
     } catch {
       await loadJobs();
@@ -1175,46 +1250,370 @@ export default function App() {
               </div>
             )}
 
-            {/* Disparo Manual de Mensagens por Categoria */}
+            {/* Compositor Interativo & Preview de Digest (Issue #22) */}
             <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #334155' }}>
-              <div style={{ marginBottom: '0.6rem' }}>
-                <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Send size={15} color="#10b981" /> Disparo de Vagas por Categoria
-                </h4>
-                <p style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                  Selecione a categoria de vagas e dispare para o WhatsApp. O bot enviará vagas completas em lotes de 3 a cada 5 minutos até esgotar a fila:
-                </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.75rem' }}>
+                <div>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 600, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Send size={15} color="#10b981" /> Compositor & Preview de Digest para WhatsApp
+                  </h4>
+                  <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '0.15rem' }}>
+                    Combine senioridades, escolha o período retroativo (5, 7, 15 ou 30 dias), confira o preview da mensagem formatada e escolha para qual grupo enviar:
+                  </p>
+                </div>
+
+                {/* Atalhos Rápidos de Combinação */}
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="btn-action"
+                    onClick={() => setComposerSeniorities(['ESTAGIO', 'JUNIOR'])}
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '0.3rem 0.65rem',
+                      borderColor:
+                        composerSeniorities.length === 2 &&
+                        composerSeniorities.includes('ESTAGIO') &&
+                        composerSeniorities.includes('JUNIOR')
+                          ? '#10b981'
+                          : '#334155',
+                    }}
+                  >
+                    🎓 Estágio + Júnior
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-action"
+                    onClick={() => setComposerSeniorities(['PLENO', 'SENIOR', 'ESPECIALISTA'])}
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '0.3rem 0.65rem',
+                      borderColor:
+                        composerSeniorities.length === 3 &&
+                        composerSeniorities.includes('PLENO') &&
+                        composerSeniorities.includes('SENIOR') &&
+                        composerSeniorities.includes('ESPECIALISTA')
+                          ? '#10b981'
+                          : '#334155',
+                    }}
+                  >
+                    🚀 Pleno + Sênior + Esp.
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-action"
+                    onClick={() =>
+                      setComposerSeniorities(['ESTAGIO', 'JUNIOR', 'PLENO', 'SENIOR', 'ESPECIALISTA'])
+                    }
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '0.3rem 0.65rem',
+                      borderColor: composerSeniorities.length === 5 ? '#10b981' : '#334155',
+                    }}
+                  >
+                    🌐 Todas
+                  </button>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                <select
-                  className="select-filter"
-                  value={dispatchCategory}
-                  onChange={(e) => {
-                    const cat = e.target.value;
-                    setDispatchCategory(cat);
-                    loadPendingCount(cat);
+              {/* 1. Pills de Senioridade (Multi-select) */}
+              <div style={{ marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.76rem', color: '#94a3b8', display: 'block', marginBottom: '0.35rem' }}>
+                  1. Senioridades incluídas no Digest (clique para combinar):
+                </span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                  {[
+                    { id: 'ESTAGIO', label: 'Estágio' },
+                    { id: 'JUNIOR', label: 'Júnior' },
+                    { id: 'PLENO', label: 'Pleno (inclui s/ senioridade)' },
+                    { id: 'SENIOR', label: 'Sênior' },
+                    { id: 'ESPECIALISTA', label: 'Especialista / Lead' },
+                  ].map((item) => {
+                    const active = composerSeniorities.includes(item.id);
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`tag-badge ${active ? 'active' : ''}`}
+                        onClick={() => toggleComposerSeniority(item.id)}
+                        style={{ cursor: 'pointer', border: '1px solid transparent', fontSize: '0.78rem' }}
+                      >
+                        {item.label} {active ? '✓' : '+'}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. Período, Modelo, Contrato e Grupo de Destino */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '0.6rem', marginBottom: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '0.25rem' }}>
+                    📅 Período Retroativo:
+                  </label>
+                  <select
+                    className="select-filter"
+                    value={composerMaxAgeDays}
+                    onChange={(e) => setComposerMaxAgeDays(Number(e.target.value))}
+                    style={{ width: '100%' }}
+                  >
+                    <option value={5}>Últimos 5 dias (Padrão)</option>
+                    <option value={7}>Últimos 7 dias (1 semana)</option>
+                    <option value={15}>Últimos 15 dias (Quinzena)</option>
+                    <option value={30}>Últimos 30 dias (1 mês)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '0.25rem' }}>
+                    🏠 Modelo de Trabalho:
+                  </label>
+                  <select
+                    className="select-filter"
+                    value={composerWorkModel}
+                    onChange={(e) => setComposerWorkModel(e.target.value)}
+                    style={{ width: '100%' }}
+                  >
+                    <option value="ALL">Todos (Remoto + Híbrido + Presencial)</option>
+                    <option value="REMOTO">Apenas Remoto</option>
+                    <option value="HIBRIDO">Apenas Híbrido</option>
+                    <option value="PRESENCIAL">Apenas Presencial</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '0.25rem' }}>
+                    📄 Tipo de Contrato:
+                  </label>
+                  <select
+                    className="select-filter"
+                    value={composerContractType}
+                    onChange={(e) => setComposerContractType(e.target.value)}
+                    style={{ width: '100%' }}
+                  >
+                    <option value="ALL">Todos os Contratos</option>
+                    <option value="CLT">CLT</option>
+                    <option value="PJ">PJ</option>
+                    <option value="FREELANCER">Freelancer / Projeto</option>
+                    <option value="ESTAGIO">Estágio</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '0.25rem' }}>
+                    📲 Grupo do WhatsApp p/ Envio:
+                  </label>
+                  <select
+                    className="select-filter"
+                    value={composerTargetGroupJid || selectedGroupJid || waStatus.targetGroupJid || ''}
+                    onChange={(e) => setComposerTargetGroupJid(e.target.value)}
+                    style={{ width: '100%', borderColor: '#10b981' }}
+                  >
+                    {!groups.length && waStatus.targetGroupJid && (
+                      <option value={waStatus.targetGroupJid}>
+                        📌 {waStatus.targetGroupName || waStatus.targetGroupJid} (Padrão)
+                      </option>
+                    )}
+                    {groups.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.id === waStatus.targetGroupJid ? '📌 ' : ''}
+                        {g.subject} ({g.participants} membros)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* 3. Opções adicionais e Botões de Ação */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: '#e2e8f0', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={composerOnlyUnsent}
+                      onChange={(e) => setComposerOnlyUnsent(e.target.checked)}
+                      style={{ accentColor: '#10b981', cursor: 'pointer' }}
+                    />
+                    Somente vagas ainda não enviadas
+                  </label>
+
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: '#e2e8f0', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={composerUseTableSearch}
+                      onChange={(e) => setComposerUseTableSearch(e.target.checked)}
+                      style={{ accentColor: '#3b82f6', cursor: 'pointer' }}
+                    />
+                    Aplicar busca/fonte da tabela abaixo
+                    {composerUseTableSearch && (searchFilter || sourceFilter !== 'ALL') && (
+                      <span style={{ color: '#38bdf8', fontSize: '0.75rem' }}>
+                        ({[sourceFilter !== 'ALL' ? sourceFilter : '', searchFilter ? `"${searchFilter}"` : ''].filter(Boolean).join(' + ')})
+                      </span>
+                    )}
+                  </label>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="btn-action"
+                    onClick={() => {
+                      setShowDigestPreview((prev) => !prev);
+                      loadDigestPreview();
+                    }}
+                    style={{ fontSize: '0.8rem' }}
+                  >
+                    <FileText size={14} />
+                    {showDigestPreview ? 'Ocultar Preview' : 'Ver Preview'}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn-action"
+                    onClick={loadDigestPreview}
+                    disabled={isLoadingPreview}
+                    style={{ fontSize: '0.8rem' }}
+                  >
+                    <RefreshCw size={14} className={isLoadingPreview ? 'animate-spin' : ''} />
+                    Atualizar Preview
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn-action primary"
+                    onClick={handleSendCustomDigest}
+                    disabled={
+                      isDispatching ||
+                      !digestPreview ||
+                      digestPreview.includedCount === 0 ||
+                      !(composerTargetGroupJid || selectedGroupJid || waStatus.targetGroupJid)
+                    }
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    <Send size={14} />
+                    {isDispatching
+                      ? 'Enviando Digest...'
+                      : `Disparar Digest (${digestPreview?.includedCount ?? 0} vagas)`}
+                  </button>
+                </div>
+              </div>
+
+              {/* 4. Painel de Preview da Mensagem Formatada */}
+              {showDigestPreview && (
+                <div
+                  style={{
+                    background: '#0f172a',
+                    border: '1px solid #334155',
+                    borderRadius: '10px',
+                    padding: '0.85rem',
+                    marginTop: '0.5rem',
                   }}
-                  style={{ minWidth: '220px' }}
                 >
-                  <option value="ESTAGIO">Estágio ({dispatchCategory === 'ESTAGIO' ? pendingCategoryCount : '...'} pendentes)</option>
-                  <option value="JUNIOR">Júnior ({dispatchCategory === 'JUNIOR' ? pendingCategoryCount : '...'} pendentes)</option>
-                  <option value="PLENO">Pleno ({dispatchCategory === 'PLENO' ? pendingCategoryCount : '...'} pendentes)</option>
-                  <option value="SENIOR">Sênior ({dispatchCategory === 'SENIOR' ? pendingCategoryCount : '...'} pendentes)</option>
-                  <option value="FREELANCER">Freelancer / PJ ({dispatchCategory === 'FREELANCER' ? pendingCategoryCount : '...'} pendentes)</option>
-                  <option value="TODAS">Todas as Categorias ({dispatchCategory === 'TODAS' ? pendingCategoryCount : '...'} pendentes)</option>
-                </select>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem',
+                      marginBottom: '0.6rem',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <strong style={{ fontSize: '0.82rem', color: '#f8fafc' }}>
+                        👁️ Preview da Mensagem WhatsApp:
+                      </strong>
+                      <span
+                        style={{
+                          fontSize: '0.74rem',
+                          padding: '0.18rem 0.55rem',
+                          borderRadius: '999px',
+                          background: 'rgba(16, 185, 129, 0.15)',
+                          color: '#34d399',
+                          border: '1px solid rgba(16, 185, 129, 0.3)',
+                        }}
+                      >
+                        ✅ {digestPreview?.includedCount ?? 0} no digest
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '0.74rem',
+                          padding: '0.18rem 0.55rem',
+                          borderRadius: '999px',
+                          background: 'rgba(59, 130, 246, 0.15)',
+                          color: '#93c5fd',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                        }}
+                      >
+                        🔎 {digestPreview?.totalCandidates ?? 0} encontradas no filtro ({composerMaxAgeDays}d)
+                      </span>
+                      {Boolean(digestPreview?.omitted && digestPreview.omitted > 0) && (
+                        <span
+                          style={{
+                            fontSize: '0.74rem',
+                            padding: '0.18rem 0.55rem',
+                            borderRadius: '999px',
+                            background: 'rgba(245, 158, 11, 0.15)',
+                            color: '#fbbf24',
+                            border: '1px solid rgba(245, 158, 11, 0.3)',
+                          }}
+                        >
+                          ➕ {digestPreview?.omitted} excedentes (próximo envio)
+                        </span>
+                      )}
+                      <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                        📏 {digestPreview?.charCount ?? 0} / {digestPreview?.maxChars ?? 3800} chars
+                      </span>
+                    </div>
 
-                <button
-                  className="btn-action primary"
-                  onClick={handleDispatchCategory}
-                  disabled={isDispatching || pendingCategoryCount === 0 || !waStatus.targetGroupJid}
-                  style={{ whiteSpace: 'nowrap' }}
-                >
-                  <Send size={14} />
-                  {isDispatching ? 'Enfileirando...' : `Disparar Vagas da Categoria (${pendingCategoryCount})`}
-                </button>
-              </div>
+                    {Boolean(digestPreview?.text) && (
+                      <button
+                        type="button"
+                        className="btn-action"
+                        onClick={handleCopyDigestPreview}
+                        style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}
+                      >
+                        {copiedPreview ? '✅ Copiado!' : '📋 Copiar Mensagem'}
+                      </button>
+                    )}
+                  </div>
+
+                  {digestPreview?.text ? (
+                    <textarea
+                      readOnly
+                      value={digestPreview.text}
+                      rows={Math.min(18, Math.max(7, digestPreview.text.split('\n').length + 1))}
+                      style={{
+                        width: '100%',
+                        background: '#0b141a',
+                        color: '#e9edef',
+                        border: '1px solid #1e293b',
+                        borderRadius: '8px',
+                        padding: '0.75rem',
+                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                        fontSize: '0.8rem',
+                        lineHeight: 1.45,
+                        resize: 'vertical',
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        padding: '1.2rem',
+                        textAlign: 'center',
+                        color: '#94a3b8',
+                        fontSize: '0.82rem',
+                        background: '#0b141a',
+                        borderRadius: '8px',
+                      }}
+                    >
+                      {isLoadingPreview
+                        ? 'Gerando preview da mensagem...'
+                        : 'Nenhuma vaga encontrada para esta combinação de filtros e período. Experimente ampliar para 7, 15 ou 30 dias ou desmarcar "Somente vagas ainda não enviadas".'}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {dispatchResultMsg && (
                 <div style={{ marginTop: '0.6rem', padding: '0.5rem 0.8rem', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', fontSize: '0.8rem', color: '#6ee7b7' }}>
@@ -1417,6 +1816,22 @@ export default function App() {
             style={{ paddingLeft: '36px' }}
           />
         </div>
+
+        <select
+          className="select-filter"
+          value={seniorityFilter}
+          onChange={(e) => {
+            setSeniorityFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="ALL">Senioridade (Todas)</option>
+          <option value="ESTAGIO">Estágio</option>
+          <option value="JUNIOR">Júnior</option>
+          <option value="PLENO">Pleno (inclui s/ senioridade)</option>
+          <option value="SENIOR">Sênior</option>
+          <option value="ESPECIALISTA">Especialista / Lead</option>
+        </select>
 
         <select
           className="select-filter"

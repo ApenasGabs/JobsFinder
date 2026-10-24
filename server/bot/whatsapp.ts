@@ -43,7 +43,25 @@ export interface QueuedDigestEnvelope {
   text: string;
   includedIds: string[];
   expiredIds: string[];
+  targetGroupJid?: string;
   createdAt: string;
+}
+
+export interface CustomDigestFilterInput {
+  seniorities?: string[];
+  workModel?: string;
+  contractType?: string;
+  source?: string;
+  search?: string;
+  onlyUnsent?: boolean;
+  maxAgeDays?: number;
+  includeAbroad?: boolean;
+  maxChars?: number;
+  title?: string;
+  emoji?: string;
+  targetGroupJid?: string;
+  customText?: string;
+  markAsSent?: boolean;
 }
 
 // Silencia ruído de sessões e buffers de criptografia do libsignal no stdout
@@ -778,6 +796,185 @@ export class WhatsAppBot {
   }
 
   /**
+   * Gera o preview do digest customizado a partir da combinação de filtros selecionada na UI.
+   */
+  public static previewCustomDigest(input: CustomDigestFilterInput): {
+    candidatesCount: number;
+    text: string;
+    includedIds: string[];
+    omitted: number;
+    expiredIds: string[];
+    charCount: number;
+    maxChars: number;
+  } {
+    const runtimeCfg = getDigestRuntimeConfig();
+    const seniorities = Array.isArray(input.seniorities)
+      ? (input.seniorities.filter(Boolean) as any[])
+      : undefined;
+
+    const maxAgeDays =
+      typeof input.maxAgeDays === "number" && input.maxAgeDays > 0
+        ? input.maxAgeDays
+        : runtimeCfg.maxAgeDays;
+
+    const candidates = StorageService.queryDigestCandidates({
+      seniorities,
+      workModel: input.workModel,
+      contractType: input.contractType,
+      source: input.source,
+      search: input.search,
+      onlyUnsent: input.onlyUnsent ?? true,
+      maxAgeDays,
+    });
+
+    // Determina título e emoji inteligentes a partir das senioridades escolhidas
+    const wantedSet = new Set((seniorities || []).map((s) => s.toUpperCase()));
+    const isOnlyEntry =
+      wantedSet.size > 0 &&
+      Array.from(wantedSet).every((s) => s === "ESTAGIO" || s === "JUNIOR");
+    const isOnlySenior =
+      wantedSet.size > 0 &&
+      Array.from(wantedSet).every(
+        (s) =>
+          s === "PLENO" ||
+          s === "SENIOR" ||
+          s === "ESPECIALISTA" ||
+          s === "NAO_INFORMADO",
+      );
+
+    const defaultTitle = isOnlyEntry
+      ? DIGESTS.entry.options.title
+      : isOnlySenior
+        ? DIGESTS.senior.options.title
+        : "VAGAS DE TI SELECIONADAS";
+    const defaultEmoji = isOnlyEntry ? "🎓" : "🚀";
+
+    const maxChars =
+      typeof input.maxChars === "number" && input.maxChars >= 500
+        ? input.maxChars
+        : runtimeCfg.maxChars;
+
+    const result = buildDigest(candidates, {
+      title: input.title?.trim() || defaultTitle,
+      emoji: input.emoji?.trim() || defaultEmoji,
+      radarUrl: runtimeCfg.radarUrl,
+      maxPerSection: runtimeCfg.maxPerSection,
+      maxTotal: runtimeCfg.maxTotal,
+      maxChars,
+      includeAbroad: input.includeAbroad ?? runtimeCfg.includeAbroad,
+      minJobs: 1,
+      maxAgeDays,
+    });
+
+    if (!result) {
+      return {
+        candidatesCount: candidates.length,
+        text: "",
+        includedIds: [],
+        omitted: 0,
+        expiredIds: [],
+        charCount: 0,
+        maxChars,
+      };
+    }
+
+    return {
+      candidatesCount: candidates.length,
+      text: result.text,
+      includedIds: result.includedIds,
+      omitted: result.omitted,
+      expiredIds: result.expiredIds,
+      charCount: result.text.length,
+      maxChars,
+    };
+  }
+
+  /**
+   * Envia o digest customizado (do compositor da UI) para o grupo escolhido.
+   */
+  public static async sendCustomDigest(input: CustomDigestFilterInput): Promise<{
+    success: boolean;
+    dryRun?: boolean;
+    includedCount: number;
+    omitted: number;
+    targetGroupJid: string;
+    message: string;
+  }> {
+    const runtimeCfg = getDigestRuntimeConfig();
+    const targetGroupJid =
+      input.targetGroupJid?.trim() || this.resolveTargetGroupJid();
+
+    if (!runtimeCfg.dryRun && (!this.sock || this.status !== "connected")) {
+      return {
+        success: false,
+        includedCount: 0,
+        omitted: 0,
+        targetGroupJid,
+        message: "Bot do WhatsApp desconectado. Conecte antes de enviar.",
+      };
+    }
+
+    if (!runtimeCfg.dryRun && !targetGroupJid) {
+      return {
+        success: false,
+        includedCount: 0,
+        omitted: 0,
+        targetGroupJid: "",
+        message: "Selecione um grupo de destino no WhatsApp antes de enviar.",
+      };
+    }
+
+    const preview = this.previewCustomDigest(input);
+    const finalText = input.customText?.trim() || preview.text;
+
+    if (!finalText || preview.includedIds.length === 0) {
+      return {
+        success: false,
+        includedCount: 0,
+        omitted: 0,
+        targetGroupJid,
+        message:
+          "Nenhuma vaga elegível encontrada para os filtros selecionados.",
+      };
+    }
+
+    if (runtimeCfg.dryRun) {
+      console.log(
+        `\n[WhatsApp Custom Digest][DRY_RUN] (target: ${targetGroupJid} | ${preview.includedIds.length} vagas):\n${finalText}\n`,
+      );
+      return {
+        success: true,
+        dryRun: true,
+        includedCount: preview.includedIds.length,
+        omitted: preview.omitted,
+        targetGroupJid,
+        message: `[DRY_RUN] Mensagem simulada no log com ${preview.includedIds.length} vagas!`,
+      };
+    }
+
+    const envelope: QueuedDigestEnvelope = {
+      id: `custom-${Date.now()}`,
+      kind: "custom",
+      slotKey: `custom:${Date.now()}`,
+      text: finalText,
+      includedIds: input.markAsSent === false ? [] : preview.includedIds,
+      expiredIds: preview.expiredIds,
+      targetGroupJid,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.enqueueDigestEnvelope(envelope);
+
+    return {
+      success: true,
+      includedCount: preview.includedIds.length,
+      omitted: preview.omitted,
+      targetGroupJid,
+      message: `Digest com ${preview.includedIds.length} vaga(s) enviado para a fila do grupo selecionado!`,
+    };
+  }
+
+  /**
    * Processa a fila anti-spam enviando 1 mensagem por vez
    */
   private static async processQueue(): Promise<void> {
@@ -796,22 +993,27 @@ export class WhatsAppBot {
     this.nextBatchTimestamp = null;
 
     const config = ConfigService.getConfig();
-    const target = this.resolveTargetGroupJid();
+    const defaultTarget = this.resolveTargetGroupJid();
     const batchIntervalMinutes = config.whatsapp?.batchIntervalMinutes || 5;
     const intervalMs = batchIntervalMinutes * 60 * 1000;
 
     try {
-      if (!target || !this.sock || this.status !== "connected") {
+      if (!this.sock || this.status !== "connected") {
         this.isProcessingQueue = false;
         return;
       }
 
       if (this.digestQueue.length > 0) {
         const envelope = this.digestQueue.shift()!;
+        const target = envelope.targetGroupJid || defaultTarget;
+        if (!target) {
+          this.isProcessingQueue = false;
+          return;
+        }
         this.saveDigestQueueToDisk();
 
         console.log(
-          `[WhatsApp] 📨 Enviando mensagem única de digest "${envelope.kind}" (${envelope.includedIds.length} vagas)...`,
+          `[WhatsApp] 📨 Enviando mensagem única de digest "${envelope.kind}" para ${target} (${envelope.includedIds.length} vagas)...`,
         );
 
         try {
@@ -859,6 +1061,10 @@ export class WhatsAppBot {
           this.saveDigestQueueToDisk();
         }
       } else if (this.messageQueue.length > 0) {
+        if (!defaultTarget) {
+          this.isProcessingQueue = false;
+          return;
+        }
         const queuedJobs = [...this.messageQueue];
         const runtimeCfg = getDigestRuntimeConfig();
         const digestRes = buildDigest(queuedJobs, {
@@ -890,7 +1096,7 @@ export class WhatsAppBot {
           this.saveQueueToDisk();
 
           try {
-            await this.sock.sendMessage(target, { text: digestRes.text });
+            await this.sock.sendMessage(defaultTarget, { text: digestRes.text });
             StorageService.markSent(digestRes.includedIds);
             StorageService.markExpired(digestRes.expiredIds);
             LoggerService.info(
@@ -898,7 +1104,7 @@ export class WhatsAppBot {
               "WA_BATCH_DISPATCHED",
               `Digest consolidado da fila enviado com ${digestRes.includedIds.length} vaga(s)`,
               {
-                target,
+                target: defaultTarget,
                 count: digestRes.includedIds.length,
                 queueRemaining: this.messageQueue.length,
               },

@@ -74,10 +74,10 @@ export function canonicalizeTitle(title: string): string {
 
 export function detectSeniority(text: string): SeniorityLevel {
   const t = text.toLowerCase();
-  // Regex estrita com word boundary para estágio e exclusão de "internal" ou "international"
+  // Regex estrita com word boundary para estágio e exclusão de "internal", "international" ou "internet"
   if (
     /\b(est[aá]gio|estagi[aá]ri[ao]|intern|internship|trainee)\b/i.test(t) &&
-    !/\b(internal|international)\b/i.test(t)
+    !/\b(internal|international|internet)\b/i.test(t)
   ) {
     return "ESTAGIO";
   }
@@ -95,8 +95,9 @@ export function detectSeniority(text: string): SeniorityLevel {
     t.includes("sênior") ||
     t.includes("senior") ||
     /\bsr\b/i.test(t) ||
-    t.includes("lead") ||
-    t.includes("tech lead")
+    /\blead\b/i.test(t) ||
+    t.includes("tech lead") ||
+    /\biii\b/i.test(t)
   ) {
     return "SENIOR";
   }
@@ -104,11 +105,14 @@ export function detectSeniority(text: string): SeniorityLevel {
     t.includes("pleno") ||
     t.includes("mid-level") ||
     t.includes("mid level") ||
-    /\bpl\b/i.test(t)
+    t.includes("intermediate") ||
+    /\bpl\b/i.test(t) ||
+    /\bii\b/i.test(t)
   ) {
     return "PLENO";
   }
-  return "NAO_INFORMADO";
+  // Regra de negócio: vagas sem senioridade explícita no título são tratadas como PLENO
+  return "PLENO";
 }
 
 export function detectWorkModel(text: string): WorkModel {
@@ -157,11 +161,8 @@ export function detectContractType(
     return "PJ";
   }
   if (
-    t.includes("estágio") ||
-    t.includes("estagio") ||
-    t.includes("estagiário") ||
-    t.includes("internship") ||
-    t.includes("intern")
+    /\b(est[aá]gio|estagi[aá]ri[ao]|intern|internship|trainee)\b/i.test(t) &&
+    !/\b(internal|international|internet)\b/i.test(t)
   ) {
     return "ESTAGIO";
   }

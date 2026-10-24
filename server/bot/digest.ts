@@ -332,7 +332,7 @@ export function buildDigest(
       const item = formatItem(g, s);
       const nextUsed = used + 1;
       const nextOmitted = totalCandidates - nextUsed;
-      const candidateSectionBlock = `${SECTION_HEADER[s]}\n${[...lines, item].join("\n")}`;
+      const candidateSectionBlock = `${SECTION_HEADER[s]}\n${[...lines, item].join("\n\n")}`;
       const candidateBlocks = [...blocks, candidateSectionBlock];
       const candidateText = composeDigestText({
         emoji,
@@ -352,7 +352,7 @@ export function buildDigest(
       included.push(...g.ids);
     }
     if (lines.length) {
-      blocks.push(`${SECTION_HEADER[s]}\n${lines.join("\n")}`);
+      blocks.push(`${SECTION_HEADER[s]}\n${lines.join("\n\n")}`);
     }
   }
 
@@ -552,7 +552,12 @@ export const DIGESTS = {
     },
   },
   senior: {
-    seniorities: ["PLENO", "SENIOR", "ESPECIALISTA"] as Seniority[],
+    seniorities: [
+      "PLENO",
+      "SENIOR",
+      "ESPECIALISTA",
+      "NAO_INFORMADO",
+    ] as Seniority[],
     options: {
       title: "VAGAS PLENO E SÊNIOR",
       emoji: "🚀",

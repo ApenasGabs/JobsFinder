@@ -13,7 +13,18 @@ import { TechClassifierService } from "../services/classifier.js";
 import { ConfigService } from "../services/config.js";
 import { LoggerService } from "../services/logger.js";
 import { StorageService } from "../services/storage.js";
+import { SupabaseSyncService } from "../services/supabase.js";
 import { Job, WhatsAppStatus } from "../types.js";
+import {
+  buildDigest,
+  buildWeeklySummary,
+  DEFAULT_RADAR_URL,
+  DIGESTS,
+  DigestKind,
+  DigestResult,
+  getDigestOptionsForKind,
+  getDigestRuntimeConfig,
+} from "./digest.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,6 +33,18 @@ const AUTH_DIR =
 const DATA_DIR =
   process.env.DATA_DIR || path.resolve(__dirname, "../../data");
 const QUEUE_FILE = path.join(DATA_DIR, "whatsapp_queue.json");
+const DIGEST_QUEUE_FILE = path.join(DATA_DIR, "whatsapp_digest_queue.json");
+const DIGEST_STATE_FILE = path.join(DATA_DIR, "digest_state.json");
+
+export interface QueuedDigestEnvelope {
+  id: string;
+  kind: DigestKind | "weekly" | "custom";
+  slotKey: string;
+  text: string;
+  includedIds: string[];
+  expiredIds: string[];
+  createdAt: string;
+}
 
 // Silencia ruído de sessões e buffers de criptografia do libsignal no stdout
 let isLibsignalSilenced = false;
@@ -50,6 +73,8 @@ export class WhatsAppBot {
   private static botNumber: string | null = null;
   private static isStarting = false;
   private static messageQueue: Job[] = [];
+  private static digestQueue: QueuedDigestEnvelope[] = [];
+  private static sentSlots: Record<string, string> = {};
   private static isProcessingQueue = false;
   private static nextBatchTimestamp: number | null = null;
   private static batchTimer: NodeJS.Timeout | null = null;
@@ -195,10 +220,13 @@ export class WhatsAppBot {
             );
           }
 
-          // Se houver vagas na fila restaurada do disco, retoma o envio
-          if (this.messageQueue.length > 0 && !this.isProcessingQueue) {
+          // Se houver mensagens ou vagas na fila restaurada do disco, retoma o envio
+          if (
+            (this.digestQueue.length > 0 || this.messageQueue.length > 0) &&
+            !this.isProcessingQueue
+          ) {
             console.log(
-              `[WhatsApp] Retomando envio de ${this.messageQueue.length} vaga(s) restaurada(s) da fila persistida...`,
+              `[WhatsApp] Retomando envio da fila persistida (${this.digestQueue.length} digest(s), ${this.messageQueue.length} vaga(s))...`,
             );
             this.processQueue();
           }
@@ -222,6 +250,13 @@ export class WhatsAppBot {
     }
   }
 
+  private static resolveTargetGroupJid(): string {
+    const runtimeCfg = getDigestRuntimeConfig();
+    if (runtimeCfg.groupJidOverride) return runtimeCfg.groupJidOverride;
+    const config = ConfigService.getConfig();
+    return config.whatsapp?.targetGroupJid || "";
+  }
+
   public static getStatus(): WhatsAppStatus {
     this.ensureQueueLoaded();
     const config = ConfigService.getConfig();
@@ -230,10 +265,10 @@ export class WhatsAppBot {
       botNumber: this.botNumber,
       qrCode: this.qrCodeDataUrl,
       enabled: config.whatsapp?.enabled ?? false,
-      targetGroupJid: config.whatsapp?.targetGroupJid || "",
+      targetGroupJid: this.resolveTargetGroupJid(),
       targetGroupName: config.whatsapp?.targetGroupName || "",
       targetCategories: config.whatsapp?.targetCategories || ["TODAS"],
-      queuePendingCount: this.messageQueue.length,
+      queuePendingCount: this.messageQueue.length + this.digestQueue.length,
       isProcessingQueue: this.isProcessingQueue,
       nextBatchRemainingSeconds: this.nextBatchTimestamp
         ? Math.max(0, Math.round((this.nextBatchTimestamp - Date.now()) / 1000))
@@ -257,7 +292,7 @@ export class WhatsAppBot {
     forceRefresh = false,
   ): Promise<Array<{ id: string; subject: string; participants: number }>> {
     const config = ConfigService.getConfig();
-    const configuredJid = config.whatsapp?.targetGroupJid;
+    const configuredJid = this.resolveTargetGroupJid();
     const configuredName = config.whatsapp?.targetGroupName;
 
     if (!this.sock || this.status !== "connected") {
@@ -330,8 +365,7 @@ export class WhatsAppBot {
     success: boolean;
     message: string;
   }> {
-    const config = ConfigService.getConfig();
-    const target = config.whatsapp?.targetGroupJid;
+    const target = this.resolveTargetGroupJid();
 
     if (!target) {
       return {
@@ -346,68 +380,305 @@ export class WhatsAppBot {
       };
     }
 
-    const testText = `🤖 *QueroVagas Crawler Bot* conectado com sucesso!\n\nEste grupo receberá alertas automáticos de novas vagas de emprego em tempo real.`;
+    const testText = `🤖 *Bot de Vagas* conectado com sucesso!\n\nEste grupo receberá digests agendados de vagas de TI (12h e 18h) e o resumo semanal aos domingos.`;
     await this.sock.sendMessage(target, { text: testText });
     return { success: true, message: "Mensagem de teste enviada com sucesso!" };
   }
 
   /**
-   * Recebe vagas novas do Scraper / Scheduler e enfileira com filtro de categoria
+   * O envio imediato foi substituído por digests agendados (12h e 18h).
+   * As vagas coletadas ficam pendentes em StorageService (notifiedAt = null)
+   * até o próximo digest.
    */
   public static async notifyNewJobs(newJobs: Job[]): Promise<number> {
-    const config = ConfigService.getConfig();
-    if (!config.whatsapp?.enabled || !config.whatsapp?.targetGroupJid) {
-      return 0;
-    }
-
-    if (!this.sock || this.status !== "connected") {
-      console.warn(
-        "[WhatsApp] Vagas novas encontradas, mas bot desconectado. Aguardando reconexão...",
+    if (newJobs.length > 0) {
+      console.log(
+        `[WhatsApp] ${newJobs.length} nova(s) vaga(s) salva(s) como pendente(s) para o próximo digest agendado.`,
       );
-      return 0;
+    }
+    return 0;
+  }
+
+  /**
+   * Gera a chave de janela de disparo (ex: "entry:2026-10-23") no fuso configurado
+   * para evitar reenvio caso o bot reinicie no mesmo horário/dia.
+   */
+  public static buildSlotKey(
+    kind: DigestKind | "weekly" | "custom",
+    now = new Date(),
+  ): string {
+    const tz = getDigestRuntimeConfig().timezone || "America/Sao_Paulo";
+    const datePart = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: tz,
+    }).format(now);
+    return `${kind}:${datePart}`;
+  }
+
+  public static hasSlotBeenSent(slotKey: string): boolean {
+    this.ensureQueueLoaded();
+    return Boolean(this.sentSlots[slotKey]);
+  }
+
+  public static markSlotSent(slotKey: string, now = new Date()): void {
+    this.ensureQueueLoaded();
+    this.sentSlots[slotKey] = now.toISOString();
+    this.saveDigestStateToDisk();
+  }
+
+  /**
+   * Executa o digest de uma categoria ('entry' ou 'senior').
+   * Respeita regra do silêncio, deduplicação de janela (anti-restart spam) e DIGEST_DRY_RUN.
+   */
+  public static async runDigest(
+    kind: DigestKind,
+    opts?: { force?: boolean; now?: Date },
+  ): Promise<{
+    sent: boolean;
+    dryRun?: boolean;
+    skippedSlot?: boolean;
+    slotKey: string;
+    result: DigestResult | null;
+  }> {
+    this.ensureQueueLoaded();
+    const now = opts?.now || new Date();
+    const slotKey = this.buildSlotKey(kind, now);
+    const runtimeCfg = getDigestRuntimeConfig();
+
+    if (
+      !opts?.force &&
+      !runtimeCfg.dryRun &&
+      (this.hasSlotBeenSent(slotKey) ||
+        this.digestQueue.some((d) => d.slotKey === slotKey))
+    ) {
+      console.log(
+        `[WhatsApp Digest] ⏭️ Digest "${kind}" (${slotKey}) já foi enviado ou enfileirado hoje. Ignorando duplicata.`,
+      );
+      return {
+        sent: false,
+        skippedSlot: true,
+        slotKey,
+        result: null,
+      };
     }
 
-    const targetCats = config.whatsapp?.targetCategories || ["TODAS"];
-    const filteredJobs =
-      targetCats.includes("TODAS") || targetCats.includes("ALL")
-        ? newJobs
-        : newJobs.filter((j) => {
-            return targetCats.some((c) => {
-              const cUpper = c.toUpperCase();
-              if (j.seniorityLevel && j.seniorityLevel.toUpperCase() === cUpper)
-                return true;
-              if (j.contractType && j.contractType.toUpperCase() === cUpper)
-                return true;
-              if (
-                cUpper === "ESTAGIO" &&
-                (j.title.toLowerCase().includes("estág") ||
-                  j.title.toLowerCase().includes("estag") ||
-                  j.title.toLowerCase().includes("intern"))
-              )
-                return true;
-              if (
-                cUpper === "JUNIOR" &&
-                (j.title.toLowerCase().includes("júnior") ||
-                  j.title.toLowerCase().includes("junior") ||
-                  j.title.toLowerCase().includes("jr"))
-              )
-                return true;
-              return false;
-            });
-          });
+    const { seniorities, options } = getDigestOptionsForKind(kind, now);
+    const pending = StorageService.getUnsentJobs({ seniorities });
 
-    const techOnlyJobs = filteredJobs.filter(
-      (j) => j.isTech !== false && TechClassifierService.isTechSync(j.title),
+    // Verifica expiração mesmo se não atingir minJobs
+    const cutoff =
+      now.getTime() - (options.maxAgeDays ?? 5) * 24 * 60 * 60 * 1000;
+    const preExpiredIds = pending
+      .filter((j) => {
+        const ts = new Date(j.scrapedAt).getTime();
+        return !Number.isNaN(ts) && ts < cutoff;
+      })
+      .map((j) => j.id);
+
+    const result = buildDigest(pending, options);
+
+    if (!result) {
+      if (!runtimeCfg.dryRun && preExpiredIds.length > 0) {
+        StorageService.markExpired(preExpiredIds);
+      }
+      console.log(
+        `[WhatsApp Digest] 🤫 Silêncio para "${kind}": menos vagas elegíveis que o mínimo (${options.minJobs}). Pendentes avaliadas: ${pending.length}.`,
+      );
+      LoggerService.info(
+        "WHATSAPP",
+        "WA_DIGEST_SKIPPED_MIN_JOBS",
+        `Digest "${kind}" não enviado: menos vagas elegíveis que o mínimo (${options.minJobs})`,
+        { kind, pendingCount: pending.length, minJobs: options.minJobs },
+      );
+      return {
+        sent: false,
+        slotKey,
+        result: null,
+      };
+    }
+
+    if (runtimeCfg.dryRun) {
+      console.log(
+        `\n[WhatsApp Digest][DRY_RUN] (${kind} | ${slotKey} | ${result.includedIds.length} vagas incluídas, ${result.omitted} omitidas, ${result.expiredIds.length} expiradas):\n${result.text}\n`,
+      );
+      LoggerService.info(
+        "WHATSAPP",
+        "WA_DIGEST_DRY_RUN",
+        `[DRY_RUN] Digest "${kind}" gerado com ${result.includedIds.length} vagas (${result.text.length} chars)`,
+        {
+          kind,
+          slotKey,
+          includedCount: result.includedIds.length,
+          omitted: result.omitted,
+          expiredCount: result.expiredIds.length,
+          textLength: result.text.length,
+        },
+      );
+      return {
+        sent: false,
+        dryRun: true,
+        slotKey,
+        result,
+      };
+    }
+
+    const envelope: QueuedDigestEnvelope = {
+      id: `digest-${kind}-${Date.now()}`,
+      kind,
+      slotKey,
+      text: result.text,
+      includedIds: result.includedIds,
+      expiredIds: result.expiredIds,
+      createdAt: now.toISOString(),
+    };
+
+    this.enqueueDigestEnvelope(envelope);
+    return {
+      sent: true,
+      slotKey,
+      result,
+    };
+  }
+
+  /**
+   * Gera e enfileira o resumo semanal de domingo (~11h).
+   */
+  public static async runWeeklySummary(opts?: {
+    force?: boolean;
+    now?: Date;
+  }): Promise<{
+    sent: boolean;
+    dryRun?: boolean;
+    skippedSlot?: boolean;
+    slotKey: string;
+    text: string | null;
+  }> {
+    this.ensureQueueLoaded();
+    const now = opts?.now || new Date();
+    const slotKey = this.buildSlotKey("weekly", now);
+    const runtimeCfg = getDigestRuntimeConfig();
+
+    if (
+      !opts?.force &&
+      !runtimeCfg.dryRun &&
+      (this.hasSlotBeenSent(slotKey) ||
+        this.digestQueue.some((d) => d.slotKey === slotKey))
+    ) {
+      console.log(
+        `[WhatsApp Weekly] ⏭️ Resumo semanal (${slotKey}) já enviado ou enfileirado hoje. Ignorando.`,
+      );
+      return {
+        sent: false,
+        skippedSlot: true,
+        slotKey,
+        text: null,
+      };
+    }
+
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const config = ConfigService.getConfig();
+    const localMonitoredCount = [
+      ...(config.gupyCompanies || []),
+      ...(config.inhireCompanies || []),
+      ...(config.ashbyCompanies || []),
+      ...(config.leverCompanies || []),
+      ...(config.greenhouseCompanies || []),
+      ...(config.workableCompanies || []),
+    ].filter((c) => c.enabled !== false).length;
+
+    const supabaseStats =
+      await SupabaseSyncService.fetchCommunityRadarStats(sevenDaysAgo);
+
+    const monitoredCompaniesCount = Math.max(
+      localMonitoredCount,
+      supabaseStats.monitoredCompaniesCount ?? 0,
+    );
+    const weeklyTechJobsCount =
+      StorageService.getTechJobsCountSince(sevenDaysAgo);
+
+    const text = buildWeeklySummary({
+      monitoredCompaniesCount:
+        monitoredCompaniesCount > 0 ? monitoredCompaniesCount : null,
+      weeklyTechJobsCount:
+        weeklyTechJobsCount > 0 ? weeklyTechJobsCount : null,
+      newSuggestions: supabaseStats.newSuggestions,
+      topVotedSuggestions: supabaseStats.topVotedSuggestions,
+      radarUrl: runtimeCfg.radarUrl,
+      now,
+    });
+
+    if (!text) {
+      console.log(
+        "[WhatsApp Weekly] 🤫 Nenhum dado confiável disponível para o resumo semanal.",
+      );
+      return {
+        sent: false,
+        slotKey,
+        text: null,
+      };
+    }
+
+    if (runtimeCfg.dryRun) {
+      console.log(`\n[WhatsApp Weekly][DRY_RUN] (${slotKey}):\n${text}\n`);
+      LoggerService.info(
+        "WHATSAPP",
+        "WA_WEEKLY_DRY_RUN",
+        `[DRY_RUN] Resumo semanal gerado (${text.length} chars)`,
+        { slotKey, textLength: text.length },
+      );
+      return {
+        sent: false,
+        dryRun: true,
+        slotKey,
+        text,
+      };
+    }
+
+    const envelope: QueuedDigestEnvelope = {
+      id: `weekly-${Date.now()}`,
+      kind: "weekly",
+      slotKey,
+      text,
+      includedIds: [],
+      expiredIds: [],
+      createdAt: now.toISOString(),
+    };
+
+    this.enqueueDigestEnvelope(envelope);
+    return {
+      sent: true,
+      slotKey,
+      text,
+    };
+  }
+
+  public static enqueueDigestEnvelope(envelope: QueuedDigestEnvelope): void {
+    this.ensureQueueLoaded();
+    if (
+      envelope.slotKey &&
+      this.digestQueue.some((d) => d.slotKey === envelope.slotKey)
+    ) {
+      return;
+    }
+    this.digestQueue.push(envelope);
+    this.saveDigestQueueToDisk();
+    LoggerService.info(
+      "WHATSAPP",
+      "WA_DIGEST_ENQUEUED",
+      `Digest "${envelope.kind}" enfileirado como mensagem única (${envelope.includedIds.length} vagas)`,
+      {
+        id: envelope.id,
+        kind: envelope.kind,
+        slotKey: envelope.slotKey,
+        includedCount: envelope.includedIds.length,
+      },
     );
 
-    if (techOnlyJobs.length === 0) {
-      console.log(
-        `[WhatsApp] Das ${newJobs.length} novas vagas recebidas, nenhuma corresponde aos filtros de categoria do grupo (${targetCats.join(", ")}).`,
-      );
-      return 0;
+    if (!this.isProcessingQueue) {
+      this.processQueue();
     }
-
-    return this.enqueueJobs(techOnlyJobs);
   }
 
   /**
@@ -449,49 +720,73 @@ export class WhatsAppBot {
   }
 
   /**
-   * Disparo manual de vagas por categoria
+   * Disparo manual de vagas por categoria (usa o formato de Digest único)
    */
   public static async dispatchCategoryJobs(
     category: string,
   ): Promise<{ enqueued: number; pendingTotal: number; message: string }> {
-    if (!this.sock || this.status !== "connected") {
+    const runtimeCfg = getDigestRuntimeConfig();
+    if (!runtimeCfg.dryRun && (!this.sock || this.status !== "connected")) {
       return {
         enqueued: 0,
-        pendingTotal: this.messageQueue.length,
+        pendingTotal: this.messageQueue.length + this.digestQueue.length,
         message: "Bot do WhatsApp desconectado. Conecte antes de disparar.",
       };
     }
-    const config = ConfigService.getConfig();
-    if (!config.whatsapp?.targetGroupJid) {
+    const target = this.resolveTargetGroupJid();
+    if (!runtimeCfg.dryRun && !target) {
       return {
         enqueued: 0,
-        pendingTotal: this.messageQueue.length,
+        pendingTotal: this.messageQueue.length + this.digestQueue.length,
         message: "Nenhum grupo de WhatsApp configurado para receber vagas.",
       };
     }
 
-    const unnotified = StorageService.getUnnotifiedJobs(category);
-    if (unnotified.length === 0) {
+    const catUpper = (category || "TODAS").toUpperCase().trim();
+    const kinds: DigestKind[] =
+      catUpper === "ESTAGIO" || catUpper === "JUNIOR" || catUpper === "ENTRY"
+        ? ["entry"]
+        : catUpper === "PLENO" ||
+            catUpper === "SENIOR" ||
+            catUpper === "ESPECIALISTA"
+          ? ["senior"]
+          : ["entry", "senior"];
+
+    let totalIncluded = 0;
+    for (const k of kinds) {
+      const res = await this.runDigest(k, { force: true });
+      if (res.result) {
+        totalIncluded += res.result.includedIds.length;
+      }
+    }
+
+    if (totalIncluded === 0) {
       return {
         enqueued: 0,
-        pendingTotal: this.messageQueue.length,
-        message: `Nenhuma vaga pendente de envio para a categoria "${category}".`,
+        pendingTotal: this.messageQueue.length + this.digestQueue.length,
+        message: `Nenhuma vaga elegível suficiente para compor o digest da categoria "${category}".`,
       };
     }
 
-    const enqueued = this.enqueueJobs(unnotified);
     return {
-      enqueued,
-      pendingTotal: this.messageQueue.length,
-      message: `Enfileiradas ${enqueued} vagas da categoria "${category}" para disparo cadenciado a cada 5 minutos!`,
+      enqueued: totalIncluded,
+      pendingTotal: this.messageQueue.length + this.digestQueue.length,
+      message: runtimeCfg.dryRun
+        ? `[DRY_RUN] Digest gerado no log com ${totalIncluded} vagas!`
+        : `Digest com ${totalIncluded} vagas enfileirado como mensagem única!`,
     };
   }
 
   /**
-   * Processa a fila em blocos espaçados por 5 minutos (sem resumir)
+   * Processa a fila anti-spam enviando 1 mensagem por vez
    */
   private static async processQueue(): Promise<void> {
-    if (this.isProcessingQueue || this.messageQueue.length === 0) return;
+    if (
+      this.isProcessingQueue ||
+      (this.digestQueue.length === 0 && this.messageQueue.length === 0)
+    ) {
+      return;
+    }
     this.isProcessingQueue = true;
 
     if (this.batchTimer) {
@@ -501,8 +796,7 @@ export class WhatsAppBot {
     this.nextBatchTimestamp = null;
 
     const config = ConfigService.getConfig();
-    const target = config.whatsapp?.targetGroupJid;
-    const batchSize = config.whatsapp?.batchSize || 4;
+    const target = this.resolveTargetGroupJid();
     const batchIntervalMinutes = config.whatsapp?.batchIntervalMinutes || 5;
     const intervalMs = batchIntervalMinutes * 60 * 1000;
 
@@ -512,74 +806,112 @@ export class WhatsAppBot {
         return;
       }
 
-      // Pega o lote atual (ex: 4 vagas)
-      const currentBatch = this.messageQueue.splice(0, batchSize);
-      this.saveQueueToDisk();
+      if (this.digestQueue.length > 0) {
+        const envelope = this.digestQueue.shift()!;
+        this.saveDigestQueueToDisk();
 
-      console.log(
-        `[WhatsApp] 📨 Enviando mensagem agrupada de ${currentBatch.length} vagas (Restam na fila: ${this.messageQueue.length})...`,
-      );
-
-      try {
-        const text = this.formatBatchJobMessage(currentBatch);
-        await this.sock.sendMessage(target, { text });
-        for (const job of currentBatch) {
-          StorageService.markAsNotified(job.id);
-        }
         console.log(
-          `[WhatsApp] ✅ Mensagem agrupada enviada com sucesso com ${currentBatch.length} vagas!`,
+          `[WhatsApp] 📨 Enviando mensagem única de digest "${envelope.kind}" (${envelope.includedIds.length} vagas)...`,
         );
-        LoggerService.info(
-          "WHATSAPP",
-          "WA_BATCH_DISPATCHED",
-          `Lote de ${currentBatch.length} vaga(s) despachado com sucesso para o grupo`,
-          {
-            target,
-            count: currentBatch.length,
-            queueRemaining: this.messageQueue.length,
-            jobs: currentBatch.map((j) => ({
-              id: j.id,
-              title: j.title,
-              company: j.company,
-            })),
-          },
-        );
-      } catch (err: any) {
-        console.error(
-          `[WhatsApp] Erro ao enviar mensagem agrupada:`,
-          err?.message || err,
-        );
-        LoggerService.error(
-          "WHATSAPP",
-          "WA_DISPATCH_ERROR",
-          `Erro ao enviar mensagem agrupada: ${err?.message || err}`,
-          {
-            target,
-            count: currentBatch.length,
-            error: err?.message || String(err),
-          },
-        );
-        // Em caso de falha de envio, devolve o lote para a fila e persiste
-        this.messageQueue.unshift(...currentBatch);
-        this.saveQueueToDisk();
+
+        try {
+          await this.sock.sendMessage(target, { text: envelope.text });
+          if (envelope.includedIds.length > 0) {
+            StorageService.markSent(envelope.includedIds);
+          }
+          if (envelope.expiredIds.length > 0) {
+            StorageService.markExpired(envelope.expiredIds);
+          }
+          if (envelope.slotKey) {
+            this.markSlotSent(envelope.slotKey);
+          }
+          console.log(
+            `[WhatsApp] ✅ Digest "${envelope.kind}" enviado com sucesso (${envelope.includedIds.length} vagas marcadas como enviadas)!`,
+          );
+          LoggerService.info(
+            "WHATSAPP",
+            "WA_DIGEST_DISPATCHED",
+            `Digest "${envelope.kind}" enviado com sucesso (${envelope.includedIds.length} vagas)`,
+            {
+              target,
+              kind: envelope.kind,
+              slotKey: envelope.slotKey,
+              includedCount: envelope.includedIds.length,
+              expiredCount: envelope.expiredIds.length,
+            },
+          );
+        } catch (err: any) {
+          console.error(
+            `[WhatsApp] Erro ao enviar digest "${envelope.kind}":`,
+            err?.message || err,
+          );
+          LoggerService.error(
+            "WHATSAPP",
+            "WA_DISPATCH_ERROR",
+            `Erro ao enviar digest "${envelope.kind}": ${err?.message || err}`,
+            {
+              target,
+              kind: envelope.kind,
+              error: err?.message || String(err),
+            },
+          );
+          this.digestQueue.unshift(envelope);
+          this.saveDigestQueueToDisk();
+        }
+      } else if (this.messageQueue.length > 0) {
+        const queuedJobs = [...this.messageQueue];
+        const runtimeCfg = getDigestRuntimeConfig();
+        const digestRes = buildDigest(queuedJobs, {
+          title: "VAGAS DE TI",
+          emoji: "🚀",
+          radarUrl: runtimeCfg.radarUrl,
+          maxPerSection: runtimeCfg.maxPerSection,
+          maxTotal: runtimeCfg.maxTotal,
+          maxChars: runtimeCfg.maxChars,
+          includeAbroad: runtimeCfg.includeAbroad,
+          minJobs: 1,
+          maxAgeDays: runtimeCfg.maxAgeDays,
+        });
+
+        if (!digestRes) {
+          this.messageQueue = [];
+          this.saveQueueToDisk();
+        } else {
+          const handledSet = new Set([
+            ...digestRes.includedIds,
+            ...digestRes.expiredIds,
+          ]);
+          const dispatchedJobs = this.messageQueue.filter((j) =>
+            handledSet.has(j.id),
+          );
+          this.messageQueue = this.messageQueue.filter(
+            (j) => !handledSet.has(j.id),
+          );
+          this.saveQueueToDisk();
+
+          try {
+            await this.sock.sendMessage(target, { text: digestRes.text });
+            StorageService.markSent(digestRes.includedIds);
+            StorageService.markExpired(digestRes.expiredIds);
+            LoggerService.info(
+              "WHATSAPP",
+              "WA_BATCH_DISPATCHED",
+              `Digest consolidado da fila enviado com ${digestRes.includedIds.length} vaga(s)`,
+              {
+                target,
+                count: digestRes.includedIds.length,
+                queueRemaining: this.messageQueue.length,
+              },
+            );
+          } catch (err: any) {
+            this.messageQueue.unshift(...dispatchedJobs);
+            this.saveQueueToDisk();
+          }
+        }
       }
 
-      // Se ainda sobraram vagas na fila, agenda o próximo bloco consolidado para o intervalo configurado!
-      if (this.messageQueue.length > 0) {
+      if (this.digestQueue.length > 0 || this.messageQueue.length > 0) {
         this.nextBatchTimestamp = Date.now() + intervalMs;
-        console.log(
-          `[WhatsApp] ⏳ Lote concluído. Próximo lote (${Math.min(batchSize, this.messageQueue.length)} vagas) em ${batchIntervalMinutes} minutos.`,
-        );
-        LoggerService.info(
-          "WHATSAPP",
-          "WA_RATE_LIMIT",
-          `Intervalo anti-ban: próximo lote de ${Math.min(batchSize, this.messageQueue.length)} vagas em ${batchIntervalMinutes} minutos`,
-          {
-            batchIntervalMinutes,
-            queueRemaining: this.messageQueue.length,
-          },
-        );
-
         this.batchTimer = setTimeout(() => {
           this.isProcessingQueue = false;
           this.processQueue();
@@ -587,9 +919,6 @@ export class WhatsAppBot {
       } else {
         this.isProcessingQueue = false;
         this.nextBatchTimestamp = null;
-        console.log(
-          `[WhatsApp] 🎉 Todas as vagas da fila foram enviadas com sucesso!`,
-        );
       }
     } catch (err) {
       console.error("[WhatsApp] Erro ao processar fila de mensagens:", err);
@@ -598,8 +927,7 @@ export class WhatsAppBot {
   }
 
   /**
-   * Formata um lote de vagas em uma única mensagem agrupada, compacta e escaneável.
-   * Elimina repetições de separadores e pés de página redundantes.
+   * Formata um lote de vagas utilizando o novo builder de Digest limpo e sem ruído.
    */
   public static formatBatchJobMessage(
     jobs: Job[],
@@ -607,167 +935,31 @@ export class WhatsAppBot {
   ): string {
     if (!jobs || jobs.length === 0) return "";
 
-    const count = jobs.length;
-    const headerTitle = count === 1 ? "1 NOVA VAGA" : `${count} NOVAS VAGAS`;
-
-    let resolvedCategory = categoryName;
-    if (!resolvedCategory) {
-      const levels = Array.from(
-        new Set(jobs.map((j) => j.seniorityLevel).filter(Boolean)),
+    const catUpper = (categoryName || "").toUpperCase().trim();
+    const isEntry =
+      catUpper === "ESTAGIO" ||
+      catUpper === "JUNIOR" ||
+      catUpper === "ENTRY" ||
+      jobs.every(
+        (j) => j.seniorityLevel === "ESTAGIO" || j.seniorityLevel === "JUNIOR",
       );
-      if (levels.length === 1 && levels[0]) {
-        resolvedCategory = levels[0];
-      }
-    }
-    const categorySuffix = resolvedCategory
-      ? ` — ${resolvedCategory.toUpperCase()}`
-      : "";
 
-    // Quick-skim highlights
-    const focusList: string[] = [];
-    const locationList: string[] = [];
+    const preset = isEntry ? DIGESTS.entry.options : DIGESTS.senior.options;
+    const runtimeCfg = getDigestRuntimeConfig();
 
-    for (const j of jobs) {
-      if (j.stack && Array.isArray(j.stack)) {
-        for (const s of j.stack) {
-          if (s && !focusList.includes(s)) {
-            focusList.push(s);
-          }
-        }
-      }
-      const cleanLoc = this.cleanLocation(j.location);
-      const isRemoto =
-        j.workModel === "REMOTO" || cleanLoc.toLowerCase().includes("remoto");
-      if (isRemoto && !locationList.includes("Remoto")) {
-        locationList.push("Remoto");
-      } else if (
-        cleanLoc &&
-        cleanLoc.toLowerCase() !== "brasil" &&
-        !locationList.includes(cleanLoc)
-      ) {
-        locationList.push(cleanLoc);
-      }
-    }
-
-    const lines: string[] = [
-      `🚀 *${headerTitle}${categorySuffix}*`,
-      ``,
-      `📌 *Foco:* ${focusList.length > 0 ? focusList.slice(0, 6).join(" • ") : "Geral"}`,
-      `📍 *Locais:* ${locationList.length > 0 ? locationList.slice(0, 5).join(" • ") : "Diversos"}`,
-      ``,
-    ];
-
-    const NUMBER_EMOJIS = [
-      "1️⃣",
-      "2️⃣",
-      "3️⃣",
-      "4️⃣",
-      "5️⃣",
-      "6️⃣",
-      "7️⃣",
-      "8️⃣",
-      "9️⃣",
-      "🔟",
-    ];
-
-    jobs.forEach((job, index) => {
-      const num = NUMBER_EMOJIS[index] || `${index + 1}️⃣`;
-      const locClean = this.cleanLocation(job.location);
-      const model = this.formatWorkModel(job.workModel);
-
-      const metaParts: string[] = [];
-      if (job.company) metaParts.push(`🏢 ${job.company}`);
-      if (locClean && locClean.toLowerCase() !== "remoto")
-        metaParts.push(`📍 ${locClean}`);
-      if (model) metaParts.push(model);
-
-      const metaLine = metaParts.length > 0 ? metaParts.join(" • ") : "";
-
-      lines.push(`${num} *${job.title}*`);
-      if (metaLine) {
-        lines.push(metaLine);
-      }
-      lines.push(`🔗 ${job.url}`);
-      lines.push(``);
+    const result = buildDigest(jobs, {
+      title: categoryName ? preset.title : "VAGAS DE TI",
+      emoji: preset.emoji,
+      radarUrl: runtimeCfg.radarUrl || DEFAULT_RADAR_URL,
+      maxPerSection: runtimeCfg.maxPerSection,
+      maxTotal: runtimeCfg.maxTotal,
+      maxChars: runtimeCfg.maxChars,
+      includeAbroad: runtimeCfg.includeAbroad,
+      minJobs: 1,
+      maxAgeDays: 36500,
     });
 
-    const sources = Array.from(
-      new Set(jobs.map((j) => j.source).filter(Boolean)),
-    ).join(", ");
-    lines.push(`🤖 _QueroVagas Crawler • Coletado via ${sources || "Web"}_`);
-
-    return lines.join("\n");
-  }
-
-  private static formatWorkModel(model?: string): string {
-    if (!model) return "";
-    const upper = model.toUpperCase();
-    if (upper === "REMOTO") return "Remoto";
-    if (upper === "HIBRIDO" || upper === "HÍBRIDO") return "Híbrido";
-    if (upper === "PRESENCIAL") return "Presencial";
-    return model;
-  }
-
-  private static cleanLocation(loc?: string): string {
-    if (!loc) return "";
-    return loc
-      .replace(/,\s*BR$/i, "")
-      .replace(/,\s*Brasil$/i, "")
-      .trim();
-  }
-
-  private static formatSingleJobMessage(job: Job): string {
-    const modelEmoji =
-      job.workModel === "REMOTO"
-        ? "🏠"
-        : job.workModel === "HIBRIDO"
-          ? "🏢/🏠"
-          : "🏢";
-    const stackText =
-      job.stack && job.stack.length > 0 ? job.stack.join(", ") : "Geral";
-
-    return [
-      `🚨 *NOVA OPORTUNIDADE ENCONTRADA!*`,
-      ``,
-      `💼 *${job.title}*`,
-      `🏢 *Empresa:* ${job.company}`,
-      `📍 *Local / Modelo:* ${modelEmoji} ${job.workModel} (${job.location})`,
-      `📑 *Contrato:* ${job.contractType} | ${job.seniorityLevel}`,
-      `🏷️ *Stack:* ${stackText}`,
-      `🌐 *Fonte:* ${job.source}`,
-      ``,
-      `👉 *Candidatar-se:* ${job.url}`,
-      `────────────────────`,
-      `🤖 _QueroVagas Crawler Bot_`,
-    ].join("\n");
-  }
-
-  private static formatDigestMessage(jobs: Job[]): string {
-    const lines = [
-      `🚀 *RESUMO DE NOVAS OPORTUNIDADES (${jobs.length} vagas)*`,
-      `Foram detectadas várias vagas nesta rodada. Veja os destaques:`,
-      ``,
-    ];
-
-    jobs.slice(0, 10).forEach((job, index) => {
-      const model =
-        job.workModel === "REMOTO" ? "[Remoto]" : `[${job.workModel}]`;
-      lines.push(`${index + 1}. *${job.title}* @ ${job.company} ${model}`);
-      lines.push(`   👉 ${job.url}`);
-    });
-
-    if (jobs.length > 10) {
-      lines.push(``);
-      lines.push(
-        `_... e mais ${jobs.length - 10} outras vagas no seu dashboard web!_`,
-      );
-    }
-
-    lines.push(``);
-    lines.push(`────────────────────`);
-    lines.push(`🤖 _QueroVagas Crawler Bot_`);
-
-    return lines.join("\n");
+    return result ? result.text : "";
   }
 
   private static async handleIncomingMessage(
@@ -784,8 +976,8 @@ export class WhatsAppBot {
       const mem = process.memoryUsage();
       const stats = StorageService.getStats();
       const reply = [
-        `🤖 *QueroVagas Crawler Status*`,
-        `📊 *Total de Vagas salvas:* ${stats.totalJobs}`,
+        `🤖 *Status do Bot de Vagas*`,
+        `📊 *Total de Vagas de TI salvas:* ${stats.totalJobs}`,
         `🏠 *Vagas Remotas:* ${stats.byModel?.REMOTO || 0}`,
         `🧠 *Consumo de RAM:* ${(mem.rss / 1024 / 1024).toFixed(1)} MB`,
         `✅ *Bot WhatsApp:* Operacional e monitorando!`,
@@ -793,7 +985,7 @@ export class WhatsAppBot {
 
       await this.sock?.sendMessage(from, { text: reply });
     } else if (command === "!vagas") {
-      const sample = StorageService.getJobs({ pageSize: 3 });
+      const sample = StorageService.getJobs({ pageSize: 3, onlyTech: true });
       if (sample.jobs.length === 0) {
         await this.sock?.sendMessage(from, {
           text: "Nenhuma vaga cadastrada no momento.",
@@ -802,7 +994,11 @@ export class WhatsAppBot {
       }
       const lines = ["📌 *Últimas vagas coletadas:*", ""];
       sample.jobs.forEach((j, i) => {
-        lines.push(`${i + 1}. *${j.title}* @ ${j.company} [${j.workModel}]`);
+        const model =
+          j.workModel && j.workModel !== "NAO_INFORMADO"
+            ? ` [${j.workModel}]`
+            : "";
+        lines.push(`${i + 1}. *${j.title}* @ ${j.company}${model}`);
         lines.push(`   👉 ${j.url}`);
       });
       await this.sock?.sendMessage(from, { text: lines.join("\n") });
@@ -854,6 +1050,52 @@ export class WhatsAppBot {
   }
 
   /**
+   * Persiste a fila de digests em disco de forma segura e atômica
+   */
+  public static saveDigestQueueToDisk(): void {
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      const tmpPath = `${DIGEST_QUEUE_FILE}.tmp`;
+      fs.writeFileSync(
+        tmpPath,
+        JSON.stringify(this.digestQueue, null, 2),
+        "utf-8",
+      );
+      fs.renameSync(tmpPath, DIGEST_QUEUE_FILE);
+    } catch (err: any) {
+      console.error(
+        "[WhatsApp] Erro ao salvar fila de digests em disco:",
+        err?.message || err,
+      );
+    }
+  }
+
+  /**
+   * Persiste o histórico de slots de digest enviados para evitar duplicidade após restart
+   */
+  public static saveDigestStateToDisk(): void {
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      const tmpPath = `${DIGEST_STATE_FILE}.tmp`;
+      fs.writeFileSync(
+        tmpPath,
+        JSON.stringify(this.sentSlots, null, 2),
+        "utf-8",
+      );
+      fs.renameSync(tmpPath, DIGEST_STATE_FILE);
+    } catch (err: any) {
+      console.error(
+        "[WhatsApp] Erro ao salvar estado de digests em disco:",
+        err?.message || err,
+      );
+    }
+  }
+
+  /**
    * Carrega a fila persistida do disco no boot
    */
   public static loadQueueFromDisk(): void {
@@ -867,6 +1109,20 @@ export class WhatsAppBot {
           console.log(
             `[WhatsApp] 📥 Fila persistente carregada do disco: ${this.messageQueue.length} vaga(s) pendente(s).`,
           );
+        }
+      }
+      if (fs.existsSync(DIGEST_QUEUE_FILE)) {
+        const rawDigest = fs.readFileSync(DIGEST_QUEUE_FILE, "utf-8");
+        const parsedDigest = JSON.parse(rawDigest);
+        if (Array.isArray(parsedDigest)) {
+          this.digestQueue = parsedDigest;
+        }
+      }
+      if (fs.existsSync(DIGEST_STATE_FILE)) {
+        const rawState = fs.readFileSync(DIGEST_STATE_FILE, "utf-8");
+        const parsedState = JSON.parse(rawState);
+        if (parsedState && typeof parsedState === "object") {
+          this.sentSlots = parsedState;
         }
       }
     } catch (err: any) {
@@ -895,9 +1151,21 @@ export class WhatsAppBot {
     return [...this.messageQueue];
   }
 
+  public static getDigestQueue(): QueuedDigestEnvelope[] {
+    this.ensureQueueLoaded();
+    return [...this.digestQueue];
+  }
+
   public static clearQueue(): void {
     this.messageQueue = [];
+    this.digestQueue = [];
     this.saveQueueToDisk();
+    this.saveDigestQueueToDisk();
+  }
+
+  public static clearDigestState(): void {
+    this.sentSlots = {};
+    this.saveDigestStateToDisk();
   }
 
   public static setMockDisconnectedSince(ts: number | null): void {

@@ -204,5 +204,134 @@ export class SupabaseSyncService {
       };
     }
   }
+
+  /**
+   * Consulta estatísticas do Radar Comunitário (`companies` e `company_suggestions`)
+   * para o resumo semanal de domingo. Nunca lança exceção; se indisponível, retorna vazio.
+   */
+  public static async fetchCommunityRadarStats(since: Date): Promise<{
+    monitoredCompaniesCount: number | null;
+    newSuggestions: Array<{
+      name: string;
+      suggestedBy?: string | null;
+      votesCount?: number | null;
+      createdAt?: string | null;
+    }>;
+    topVotedSuggestions: Array<{
+      name: string;
+      suggestedBy?: string | null;
+      votesCount?: number | null;
+      createdAt?: string | null;
+    }>;
+  }> {
+    const creds = this.getCredentials();
+    if (!creds) {
+      return {
+        monitoredCompaniesCount: null,
+        newSuggestions: [],
+        topVotedSuggestions: [],
+      };
+    }
+
+    const headers = {
+      apikey: creds.key,
+      Authorization: `Bearer ${creds.key}`,
+      "Content-Type": "application/json",
+    };
+
+    let monitoredCompaniesCount: number | null = null;
+    const newSuggestions: Array<{
+      name: string;
+      suggestedBy?: string | null;
+      votesCount?: number | null;
+      createdAt?: string | null;
+    }> = [];
+    const topVotedSuggestions: Array<{
+      name: string;
+      suggestedBy?: string | null;
+      votesCount?: number | null;
+      createdAt?: string | null;
+    }> = [];
+
+    try {
+      const compRes = await fetch(
+        `${creds.url}/rest/v1/companies?select=id&status=eq.MONITORED`,
+        {
+          method: "GET",
+          headers: { ...headers, Prefer: "count=exact" },
+        },
+      );
+      if (compRes.ok) {
+        const range = compRes.headers.get("content-range");
+        if (range && range.includes("/")) {
+          const totalStr = range.split("/")[1];
+          const parsed = Number.parseInt(totalStr, 10);
+          if (Number.isFinite(parsed) && parsed > 0) {
+            monitoredCompaniesCount = parsed;
+          }
+        }
+        if (monitoredCompaniesCount === null) {
+          const data = await compRes.json();
+          if (Array.isArray(data) && data.length > 0) {
+            monitoredCompaniesCount = data.length;
+          }
+        }
+      }
+    } catch {
+      // Silencioso: omite se falhar
+    }
+
+    try {
+      const sugRes = await fetch(
+        `${creds.url}/rest/v1/company_suggestions?select=id,name,suggested_by,votes_count,created_at,status&order=votes_count.desc&limit=50`,
+        {
+          method: "GET",
+          headers,
+        },
+      );
+      if (sugRes.ok) {
+        const rows = await sugRes.json();
+        if (Array.isArray(rows)) {
+          const cutoff = since.getTime();
+          for (const r of rows) {
+            if (!r || typeof r.name !== "string" || !r.name.trim()) continue;
+            const item = {
+              name: r.name.trim(),
+              suggestedBy:
+                typeof r.suggested_by === "string" ? r.suggested_by : null,
+              votesCount:
+                typeof r.votes_count === "number" ? r.votes_count : null,
+              createdAt:
+                typeof r.created_at === "string" ? r.created_at : null,
+            };
+
+            if (item.createdAt) {
+              const createdTs = new Date(item.createdAt).getTime();
+              if (!Number.isNaN(createdTs) && createdTs >= cutoff) {
+                newSuggestions.push(item);
+              }
+            }
+
+            if (
+              r.status !== "MONITORED" &&
+              typeof item.votesCount === "number" &&
+              item.votesCount > 0 &&
+              topVotedSuggestions.length < 3
+            ) {
+              topVotedSuggestions.push(item);
+            }
+          }
+        }
+      }
+    } catch {
+      // Silencioso: omite se falhar
+    }
+
+    return {
+      monitoredCompaniesCount,
+      newSuggestions,
+      topVotedSuggestions,
+    };
+  }
 }
 

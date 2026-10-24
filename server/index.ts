@@ -15,6 +15,7 @@ import { LogCategory, LoggerService, LogLevel } from "./services/logger.js";
 import { SchedulerService } from "./services/scheduler.js";
 import { ScraperHealthService } from "./services/scraper-health.js";
 import { StorageService } from "./services/storage.js";
+import { AutoUpdaterService } from "./utils/autoUpdater.js";
 import {
   ContractType,
   ScrapeOptions,
@@ -38,7 +39,9 @@ app.use(
 );
 app.use(express.json());
 
-// Inicializa os serviços
+// Auto-Update no boot (verifica origin/main preservando dados locais e recompila dist/ se o commit mudou)
+AutoUpdaterService.runStartupCheck();
+
 // Inicializa os serviços centrais
 StorageService.initialize();
 ScraperHealthService.initialize();
@@ -51,6 +54,34 @@ WhatsAppBot.initialize().catch((err) => {
     "[Server] WhatsApp Bot aguardando pareamento ou inicialização:",
     err,
   );
+});
+
+// 0. Auto-Update & Controle de Versão no Container
+app.get("/api/system/auto-update", (req: Request, res: Response) => {
+  const checkRemote = req.query.check === "true" || req.query.check === "1";
+  res.json(AutoUpdaterService.getStatus(checkRemote));
+});
+
+app.post("/api/system/auto-update/config", (req: Request, res: Response) => {
+  const { autoUpdateOnStart } = req.body || {};
+  const enabled = AutoUpdaterService.setAutoUpdateOnStart(Boolean(autoUpdateOnStart));
+  res.json({
+    success: true,
+    autoUpdateOnStart: enabled,
+    status: AutoUpdaterService.getStatus(false),
+  });
+});
+
+app.post("/api/system/auto-update/trigger", (_req: Request, res: Response) => {
+  try {
+    const result = AutoUpdaterService.triggerUpdateAndRestart();
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      error: err?.message || "Erro ao atualizar e reiniciar container",
+    });
+  }
 });
 
 // 1. Health check avançado, telemetria e estatísticas de integridade

@@ -316,9 +316,16 @@ export class StorageService {
 
   public static markAllExistingAsNotified(): void {
     this.initialize();
+    const allJobs = Array.from(this.jobsMap.values());
+    const hasAnyNotified = allJobs.some((j) => Boolean(j.notifiedAt));
+    if (hasAnyNotified) {
+      // Não é o primeiro boot do banco; preserva as vagas pendentes (notifiedAt: null) após restarts do container
+      return;
+    }
+
     let changed = false;
     const now = new Date().toISOString();
-    for (const job of this.jobsMap.values()) {
+    for (const job of allJobs) {
       if (!job.notifiedAt) {
         job.notifiedAt = now;
         changed = true;

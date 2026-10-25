@@ -6,6 +6,7 @@ import { Freelas99Scraper } from "../scrapers/freelas99.js";
 import { GeekHunterScraper } from "../scrapers/geekhunter.js";
 import { GreenhouseScraper } from "../scrapers/greenhouse.js";
 import { GupyScraper } from "../scrapers/gupy.js";
+import { IbmScraper } from "../scrapers/ibm.js";
 import { InHireScraper } from "../scrapers/inhire.js";
 import { LeverScraper } from "../scrapers/lever.js";
 import { MindsightScraper } from "../scrapers/mindsight.js";
@@ -62,11 +63,12 @@ export class CrawlerService {
     ScraperRegistry.register(new ProgramathorScraper());
     ScraperRegistry.register(new Freelas99Scraper());
     ScraperRegistry.register(new GeekHunterScraper());
+    ScraperRegistry.register(new IbmScraper());
 
     StorageService.initialize();
     this.isRegistered = true;
     console.log(
-      "[CrawlerService] Todos os 24 scrapers registrados com sucesso.",
+      "[CrawlerService] Todos os 25 scrapers registrados com sucesso.",
     );
   }
 

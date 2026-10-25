@@ -192,7 +192,7 @@ export default function App() {
 
   // Parâmetros de execução do crawler
   const [selectedTerms, setSelectedTerms] = useState<string[]>(['java', 'react', 'node']);
-  const [selectedSources, setSelectedSources] = useState<string[]>(['GUPY', 'INHIRE', 'ASHBY', 'LEVER', 'GREENHOUSE', 'WORKABLE', 'SOLIDES', 'QUICKIN', 'SMARTRECRUITERS', 'WORKDAY', 'PANDAPE', 'TOTVS', 'MINDSIGHT', 'ABLER', 'RECRUTAI', 'EIGHTFOLD', 'RECRUTEI', 'RECRUITEE', 'TEAMTAILOR', 'SELECTY', 'REMOTEOK', 'PROGRAMATHOR', 'FREELAS_99', 'GEEKHUNTER']);
+  const [selectedSources, setSelectedSources] = useState<string[]>(['GUPY', 'INHIRE', 'ASHBY', 'LEVER', 'GREENHOUSE', 'WORKABLE', 'SOLIDES', 'QUICKIN', 'SMARTRECRUITERS', 'WORKDAY', 'PANDAPE', 'TOTVS', 'MINDSIGHT', 'ABLER', 'RECRUTAI', 'EIGHTFOLD', 'RECRUTEI', 'RECRUITEE', 'TEAMTAILOR', 'SELECTY', 'REMOTEOK', 'PROGRAMATHOR', 'FREELAS_99', 'GEEKHUNTER', 'IBM']);
   const [newCustomTerm, setNewCustomTerm] = useState('');
 
   // Estado da execução / SSE
@@ -1890,7 +1890,8 @@ export default function App() {
                 { id: 'REMOTEOK', label: 'RemoteOK (Global)', type: 'FREELANCE' },
                 { id: 'PROGRAMATHOR', label: 'Programathor', type: 'CLT' },
                 { id: 'FREELAS_99', label: '99Freelas', type: 'FREELANCE' },
-                { id: 'GEEKHUNTER', label: 'GeekHunter', type: 'CLT' }
+                { id: 'GEEKHUNTER', label: 'GeekHunter', type: 'CLT' },
+                { id: 'IBM', label: 'IBM Careers', type: 'CLT' }
               ].map((s) => (
                 <div
                   key={s.id}
@@ -2011,6 +2012,7 @@ export default function App() {
           <option value="PROGRAMATHOR">Programathor</option>
           <option value="FREELAS_99">99Freelas</option>
           <option value="GEEKHUNTER">GeekHunter</option>
+          <option value="IBM">IBM Careers</option>
         </select>
 
         <select

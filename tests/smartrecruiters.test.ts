@@ -4,6 +4,7 @@ import { buildDigest } from "../server/bot/digest.js";
 import { ScraperRegistry } from "../server/scrapers/base.js";
 import {
   normalizeSmartRecruitersJob,
+  parseCiandtPortalHtml,
   SmartRecruitersRawJob,
   SmartRecruitersScraper,
 } from "../server/scrapers/smartrecruiters.js";
@@ -170,5 +171,34 @@ describe("SmartRecruiters Scraper & E2E Pipeline", () => {
         "https://jobs.smartrecruiters.com/CIAndT/744000045612345",
       ),
     );
+  });
+
+  it("should parse CI&T career portal SSR HTML cards correctly", () => {
+    const mockHtml = `
+      <div class="opportunities-list">
+        <div class="opprtunity-item">
+          <h2>Engenheiro(a) de Software Sênior (Java / Cloud)</h2>
+          <span class="short-text-caption">Campinas, SP, Brasil</span>
+          <div class="filters-item">Workplace_type_Remote Pa[í]s_Brazil Tecnologia</div>
+          <a href="/br/pt-br/carreiras/oportunidades/candidate-se?opportunity=abcd-1234-uuid">Candidatar-se</a>
+        </div>
+        <div class="opprtunity-item">
+          <h2>Arquiteto de Soluções Cloud</h2>
+          <span class="short-text-caption">São Paulo, SP</span>
+          <div class="filters-item">Workplace_type_Hybrid Pa[í]s_Brazil</div>
+          <a href="/br/pt-br/carreiras/oportunidades/candidate-se?opportunity=efgh-5678-uuid">Candidatar-se</a>
+        </div>
+      </div>
+    `;
+
+    const jobs = parseCiandtPortalHtml(mockHtml, "CI&T");
+    assert.equal(jobs.length, 2);
+    assert.equal(jobs[0].title, "Engenheiro(a) de Software Sênior (Java / Cloud)");
+    assert.equal(jobs[0].company, "CI&T");
+    assert.equal(jobs[0].workModel, "REMOTO");
+    assert.equal(jobs[0].seniorityLevel, "SENIOR");
+    assert.ok(jobs[0].url.includes("opportunity=abcd-1234-uuid"));
+    assert.equal(jobs[1].workModel, "HIBRIDO");
+    assert.ok(jobs[1].url.includes("opportunity=efgh-5678-uuid"));
   });
 });

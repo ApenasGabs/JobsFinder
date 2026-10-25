@@ -40,7 +40,7 @@
     },
     {
       "id": "ASHBY",
-      "name": "Ashby (60 Global Tech)",
+      "name": "Ashby (61 Global Tech)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
@@ -54,7 +54,7 @@
     },
     {
       "id": "GREENHOUSE",
-      "name": "Greenhouse (49 Top Tech)",
+      "name": "Greenhouse (52 Top Tech)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
@@ -188,6 +188,13 @@
     {
       "id": "SELECTY",
       "name": "Selecty (3 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "IBM",
+      "name": "IBM Careers (Brasil)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
@@ -5163,6 +5170,12 @@
       "enabled": true
     },
     {
+      "name": "Nubank",
+      "slug": "nubank",
+      "link": "https://nu.com/pt/carreiras/open-roles",
+      "enabled": true
+    },
+    {
       "name": "OpenAI",
       "slug": "openai",
       "link": "https://jobs.ashbyhq.com/openai",
@@ -5641,6 +5654,12 @@
       "enabled": true
     },
     {
+      "name": "iFood",
+      "slug": "ifoodcarreiras",
+      "link": "https://carreiras.ifood.com.br",
+      "enabled": true
+    },
+    {
       "name": "ília",
       "slug": "ilia",
       "link": "https://boards.greenhouse.io/ilia",
@@ -5701,12 +5720,6 @@
       "enabled": true
     },
     {
-      "name": "Nubank",
-      "slug": "nubank",
-      "link": "https://boards.greenhouse.io/nubank",
-      "enabled": true
-    },
-    {
       "name": "Ordergroove",
       "slug": "ordergroove-referrals",
       "link": "https://boards.greenhouse.io/ordergroove-referrals",
@@ -5716,6 +5729,12 @@
       "name": "PicPay",
       "slug": "picpay",
       "link": "https://boards.greenhouse.io/picpay",
+      "enabled": true
+    },
+    {
+      "name": "Pinterest",
+      "slug": "pinterest",
+      "link": "https://boards.greenhouse.io/pinterest",
       "enabled": true
     },
     {
@@ -5773,6 +5792,12 @@
       "enabled": true
     },
     {
+      "name": "ThoughtWorks",
+      "slug": "thoughtworks",
+      "link": "https://boards.greenhouse.io/thoughtworks",
+      "enabled": true
+    },
+    {
       "name": "VTEX",
       "slug": "vtex",
       "link": "https://boards.greenhouse.io/vtex",
@@ -5785,6 +5810,12 @@
       "enabled": true
     },
     {
+      "name": "Wildlife Studios",
+      "slug": "wildlifestudios",
+      "link": "https://boards.greenhouse.io/wildlifestudios",
+      "enabled": true
+    },
+    {
       "name": "XP Inc.",
       "slug": "xpinc",
       "link": "https://boards.greenhouse.io/xpinc",
@@ -5794,24 +5825,6 @@
       "name": "Zup Innovation",
       "slug": "zupinnovation",
       "link": "https://boards.greenhouse.io/zupinnovation",
-      "enabled": true
-    },
-    {
-      "name": "Pinterest",
-      "slug": "pinterest",
-      "link": "https://boards.greenhouse.io/pinterest",
-      "enabled": true
-    },
-    {
-      "name": "ThoughtWorks",
-      "slug": "thoughtworks",
-      "link": "https://boards.greenhouse.io/thoughtworks",
-      "enabled": true
-    },
-    {
-      "name": "Wildlife Studios",
-      "slug": "wildlifestudios",
-      "link": "https://boards.greenhouse.io/wildlifestudios",
       "enabled": true
     }
   ],

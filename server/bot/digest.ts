@@ -15,6 +15,7 @@ import type {
   SeniorityLevel,
   WorkModel as InternalWorkModel,
 } from "../types.js";
+import { detectSeniority } from "../utils/normalizer.js";
 
 export type Seniority = SeniorityLevel;
 export type WorkModel = InternalWorkModel;
@@ -399,6 +400,17 @@ export interface WeeklySummaryOptions {
   /** Link do Radar de Empresas */
   radarUrl?: string;
   now?: Date;
+  /** Vagas da semana para curadoria e compartilhamento */
+  weeklyJobs?: DigestJob[];
+  /** Limite máximo de vagas por categoria (padrão 5) */
+  maxJobsPerCategory?: number;
+  /** Limite máximo de caracteres da mensagem (padrão 4000) */
+  maxChars?: number;
+}
+
+export interface WeeklySummaryResult {
+  text: string;
+  includedIds: string[];
 }
 
 const GENERIC_SUGGESTERS = new Set([
@@ -420,12 +432,68 @@ function isMeaningfulSuggester(suggestedBy?: string | null): string | null {
   return trimmed;
 }
 
+function isEntryJob(job: DigestJob): boolean {
+  const sen = (
+    job.seniorityLevel ||
+    job.seniority ||
+    detectSeniority(job.title || "")
+  ).toUpperCase();
+  return sen === "ESTAGIO" || sen === "JUNIOR";
+}
+
+function formatWeeklyItem(g: Grouped): string {
+  const { job, locations } = g;
+  const primaryStack = resolvePrimaryStack(job.stack);
+  const tag = primaryStack ? ` [${primaryStack}]` : "";
+  const validLocations = locations.filter(
+    (l) => l && norm(l) !== "nao informado" && norm(l) !== "remoto",
+  );
+  const cleanCompany = (job.company || "")
+    .replace(/\bNAO_INFORMADO\b/gi, "")
+    .trim();
+
+  let where = "";
+  if (job.workModel === "REMOTO" || !isBrazil(job.location)) {
+    where = job.workModel === "REMOTO" ? " (Remoto)" : " (Exterior)";
+  } else if (validLocations.length > 0) {
+    const model = job.workModel === "HIBRIDO" ? " (híbrido)" : "";
+    where = ` · ${validLocations.slice(0, 2).join(" / ")}${model}`;
+  } else if (job.workModel === "HIBRIDO") {
+    where = " (híbrido)";
+  }
+
+  return `• ${cleanTitle(job.title)}${tag} — ${cleanCompany}${where}\n  ${job.url}`;
+}
+
+function pickDiverse(items: Grouped[], limit: number, maxPerCompany = 2): Grouped[] {
+  const selected: Grouped[] = [];
+  const companyCount = new Map<string, number>();
+  const remaining: Grouped[] = [];
+
+  for (const item of items) {
+    const comp = norm(item.job.company);
+    const count = companyCount.get(comp) || 0;
+    if (count < maxPerCompany && selected.length < limit) {
+      selected.push(item);
+      companyCount.set(comp, count + 1);
+    } else {
+      remaining.push(item);
+    }
+  }
+
+  while (selected.length < limit && remaining.length > 0) {
+    selected.push(remaining.shift()!);
+  }
+
+  return selected;
+}
+
 /**
- * Monta o resumo semanal de domingo (~11h).
- * Se não houver dado confiável para algum item, omite o item em vez de inventar.
- * Se não houver nenhum dado confiável, retorna null.
+ * Monta o resumo semanal de domingo (~11h) retornando texto e IDs das vagas incluídas.
  */
-export function buildWeeklySummary(opts: WeeklySummaryOptions): string | null {
+export function buildWeeklySummaryResult(
+  opts: WeeklySummaryOptions,
+): WeeklySummaryResult | null {
   const {
     monitoredCompaniesCount,
     weeklyTechJobsCount,
@@ -433,6 +501,9 @@ export function buildWeeklySummary(opts: WeeklySummaryOptions): string | null {
     topVotedSuggestions = [],
     radarUrl = DEFAULT_RADAR_URL,
     now = new Date(),
+    weeklyJobs = [],
+    maxJobsPerCategory = 5,
+    maxChars = 4000,
   } = opts;
 
   const hasMonitored =
@@ -441,7 +512,11 @@ export function buildWeeklySummary(opts: WeeklySummaryOptions): string | null {
     typeof weeklyTechJobsCount === "number" && weeklyTechJobsCount > 0;
 
   const validNewSuggestions = newSuggestions.filter(
-    (s) => s && typeof s.name === "string" && s.name.trim().length > 0 && !HIDDEN_COMPANIES.some((r) => r.test(s.name)),
+    (s) =>
+      s &&
+      typeof s.name === "string" &&
+      s.name.trim().length > 0 &&
+      !HIDDEN_COMPANIES.some((r) => r.test(s.name)),
   );
 
   const validTopVoted = [...topVotedSuggestions]
@@ -457,11 +532,34 @@ export function buildWeeklySummary(opts: WeeklySummaryOptions): string | null {
     .sort((a, b) => (b.votesCount || 0) - (a.votesCount || 0))
     .slice(0, 3);
 
+  // Filtra e agrupa vagas da semana
+  const eligibleWeekly = (weeklyJobs || []).filter(
+    (j) => !isExcludedFromDigest(j),
+  );
+  const groupedWeekly = groupDuplicates(eligibleWeekly);
+
+  const entryCandidates: Grouped[] = [];
+  const seniorCandidates: Grouped[] = [];
+
+  for (const g of groupedWeekly) {
+    if (isEntryJob(g.job)) {
+      entryCandidates.push(g);
+    } else {
+      seniorCandidates.push(g);
+    }
+  }
+
+  const selectedEntry = pickDiverse(entryCandidates, maxJobsPerCategory);
+  const selectedSenior = pickDiverse(seniorCandidates, maxJobsPerCategory);
+  const hasAnyCuratedJobs =
+    selectedEntry.length > 0 || selectedSenior.length > 0;
+
   if (
     !hasMonitored &&
     !hasJobs &&
     validNewSuggestions.length === 0 &&
-    validTopVoted.length === 0
+    validTopVoted.length === 0 &&
+    !hasAnyCuratedJobs
   ) {
     return null;
   }
@@ -483,6 +581,32 @@ export function buildWeeklySummary(opts: WeeklySummaryOptions): string | null {
   }
   if (statsLines.length > 0) {
     sections.push(statsLines.join("\n"));
+  }
+
+  const includedIds: string[] = [];
+
+  if (hasAnyCuratedJobs) {
+    const curatedBlocks: string[] = [
+      "✨ *SELEÇÃO DA SEMANA — TOP VAGAS PARA COMPARTILHAR* 🔥",
+    ];
+
+    if (selectedEntry.length > 0) {
+      const entryLines = selectedEntry.map(formatWeeklyItem).join("\n\n");
+      curatedBlocks.push(`🎓 *Estágio, Trainee e Júnior:*\n${entryLines}`);
+      for (const g of selectedEntry) includedIds.push(...g.ids);
+    }
+
+    if (selectedSenior.length > 0) {
+      const seniorLines = selectedSenior.map(formatWeeklyItem).join("\n\n");
+      curatedBlocks.push(`🚀 *Pleno e Sênior:*\n${seniorLines}`);
+      for (const g of selectedSenior) includedIds.push(...g.ids);
+    }
+
+    curatedBlocks.push(
+      "📢 *Curtiu essa seleção? Compartilhe com quem está buscando vagas de TI!*",
+    );
+
+    sections.push(curatedBlocks.join("\n\n"));
   }
 
   if (validNewSuggestions.length > 0) {
@@ -519,7 +643,53 @@ export function buildWeeklySummary(opts: WeeklySummaryOptions): string | null {
     ].join("\n"),
   );
 
-  return sections.join("\n\n");
+  let finalContent = sections.join("\n\n");
+
+  // Se exceder o orçamento de caracteres, trunca preservando estrutura
+  if (finalContent.length > maxChars && hasAnyCuratedJobs) {
+    const trimmedEntry = selectedEntry.slice(0, 3);
+    const trimmedSenior = selectedSenior.slice(0, 3);
+    includedIds.length = 0;
+    const trimmedBlocks: string[] = [
+      "✨ *SELEÇÃO DA SEMANA — TOP VAGAS PARA COMPARTILHAR* 🔥",
+    ];
+    if (trimmedEntry.length > 0) {
+      trimmedBlocks.push(
+        `🎓 *Estágio, Trainee e Júnior:*\n${trimmedEntry.map(formatWeeklyItem).join("\n\n")}`,
+      );
+      for (const g of trimmedEntry) includedIds.push(...g.ids);
+    }
+    if (trimmedSenior.length > 0) {
+      trimmedBlocks.push(
+        `🚀 *Pleno e Sênior:*\n${trimmedSenior.map(formatWeeklyItem).join("\n\n")}`,
+      );
+      for (const g of trimmedSenior) includedIds.push(...g.ids);
+    }
+    trimmedBlocks.push(
+      "📢 *Curtiu essa seleção? Compartilhe com quem está buscando vagas de TI!*",
+    );
+    const idx = sections.findIndex((s) =>
+      s.includes("SELEÇÃO DA SEMANA — TOP VAGAS PARA COMPARTILHAR"),
+    );
+    if (idx !== -1) {
+      sections[idx] = trimmedBlocks.join("\n\n");
+    }
+    finalContent = sections.join("\n\n");
+  }
+
+  return {
+    text: finalContent,
+    includedIds: [...new Set(includedIds)],
+  };
+}
+
+/**
+ * Monta o resumo semanal de domingo (~11h).
+ * Se não houver dado confiável para algum item, omite o item em vez de inventar.
+ * Se não houver nenhum dado confiável, retorna null.
+ */
+export function buildWeeklySummary(opts: WeeklySummaryOptions): string | null {
+  return buildWeeklySummaryResult(opts)?.text ?? null;
 }
 
 /* ------------------------------ presets & env ------------------------------ */

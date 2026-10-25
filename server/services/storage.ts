@@ -515,6 +515,30 @@ export class StorageService {
     return count;
   }
 
+  public static getWeeklyJobs(since: Date, limit = 100): Job[] {
+    this.initialize();
+    const cutoff = since.getTime();
+    const jobs: Job[] = [];
+    for (const job of this.jobsMap.values()) {
+      if (job.isTech === false || !TechClassifierService.isTechSync(job.title)) {
+        continue;
+      }
+      const ts = new Date(job.scrapedAt).getTime();
+      if (
+        (!Number.isNaN(ts) && ts >= cutoff) ||
+        (!job.notifiedAt && !job.expiredAt)
+      ) {
+        jobs.push(job);
+      }
+    }
+    // Mais recentes primeiro
+    jobs.sort(
+      (a, b) =>
+        new Date(b.scrapedAt).getTime() - new Date(a.scrapedAt).getTime(),
+    );
+    return jobs.slice(0, limit);
+  }
+
   public static upsertBatch(jobs: Array<Omit<Job, "id">>): {
     totalSaved: number;
     totalUpdated: number;

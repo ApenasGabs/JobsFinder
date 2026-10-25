@@ -214,6 +214,9 @@ export interface AppConfig {
   leverCompanies?: CompanyConfig[];
   greenhouseCompanies?: CompanyConfig[];
   workableCompanies?: CompanyConfig[];
+  solidesCompanies?: CompanyConfig[];
+  quickinCompanies?: CompanyConfig[];
+  smartrecruitersCompanies?: CompanyConfig[];
   whatsapp?: WhatsAppConfig;
   scheduler?: SchedulerConfig;
 }

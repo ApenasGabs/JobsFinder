@@ -7,7 +7,10 @@ import { GupyScraper } from "../scrapers/gupy.js";
 import { InHireScraper } from "../scrapers/inhire.js";
 import { LeverScraper } from "../scrapers/lever.js";
 import { ProgramathorScraper } from "../scrapers/programathor.js";
+import { QuickinScraper } from "../scrapers/quickin.js";
 import { RemoteOKScraper } from "../scrapers/remoteok.js";
+import { SmartRecruitersScraper } from "../scrapers/smartrecruiters.js";
+import { SolidesScraper } from "../scrapers/solides.js";
 import { WorkableScraper } from "../scrapers/workable.js";
 import { Job, ScrapeOptions, ScrapeProgressEvent } from "../types.js";
 import { TechClassifierService } from "./classifier.js";
@@ -30,6 +33,9 @@ export class CrawlerService {
     ScraperRegistry.register(new LeverScraper());
     ScraperRegistry.register(new GreenhouseScraper());
     ScraperRegistry.register(new WorkableScraper());
+    ScraperRegistry.register(new SolidesScraper());
+    ScraperRegistry.register(new QuickinScraper());
+    ScraperRegistry.register(new SmartRecruitersScraper());
     ScraperRegistry.register(new RemoteOKScraper());
     ScraperRegistry.register(new ProgramathorScraper());
     ScraperRegistry.register(new Freelas99Scraper());
@@ -38,7 +44,7 @@ export class CrawlerService {
     StorageService.initialize();
     this.isRegistered = true;
     console.log(
-      "[CrawlerService] Todos os 10 scrapers registrados com sucesso.",
+      "[CrawlerService] Todos os 12 scrapers registrados com sucesso.",
     );
   }
 
@@ -77,6 +83,8 @@ export class CrawlerService {
               "LEVER",
               "GREENHOUSE",
               "WORKABLE",
+              "SOLIDES",
+              "QUICKIN",
               "REMOTEOK",
               "PROGRAMATHOR",
               "FREELAS_99",
@@ -139,7 +147,7 @@ export class CrawlerService {
               // Descarta vagas que não sejam de Tecnologia/TI
               if (
                 newJob.isTech === false ||
-                !TechClassifierService.isTechSync(newJob.title)
+                !TechClassifierService.isTechSync(newJob)
               ) {
                 return;
               }

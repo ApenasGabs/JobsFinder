@@ -1,0 +1,1605 @@
+[
+  {
+    "company": "Accenture",
+    "ats": "Workday",
+    "slug": "accenture",
+    "career_url": "https://accenture.wd103.myworkdayjobs.com/pt-BR/AccentureCareers",
+    "live_jobs_count": 45
+  },
+  {
+    "company": "Act Digital",
+    "ats": "Portal Próprio",
+    "slug": "actdigital",
+    "career_url": "https://actdigital.com/carreiras",
+    "live_jobs_count": 18
+  },
+  {
+    "company": "Adobe Assessoria de Serviços Cadastrais",
+    "ats": "Portal Próprio",
+    "slug": "grupoadobe",
+    "career_url": "https://www.grupoadobe.com.br/trabalhe-conosco",
+    "live_jobs_count": 2
+  },
+  {
+    "company": "AEGEA",
+    "ats": "Gupy",
+    "slug": "aegea",
+    "career_url": "https://aegea.gupy.io",
+    "live_jobs_count": 171
+  },
+  {
+    "company": "Algar Tech",
+    "ats": "Gupy",
+    "slug": "algar",
+    "career_url": "https://algar.gupy.io",
+    "live_jobs_count": 22
+  },
+  {
+    "company": "Algar Telecom",
+    "ats": "Gupy",
+    "slug": "algar",
+    "career_url": "https://algar.gupy.io",
+    "live_jobs_count": 22
+  },
+  {
+    "company": "AlmaViva",
+    "ats": "Gupy",
+    "slug": "almavivasolutions",
+    "career_url": "https://almavivasolutions.gupy.io",
+    "live_jobs_count": 3
+  },
+  {
+    "company": "Alterdata",
+    "ats": "Gupy",
+    "slug": "alterdata",
+    "career_url": "https://alterdata.gupy.io",
+    "live_jobs_count": 40
+  },
+  {
+    "company": "Amazon",
+    "ats": "Portal Próprio",
+    "slug": "amazon-brazil",
+    "career_url": "https://www.amazon.jobs/pt/locations/brazil",
+    "live_jobs_count": 405
+  },
+  {
+    "company": "Amazon Informática",
+    "ats": "Portal Próprio",
+    "slug": "amazoninformatica",
+    "career_url": "https://www.amazoninformatica.com.br/trabalhe-conosco",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "Amazon Web Services (AWS)",
+    "ats": "Portal Próprio",
+    "slug": "aws-brazil",
+    "career_url": "https://www.amazon.jobs/pt/teams/aws",
+    "live_jobs_count": 405
+  },
+  {
+    "company": "Ambev e Ambectech",
+    "ats": "Gupy",
+    "slug": "ambev",
+    "career_url": "https://ambev.gupy.io",
+    "live_jobs_count": 303
+  },
+  {
+    "company": "AmBev/BEES",
+    "ats": "Greenhouse",
+    "slug": "abinbev",
+    "career_url": "https://boards.greenhouse.io/abinbev",
+    "live_jobs_count": 61
+  },
+  {
+    "company": "AMCOM",
+    "ats": "Inhire",
+    "slug": "amcom",
+    "career_url": "https://amcom.inhire.app/vagas",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "americanas s.a.",
+    "ats": "Portal Próprio",
+    "slug": "americanas",
+    "career_url": "https://carreiras.americanas.com.br",
+    "live_jobs_count": 12
+  },
+  {
+    "company": "Americanas S/A /B2W/DIRECT",
+    "ats": "Portal Próprio",
+    "slug": "americanas",
+    "career_url": "https://carreiras.americanas.com.br",
+    "live_jobs_count": 12
+  },
+  {
+    "company": "Americanas SA / B2W",
+    "ats": "Portal Próprio",
+    "slug": "americanas",
+    "career_url": "https://carreiras.americanas.com.br",
+    "live_jobs_count": 12
+  },
+  {
+    "company": "Anima educação",
+    "ats": "Ashby",
+    "slug": "anima",
+    "career_url": "https://jobs.ashbyhq.com/anima",
+    "live_jobs_count": 8
+  },
+  {
+    "company": "Apple Developer Academy - IFCE",
+    "ats": "Portal Próprio",
+    "slug": "apple-academy-ifce",
+    "career_url": "https://academy.ifce.edu.br",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "Arcadis",
+    "ats": "Portal Próprio",
+    "slug": "arcadis",
+    "career_url": "https://jobs.arcadis.com",
+    "live_jobs_count": 10
+  },
+  {
+    "company": "Assai",
+    "ats": "Gupy",
+    "slug": "assai",
+    "career_url": "https://assai.gupy.io",
+    "live_jobs_count": 3636
+  },
+  {
+    "company": "Atacadão",
+    "ats": "Gupy",
+    "slug": "grupocarrefourbrasil",
+    "career_url": "https://grupocarrefourbrasil.gupy.io",
+    "live_jobs_count": 0
+  },
+  {
+    "company": "ATENTO/FISERV",
+    "ats": "Gupy",
+    "slug": "atento",
+    "career_url": "https://atento.gupy.io",
+    "live_jobs_count": 130
+  },
+  {
+    "company": "Atento/Liq/Loggi",
+    "ats": "Gupy",
+    "slug": "atento",
+    "career_url": "https://atento.gupy.io",
+    "live_jobs_count": 130
+  },
+  {
+    "company": "Aurora Saúde",
+    "ats": "Inhire",
+    "slug": "asa",
+    "career_url": "https://asa.inhire.app/vagas",
+    "live_jobs_count": 44
+  },
+  {
+    "company": "Autoglass e Btg pactual",
+    "ats": "Portal Próprio",
+    "slug": "btgpactual",
+    "career_url": "https://carreiras.btgpactual.com",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "AVANADE",
+    "ats": "Portal Próprio",
+    "slug": "avanade",
+    "career_url": "https://www.avanade.com/pt-br/career",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Avanade/Accenture",
+    "ats": "Portal Próprio",
+    "slug": "avanade",
+    "career_url": "https://www.avanade.com/pt-br/career",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Aws",
+    "ats": "Portal Próprio",
+    "slug": "aws-brazil",
+    "career_url": "https://www.amazon.jobs/pt/teams/aws",
+    "live_jobs_count": 405
+  },
+  {
+    "company": "B3",
+    "ats": "Portal Próprio",
+    "slug": "b3",
+    "career_url": "https://www.b3.com.br/pt_br/b3/institucional/carreiras/",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "Bain",
+    "ats": "Portal Próprio",
+    "slug": "bain",
+    "career_url": "https://careers.bain.com",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "Banco Bradesco",
+    "ats": "Inhire",
+    "slug": "bradesco",
+    "career_url": "https://bradesco.inhire.app/vagas",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "Banco Daycoval",
+    "ats": "Gupy",
+    "slug": "bancodaycoval",
+    "career_url": "https://bancodaycoval.gupy.io",
+    "live_jobs_count": 45
+  },
+  {
+    "company": "Banco do Brasil",
+    "ats": "Portal Próprio",
+    "slug": "bancodobrasil",
+    "career_url": "https://www.bb.com.br/site/concurso-banco-do-brasil/",
+    "live_jobs_count": 10
+  },
+  {
+    "company": "Banco Safra",
+    "ats": "Gupy",
+    "slug": "venhasersafra",
+    "career_url": "https://venhasersafra.gupy.io",
+    "live_jobs_count": 34
+  },
+  {
+    "company": "Banco Santander",
+    "ats": "Workday",
+    "slug": "santander",
+    "career_url": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+    "live_jobs_count": 40
+  },
+  {
+    "company": "BCG",
+    "ats": "Portal Próprio",
+    "slug": "bcg",
+    "career_url": "https://careers.bcg.com",
+    "live_jobs_count": 8
+  },
+  {
+    "company": "Bees bank - Ambev",
+    "ats": "Greenhouse",
+    "slug": "abinbev",
+    "career_url": "https://boards.greenhouse.io/abinbev",
+    "live_jobs_count": 61
+  },
+  {
+    "company": "BeFly",
+    "ats": "Gupy",
+    "slug": "befly",
+    "career_url": "https://befly.gupy.io",
+    "live_jobs_count": 44
+  },
+  {
+    "company": "Bracell",
+    "ats": "Workday",
+    "slug": "bracell-rge",
+    "career_url": "https://averis.wd3.myworkdayjobs.com/pt-BR/RGE",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Bradesco",
+    "ats": "Inhire",
+    "slug": "bradesco",
+    "career_url": "https://bradesco.inhire.app/vagas",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "Bradesco - Vila de Writing",
+    "ats": "Inhire",
+    "slug": "bradesco",
+    "career_url": "https://bradesco.inhire.app/vagas",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "Bradesco Seguros",
+    "ats": "Inhire",
+    "slug": "bradesco",
+    "career_url": "https://bradesco.inhire.app/vagas",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "BRQ",
+    "ats": "Inhire",
+    "slug": "brq",
+    "career_url": "https://brq.inhire.app/vagas",
+    "live_jobs_count": 67
+  },
+  {
+    "company": "Caixa Econômica Federal (CEF)",
+    "ats": "Gupy",
+    "slug": "caixavidaeprevidencia",
+    "career_url": "https://caixavidaeprevidencia.gupy.io",
+    "live_jobs_count": 17
+  },
+  {
+    "company": "Capgemini",
+    "ats": "Portal Próprio",
+    "slug": "capgemini",
+    "career_url": "https://www.capgemini.com/br-pt/carreiras/",
+    "live_jobs_count": 30
+  },
+  {
+    "company": "Carrefour - MS",
+    "ats": "Gupy",
+    "slug": "grupocarrefourbrasil",
+    "career_url": "https://grupocarrefourbrasil.gupy.io",
+    "live_jobs_count": 0
+  },
+  {
+    "company": "Carrefour Icatu brasil",
+    "ats": "Inhire",
+    "slug": "icatu",
+    "career_url": "https://icatu.inhire.app/vagas",
+    "live_jobs_count": 24
+  },
+  {
+    "company": "Cast Group",
+    "ats": "SAP SuccessFactors",
+    "slug": "CAST",
+    "career_url": "https://career19.sapsf.com/career?career_company=CAST&lang=pt_BR",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "Catho",
+    "ats": "Portal Próprio",
+    "slug": "catho",
+    "career_url": "https://www.catho.com.br/carreira-catho/",
+    "live_jobs_count": 10
+  },
+  {
+    "company": "Central Nacional Unimed",
+    "ats": "Gupy",
+    "slug": "unimednacional",
+    "career_url": "https://unimednacional.gupy.io",
+    "live_jobs_count": 19
+  },
+  {
+    "company": "Centro Campinense de Cultura Anglo Americana - CCAA Campina Grande",
+    "ats": "Portal Próprio",
+    "slug": "ccaa",
+    "career_url": "https://www.ccaa.com.br/trabalhe-conosco/",
+    "live_jobs_count": 2
+  },
+  {
+    "company": "CEVA SAUDE ANIMAL",
+    "ats": "Portal Próprio",
+    "slug": "ceva",
+    "career_url": "https://www.ceva.com.br/Carreira",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "CI&T",
+    "ats": "SmartRecruiters",
+    "slug": "CIT",
+    "career_url": "https://jobs.smartrecruiters.com/CIT",
+    "live_jobs_count": 0
+  },
+  {
+    "company": "Cloudwalk",
+    "ats": "Portal Próprio",
+    "slug": "cloudwalk",
+    "career_url": "https://lp.cloudwalk.io/jobs",
+    "live_jobs_count": 22
+  },
+  {
+    "company": "Cometa Supermercados",
+    "ats": "Portal Próprio",
+    "slug": "cometasupermercados",
+    "career_url": "https://cometasupermercados.com.br/trabalhe-conosco/",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "Compass UOL",
+    "ats": "Gupy",
+    "slug": "compass",
+    "career_url": "https://compass.gupy.io",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "Compasso Uol",
+    "ats": "Gupy",
+    "slug": "compass",
+    "career_url": "https://compass.gupy.io",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "Conquestone",
+    "ats": "Portal Próprio",
+    "slug": "conquestone",
+    "career_url": "https://jobs.conquestone.com/jobboard.job.wpsearch.aspx?CustomerID=7ffd5c5b-11ae-439a-9152-ccc86c6e3844",
+    "live_jobs_count": 12
+  },
+  {
+    "company": "CPFL",
+    "ats": "Portal Próprio",
+    "slug": "grupocpfl",
+    "career_url": "https://www.grupocpfl.com.br/rh/trabalhe-conosco",
+    "live_jobs_count": 18
+  },
+  {
+    "company": "CWI",
+    "ats": "Portal Próprio",
+    "slug": "cwi",
+    "career_url": "https://cwi.com.br/talentos/oportunidades/",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Dataprev",
+    "ats": "Portal Próprio",
+    "slug": "dataprev",
+    "career_url": "https://portal.dataprev.gov.br/concursos-publicos",
+    "live_jobs_count": 16
+  },
+  {
+    "company": "Decolar",
+    "ats": "Lever",
+    "slug": "despegar",
+    "career_url": "https://jobs.lever.co/despegar",
+    "live_jobs_count": 115
+  },
+  {
+    "company": "Dell",
+    "ats": "Portal Próprio",
+    "slug": "dell",
+    "career_url": "https://jobs.dell.com",
+    "live_jobs_count": 35
+  },
+  {
+    "company": "Deloitte",
+    "ats": "Inhire",
+    "slug": "deloitte",
+    "career_url": "https://deloitte.inhire.app/vagas",
+    "live_jobs_count": 199
+  },
+  {
+    "company": "Despegar",
+    "ats": "Lever",
+    "slug": "despegar",
+    "career_url": "https://jobs.lever.co/despegar",
+    "live_jobs_count": 115
+  },
+  {
+    "company": "DHL prestando serviços para Mercado Livre",
+    "ats": "Portal Próprio",
+    "slug": "dhl",
+    "career_url": "https://careers.dhl.com",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "DigiPlus Interactive Corp",
+    "ats": "Portal Próprio",
+    "slug": "digiplus",
+    "career_url": "https://digiplus.com.ph/careers",
+    "live_jobs_count": 2
+  },
+  {
+    "company": "Drogasil",
+    "ats": "Gupy",
+    "slug": "rdsaude-corporativo",
+    "career_url": "https://rdsaude-corporativo.gupy.io",
+    "live_jobs_count": 43
+  },
+  {
+    "company": "E aí Ipiranga",
+    "ats": "Gupy",
+    "slug": "ipiranga",
+    "career_url": "https://ipiranga.gupy.io",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "Eicon Sistemas Inteligentes",
+    "ats": "Portal Próprio",
+    "slug": "eicon",
+    "career_url": "https://www.eicon.com.br/trabalhe-conosco/",
+    "live_jobs_count": 4
+  },
+  {
+    "company": "ENEL",
+    "ats": "Portal Próprio",
+    "slug": "enel",
+    "career_url": "https://www.enel.com.br/pt/carreiras.html",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "Equatorial Energia Goiás",
+    "ats": "Gupy",
+    "slug": "equatorialenergia",
+    "career_url": "https://equatorialenergia.gupy.io",
+    "live_jobs_count": 75
+  },
+  {
+    "company": "Ericsson Inovacao (EISA)",
+    "ats": "Portal Próprio",
+    "slug": "ericsson",
+    "career_url": "https://www.ericsson.com/en/careers",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Estacio de Sá",
+    "ats": "Gupy",
+    "slug": "yduqs",
+    "career_url": "https://yduqs.gupy.io",
+    "live_jobs_count": 50
+  },
+  {
+    "company": "Everis",
+    "ats": "Portal Próprio",
+    "slug": "nttdata",
+    "career_url": "https://careers.nttdata.com",
+    "live_jobs_count": 30
+  },
+  {
+    "company": "Evolutix Intelligent Living",
+    "ats": "Portal Próprio",
+    "slug": "evolutix",
+    "career_url": "https://evolutix.com.br",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "Experian",
+    "ats": "SmartRecruiters",
+    "slug": "Experian",
+    "career_url": "https://jobs.smartrecruiters.com/Experian",
+    "live_jobs_count": 384
+  },
+  {
+    "company": "F1rst - Santander",
+    "ats": "Workday",
+    "slug": "santander",
+    "career_url": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+    "live_jobs_count": 40
+  },
+  {
+    "company": "F1RST empresa do Santander",
+    "ats": "Workday",
+    "slug": "santander",
+    "career_url": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+    "live_jobs_count": 40
+  },
+  {
+    "company": "F1rst Tecnologia - Banco Santander",
+    "ats": "Workday",
+    "slug": "santander",
+    "career_url": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+    "live_jobs_count": 40
+  },
+  {
+    "company": "Faculdade Unimed",
+    "ats": "Gupy",
+    "slug": "faculdadeunimed",
+    "career_url": "https://faculdadeunimed.gupy.io",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "Farmácias Pague Menos",
+    "ats": "Gupy",
+    "slug": "paguemenosextrafarma",
+    "career_url": "https://paguemenosextrafarma.gupy.io",
+    "live_jobs_count": 52
+  },
+  {
+    "company": "First - Grupo Santander",
+    "ats": "Workday",
+    "slug": "santander",
+    "career_url": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+    "live_jobs_count": 40
+  },
+  {
+    "company": "Fundação Bradesco - Campinas",
+    "ats": "Inhire",
+    "slug": "bradesco",
+    "career_url": "https://bradesco.inhire.app/vagas",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "G30 Inteligência Automotiva",
+    "ats": "Portal Próprio",
+    "slug": "g30",
+    "career_url": "https://g30.com.br",
+    "live_jobs_count": 2
+  },
+  {
+    "company": "Gerdau",
+    "ats": "Portal Próprio",
+    "slug": "gerdau",
+    "career_url": "https://jobs.gerdau.com/?locale=pt_BR",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "Globant",
+    "ats": "SmartRecruiters",
+    "slug": "Globant",
+    "career_url": "https://jobs.smartrecruiters.com/Globant",
+    "live_jobs_count": 0
+  },
+  {
+    "company": "Google",
+    "ats": "Portal Próprio",
+    "slug": "google",
+    "career_url": "https://www.google.com/about/careers/applications/jobs/results/?location=Brazil",
+    "live_jobs_count": 35
+  },
+  {
+    "company": "Gove",
+    "ats": "Portal Próprio",
+    "slug": "gove",
+    "career_url": "https://www.gove.digital/carreiras",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "Grendene",
+    "ats": "Gupy",
+    "slug": "facapartegrendene",
+    "career_url": "https://facapartegrendene.gupy.io",
+    "live_jobs_count": 41
+  },
+  {
+    "company": "Grupo Carrefour Brasil",
+    "ats": "Gupy",
+    "slug": "grupocarrefourbrasil",
+    "career_url": "https://grupocarrefourbrasil.gupy.io",
+    "live_jobs_count": 0
+  },
+  {
+    "company": "Grupo Mateus/Bumba alimentos",
+    "ats": "Portal Próprio",
+    "slug": "grupomateus",
+    "career_url": "https://curriculo.grupomateus.com.br",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "Grupo Novaera - O Boticário | Eudora | Quem Disse, Berenice? | O.U.i Paris",
+    "ats": "Gupy",
+    "slug": "grupoboticario",
+    "career_url": "https://grupoboticario.gupy.io",
+    "live_jobs_count": 278
+  },
+  {
+    "company": "Grupo Oncoclínicas",
+    "ats": "Portal Próprio",
+    "slug": "grupooncoclinicas",
+    "career_url": "https://grupooncoclinicas.com/trabalhe-conosco/",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "Grupo RD DROGA RAIA DROGASIL",
+    "ats": "Gupy",
+    "slug": "rdsaude-corporativo",
+    "career_url": "https://rdsaude-corporativo.gupy.io",
+    "live_jobs_count": 43
+  },
+  {
+    "company": "Grupo Recovery",
+    "ats": "Portal Próprio",
+    "slug": "gruporecovery",
+    "career_url": "https://www.gruporecovery.com/carreiras/",
+    "live_jobs_count": 10
+  },
+  {
+    "company": "grupo sbf",
+    "ats": "Gupy",
+    "slug": "gruposbftalentos",
+    "career_url": "https://gruposbftalentos.gupy.io",
+    "live_jobs_count": 17
+  },
+  {
+    "company": "Grupo Ânima",
+    "ats": "Ashby",
+    "slug": "anima",
+    "career_url": "https://jobs.ashbyhq.com/anima",
+    "live_jobs_count": 8
+  },
+  {
+    "company": "Grão de Gente",
+    "ats": "Portal Próprio",
+    "slug": "graodegente",
+    "career_url": "https://www.graodegente.com.br/trabalhe-conosco",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "Gympass",
+    "ats": "Greenhouse",
+    "slug": "gympass",
+    "career_url": "https://boards.greenhouse.io/gympass",
+    "live_jobs_count": 87
+  },
+  {
+    "company": "Hapvida",
+    "ats": "Gupy",
+    "slug": "hapvidandi",
+    "career_url": "https://hapvidandi.gupy.io",
+    "live_jobs_count": 615
+  },
+  {
+    "company": "Huawei",
+    "ats": "Portal Próprio",
+    "slug": "huawei",
+    "career_url": "https://career.huawei.com",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "Hurb",
+    "ats": "Portal Próprio",
+    "slug": "hurb",
+    "career_url": "https://careers.hurb.com",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "Hypera Pharma (Goiânia)",
+    "ats": "Gupy",
+    "slug": "hyperapharma",
+    "career_url": "https://hyperapharma.gupy.io",
+    "live_jobs_count": 38
+  },
+  {
+    "company": "Ifood /Anota Aí",
+    "ats": "Gupy",
+    "slug": "anotaai",
+    "career_url": "https://anotaai.gupy.io",
+    "live_jobs_count": 0
+  },
+  {
+    "company": "Iguatemi S.A.",
+    "ats": "SAP SuccessFactors",
+    "slug": "iguatemiP",
+    "career_url": "https://career19.sapsf.com/career?company=iguatemiP&lang=pt_BR",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Indra",
+    "ats": "Gupy",
+    "slug": "minsait",
+    "career_url": "https://minsait.gupy.io",
+    "live_jobs_count": 16
+  },
+  {
+    "company": "Insper",
+    "ats": "Portal Próprio",
+    "slug": "insper",
+    "career_url": "https://www.insper.edu.br/pt/institucional/trabalhe-conosco",
+    "live_jobs_count": 8
+  },
+  {
+    "company": "Intel Brasil",
+    "ats": "Workday",
+    "slug": "intel",
+    "career_url": "https://intel.wd1.myworkdayjobs.com/External",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Intelbras",
+    "ats": "Senior HCM",
+    "slug": "intelbras",
+    "career_url": "https://vagas.portaldetalentos.senior.com.br/intelbras/82901000000127",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "Intelipost",
+    "ats": "Gupy",
+    "slug": "intelipost",
+    "career_url": "https://intelipost.gupy.io",
+    "live_jobs_count": 4
+  },
+  {
+    "company": "Intell teach",
+    "ats": "Portal Próprio",
+    "slug": "intellteach",
+    "career_url": "https://intellteach.com",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "Inter",
+    "ats": "Greenhouse",
+    "slug": "inter",
+    "career_url": "https://boards.greenhouse.io/inter",
+    "live_jobs_count": 158
+  },
+  {
+    "company": "Intera Talent Hacking",
+    "ats": "Inhire",
+    "slug": "intera",
+    "career_url": "https://intera.inhire.app/vagas",
+    "live_jobs_count": 7
+  },
+  {
+    "company": "Intuit",
+    "ats": "Portal Próprio",
+    "slug": "intuit",
+    "career_url": "https://jobs.intuit.com",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Jobbol",
+    "ats": "Portal Próprio",
+    "slug": "jobbol",
+    "career_url": "https://www.jobbol.com.br",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Jobgether",
+    "ats": "Lever",
+    "slug": "jobgether",
+    "career_url": "https://jobs.lever.co/jobgether",
+    "live_jobs_count": 858
+  },
+  {
+    "company": "Klabin",
+    "ats": "Vagas.com",
+    "slug": "klabin",
+    "career_url": "https://www.vagas.com.br/empregos/klabin",
+    "live_jobs_count": 3
+  },
+  {
+    "company": "KPMG",
+    "ats": "Inhire",
+    "slug": "kpmg",
+    "career_url": "https://kpmg.inhire.app/vagas",
+    "live_jobs_count": 157
+  },
+  {
+    "company": "Lexmark International do Brasil",
+    "ats": "Portal Próprio",
+    "slug": "lexmark",
+    "career_url": "https://careers.lexmark.com",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "LG lugar de gente",
+    "ats": "Portal Próprio",
+    "slug": "lglugardegente",
+    "career_url": "https://carreiras.recrutamento.lg.com.br/",
+    "live_jobs_count": 17
+  },
+  {
+    "company": "Loggi",
+    "ats": "Greenhouse",
+    "slug": "loggi",
+    "career_url": "https://boards.greenhouse.io/loggi",
+    "live_jobs_count": 21
+  },
+  {
+    "company": "Lojas Americanas",
+    "ats": "Portal Próprio",
+    "slug": "americanas",
+    "career_url": "https://carreiras.americanas.com.br",
+    "live_jobs_count": 12
+  },
+  {
+    "company": "luiza labs",
+    "ats": "Inhire",
+    "slug": "magalu",
+    "career_url": "https://magalu.inhire.app/vagas",
+    "live_jobs_count": 4
+  },
+  {
+    "company": "Luizalabs",
+    "ats": "Inhire",
+    "slug": "magalu",
+    "career_url": "https://magalu.inhire.app/vagas",
+    "live_jobs_count": 4
+  },
+  {
+    "company": "Luxoft",
+    "ats": "Portal Próprio",
+    "slug": "luxoft",
+    "career_url": "https://career.luxoft.com",
+    "live_jobs_count": 30
+  },
+  {
+    "company": "MadeiraMadeira",
+    "ats": "Portal Próprio",
+    "slug": "madeiramadeira",
+    "career_url": "https://www.madeiramadeira.com.br/landing/carreiras",
+    "live_jobs_count": 4
+  },
+  {
+    "company": "Magazineluiza / Luizalabs",
+    "ats": "Inhire",
+    "slug": "magalu",
+    "career_url": "https://magalu.inhire.app/vagas",
+    "live_jobs_count": 4
+  },
+  {
+    "company": "Mapfre",
+    "ats": "Inhire",
+    "slug": "mapfrepoc",
+    "career_url": "https://mapfrepoc.inhire.app/vagas",
+    "live_jobs_count": 0
+  },
+  {
+    "company": "Marfrig",
+    "ats": "Vagas.com",
+    "slug": "marfrig",
+    "career_url": "https://trabalheconosco.vagas.com.br/marfrig",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "McKinsey / Quantum Black",
+    "ats": "Portal Próprio",
+    "slug": "mckinsey",
+    "career_url": "https://www.mckinsey.com/careers",
+    "live_jobs_count": 12
+  },
+  {
+    "company": "Mega Sistemas",
+    "ats": "Senior HCM",
+    "slug": "senior",
+    "career_url": "https://vemprasenior.portaldetalentos.senior.com.br/jobs",
+    "live_jobs_count": 6
+  },
+  {
+    "company": "Microsoft",
+    "ats": "Portal Próprio",
+    "slug": "microsoft",
+    "career_url": "https://careers.microsoft.com",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "Minsait",
+    "ats": "Gupy",
+    "slug": "minsait",
+    "career_url": "https://minsait.gupy.io",
+    "live_jobs_count": 16
+  },
+  {
+    "company": "Mondelēz International",
+    "ats": "Workday",
+    "slug": "mondelez",
+    "career_url": "https://mondelez.wd3.myworkdayjobs.com/pt-BR/External",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Mosaico",
+    "ats": "Greenhouse",
+    "slug": "bancopan",
+    "career_url": "https://boards.greenhouse.io/bancopan",
+    "live_jobs_count": 16
+  },
+  {
+    "company": "Movile Pay",
+    "ats": "Portal Próprio",
+    "slug": "ifood",
+    "career_url": "https://carreiras.ifood.com.br",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "Multilaser",
+    "ats": "Woke People",
+    "slug": "multilaser",
+    "career_url": "https://app.wokepeople.com/public/career/page/3291e63d-fe35-4d3d-8214-cc2cb713037f",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "NeoEnergia",
+    "ats": "Workday",
+    "slug": "iberdrola",
+    "career_url": "https://iberdrola.wd3.myworkdayjobs.com/pt-BR/Iberdrola",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "Nestlé",
+    "ats": "Portal Próprio",
+    "slug": "nestle",
+    "career_url": "https://www.nestle.com.br/carreiras",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "Net Claro",
+    "ats": "Gupy",
+    "slug": "vempraclaro",
+    "career_url": "https://vempraclaro.gupy.io",
+    "live_jobs_count": 47
+  },
+  {
+    "company": "Netflix",
+    "ats": "Eightfold",
+    "slug": "netflix",
+    "career_url": "https://explore.jobs.netflix.net/careers",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "NOUS LATAM",
+    "ats": "Portal Próprio",
+    "slug": "nouslatam",
+    "career_url": "https://www.nouslatam.com",
+    "live_jobs_count": 2
+  },
+  {
+    "company": "NTT DATA",
+    "ats": "Portal Próprio",
+    "slug": "nttdata",
+    "career_url": "https://careers.nttdata.com",
+    "live_jobs_count": 30
+  },
+  {
+    "company": "NTT DATA - Cliente Claro",
+    "ats": "Portal Próprio",
+    "slug": "nttdata",
+    "career_url": "https://careers.nttdata.com",
+    "live_jobs_count": 30
+  },
+  {
+    "company": "NTT DATA Business Solutions",
+    "ats": "Portal Próprio",
+    "slug": "nttdatabs",
+    "career_url": "https://nttdata-solutions.com/br/carreiras/",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "O Boticário",
+    "ats": "Gupy",
+    "slug": "grupoboticario",
+    "career_url": "https://grupoboticario.gupy.io",
+    "live_jobs_count": 278
+  },
+  {
+    "company": "Oi",
+    "ats": "Portal Próprio",
+    "slug": "oi",
+    "career_url": "https://www.oi.com.br/sobre-a-oi/carreiras/",
+    "live_jobs_count": 10
+  },
+  {
+    "company": "Oracle",
+    "ats": "Portal Próprio",
+    "slug": "oracle",
+    "career_url": "https://careers.oracle.com",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "P&G Procter and Gamble",
+    "ats": "Workday",
+    "slug": "pg",
+    "career_url": "https://www.pgcareers.com",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Pagar.me - stone co",
+    "ats": "Inhire",
+    "slug": "stone",
+    "career_url": "https://stone.inhire.app/vagas",
+    "live_jobs_count": 0
+  },
+  {
+    "company": "PagSeguro/PagBank",
+    "ats": "Gupy",
+    "slug": "pagseguro",
+    "career_url": "https://pagseguro.gupy.io",
+    "live_jobs_count": 870
+  },
+  {
+    "company": "Paschoalotto",
+    "ats": "Gupy",
+    "slug": "paschoalotto",
+    "career_url": "https://paschoalotto.gupy.io",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "PepsiCo",
+    "ats": "Portal Próprio",
+    "slug": "pepsico",
+    "career_url": "https://www.pepsicojobs.com",
+    "live_jobs_count": 10
+  },
+  {
+    "company": "Philips EMR Brasil",
+    "ats": "Workday",
+    "slug": "philips",
+    "career_url": "https://philips.wd3.myworkdayjobs.com/pt-BR/jobs-and-careers",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Phocus Interact",
+    "ats": "Portal Próprio",
+    "slug": "phocus",
+    "career_url": "https://www.phocus.com.br",
+    "live_jobs_count": 2
+  },
+  {
+    "company": "PicPay",
+    "ats": "Greenhouse",
+    "slug": "picpay",
+    "career_url": "https://boards.greenhouse.io/picpay",
+    "live_jobs_count": 50
+  },
+  {
+    "company": "Pinterest",
+    "ats": "Greenhouse",
+    "slug": "pinterest",
+    "career_url": "https://boards.greenhouse.io/pinterest",
+    "live_jobs_count": 163
+  },
+  {
+    "company": "Pismo",
+    "ats": "Workday",
+    "slug": "visa-pismo",
+    "career_url": "https://visa.wd5.myworkdayjobs.com/Visa/page/3b371539a3c810015ae4164c71d70000",
+    "live_jobs_count": 6
+  },
+  {
+    "company": "Porto Seguro",
+    "ats": "Gupy",
+    "slug": "porto",
+    "career_url": "https://porto.gupy.io",
+    "live_jobs_count": 183
+  },
+  {
+    "company": "Porto Seguro Consórcio",
+    "ats": "Gupy",
+    "slug": "porto",
+    "career_url": "https://porto.gupy.io",
+    "live_jobs_count": 183
+  },
+  {
+    "company": "Pratidonaduzzi",
+    "ats": "Portal Próprio",
+    "slug": "pratidonaduzzi",
+    "career_url": "https://www.pratidonaduzzi.com.br/trabalhe-conosco",
+    "live_jobs_count": 12
+  },
+  {
+    "company": "Prevent Senior",
+    "ats": "SAP SuccessFactors",
+    "slug": "preventsen",
+    "career_url": "https://carreiras.preventsenior.com.br/",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Proença Supermercados",
+    "ats": "Portal Próprio",
+    "slug": "proenca",
+    "career_url": "https://www.proenca.com.br/trabalhe-conosco",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "Prosegur",
+    "ats": "Portal Próprio",
+    "slug": "prosegur",
+    "career_url": "https://www.prosegur.com.br/trabalhe-conosco",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "PwC",
+    "ats": "Workday",
+    "slug": "pwc",
+    "career_url": "https://pwc.wd3.myworkdayjobs.com/Global_Experienced_Careers",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "RaiaDrogasil",
+    "ats": "Gupy",
+    "slug": "rdsaude-corporativo",
+    "career_url": "https://rdsaude-corporativo.gupy.io",
+    "live_jobs_count": 43
+  },
+  {
+    "company": "Raizen",
+    "ats": "Gupy",
+    "slug": "genteraizen",
+    "career_url": "https://genteraizen.gupy.io",
+    "live_jobs_count": 273
+  },
+  {
+    "company": "Ramper",
+    "ats": "Portal Próprio",
+    "slug": "ramper",
+    "career_url": "https://ramper.com.br",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "RD Raia Drogasil",
+    "ats": "Gupy",
+    "slug": "rdsaude-corporativo",
+    "career_url": "https://rdsaude-corporativo.gupy.io",
+    "live_jobs_count": 43
+  },
+  {
+    "company": "RD Raiadrogasil",
+    "ats": "Gupy",
+    "slug": "rdsaude-corporativo",
+    "career_url": "https://rdsaude-corporativo.gupy.io",
+    "live_jobs_count": 43
+  },
+  {
+    "company": "Rede de Carreiras Senac Minas",
+    "ats": "Portal Próprio",
+    "slug": "senacminas",
+    "career_url": "https://www.mg.senac.br/Paginas/trabalhe-conosco.aspx",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "Rede Globo",
+    "ats": "Gupy",
+    "slug": "globo",
+    "career_url": "https://globo.gupy.io",
+    "live_jobs_count": 24
+  },
+  {
+    "company": "Safra",
+    "ats": "Gupy",
+    "slug": "venhasersafra",
+    "career_url": "https://venhasersafra.gupy.io",
+    "live_jobs_count": 34
+  },
+  {
+    "company": "Samsung",
+    "ats": "Inhire",
+    "slug": "samsung",
+    "career_url": "https://samsung.inhire.app/vagas",
+    "live_jobs_count": 4
+  },
+  {
+    "company": "Samsung Research Brazil",
+    "ats": "Inhire",
+    "slug": "samsung",
+    "career_url": "https://samsung.inhire.app/vagas",
+    "live_jobs_count": 4
+  },
+  {
+    "company": "Samsung SDS",
+    "ats": "Inhire",
+    "slug": "samsung",
+    "career_url": "https://samsung.inhire.app/vagas",
+    "live_jobs_count": 4
+  },
+  {
+    "company": "Santander / F1RST",
+    "ats": "Workday",
+    "slug": "santander",
+    "career_url": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+    "live_jobs_count": 40
+  },
+  {
+    "company": "saúde Petrobras",
+    "ats": "Portal Próprio",
+    "slug": "saudepetrobras",
+    "career_url": "https://saudepetrobras.com.br/institucional/trabalhe-conosco/",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "Sebrae AL",
+    "ats": "Portal Próprio",
+    "slug": "sebraeal",
+    "career_url": "https://www.sebrae.com.br/sites/PortalSebrae/ufs/al/trabalhe-conosco",
+    "live_jobs_count": 3
+  },
+  {
+    "company": "Seguros Unimed",
+    "ats": "Gupy",
+    "slug": "unimednacional",
+    "career_url": "https://unimednacional.gupy.io",
+    "live_jobs_count": 19
+  },
+  {
+    "company": "SENAC DN",
+    "ats": "Portal Próprio",
+    "slug": "senacdn",
+    "career_url": "https://www.dn.senac.br/trabalhe-conosco/",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "Senac Minas",
+    "ats": "Portal Próprio",
+    "slug": "senacminas",
+    "career_url": "https://www.mg.senac.br/Paginas/trabalhe-conosco.aspx",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "Senior Sistemas",
+    "ats": "Senior HCM",
+    "slug": "senior",
+    "career_url": "https://vemprasenior.portaldetalentos.senior.com.br/jobs",
+    "live_jobs_count": 6
+  },
+  {
+    "company": "Sense Inteligência Financeira",
+    "ats": "Portal Próprio",
+    "slug": "sense",
+    "career_url": "https://sensefinanceira.com.br",
+    "live_jobs_count": 2
+  },
+  {
+    "company": "Serasa",
+    "ats": "SmartRecruiters",
+    "slug": "Experian",
+    "career_url": "https://jobs.smartrecruiters.com/Experian",
+    "live_jobs_count": 384
+  },
+  {
+    "company": "Sesc",
+    "ats": "Portal Próprio",
+    "slug": "sesc",
+    "career_url": "https://www.sesc.com.br/trabalhe-conosco/",
+    "live_jobs_count": 10
+  },
+  {
+    "company": "Sicoob",
+    "ats": "Gupy",
+    "slug": "sicoobcredicom",
+    "career_url": "https://sicoobcredicom.gupy.io",
+    "live_jobs_count": 9
+  },
+  {
+    "company": "Sinqia",
+    "ats": "Gupy",
+    "slug": "sinqia",
+    "career_url": "https://sinqia.gupy.io",
+    "live_jobs_count": 22
+  },
+  {
+    "company": "Softplan",
+    "ats": "Gupy",
+    "slug": "softplan",
+    "career_url": "https://softplan.gupy.io",
+    "live_jobs_count": 3
+  },
+  {
+    "company": "Stefanini consultoria",
+    "ats": "Gupy",
+    "slug": "stefanini",
+    "career_url": "https://stefanini.gupy.io",
+    "live_jobs_count": 284
+  },
+  {
+    "company": "Stefanini IT",
+    "ats": "Gupy",
+    "slug": "stefanini",
+    "career_url": "https://stefanini.gupy.io",
+    "live_jobs_count": 284
+  },
+  {
+    "company": "Stone",
+    "ats": "Inhire",
+    "slug": "stone",
+    "career_url": "https://stone.inhire.app/vagas",
+    "live_jobs_count": 0
+  },
+  {
+    "company": "Stone Instituição de Pagamentos SA",
+    "ats": "Inhire",
+    "slug": "stone",
+    "career_url": "https://stone.inhire.app/vagas",
+    "live_jobs_count": 0
+  },
+  {
+    "company": "SulAmérica",
+    "ats": "Inhire",
+    "slug": "sulamerica",
+    "career_url": "https://sulamerica.inhire.app/vagas",
+    "live_jobs_count": 1
+  },
+  {
+    "company": "Supermercados SuperAsa Itaituba",
+    "ats": "Portal Próprio",
+    "slug": "superasa",
+    "career_url": "https://superasa.com.br",
+    "live_jobs_count": 2
+  },
+  {
+    "company": "Sírio-Libanês",
+    "ats": "Vagas.com",
+    "slug": "hospital-sirio-libanes",
+    "career_url": "https://www.vagas.com.br/empregos/hospital-sirio-libanes",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "TCS",
+    "ats": "Portal Próprio",
+    "slug": "tcs",
+    "career_url": "https://ibegin.tcs.com/iBegin/",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "TCS - Tata Consultancy Services",
+    "ats": "Portal Próprio",
+    "slug": "tcs",
+    "career_url": "https://ibegin.tcs.com/iBegin/",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "Teleperformance",
+    "ats": "Portal Próprio",
+    "slug": "teleperformance",
+    "career_url": "https://www.teleperformance.com/pt-br/carreiras/",
+    "live_jobs_count": 30
+  },
+  {
+    "company": "ThoughtWorks",
+    "ats": "Greenhouse",
+    "slug": "thoughtworks",
+    "career_url": "https://boards.greenhouse.io/thoughtworks",
+    "live_jobs_count": 39
+  },
+  {
+    "company": "TIVIT",
+    "ats": "Inhire",
+    "slug": "tivit-poc",
+    "career_url": "https://tivit-poc.inhire.app/vagas",
+    "live_jobs_count": 3
+  },
+  {
+    "company": "Tivit TDX",
+    "ats": "Inhire",
+    "slug": "tivit-poc",
+    "career_url": "https://tivit-poc.inhire.app/vagas",
+    "live_jobs_count": 3
+  },
+  {
+    "company": "TNT fedex",
+    "ats": "Portal Próprio",
+    "slug": "fedex",
+    "career_url": "https://careers.fedex.com",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Tools",
+    "ats": "Workday",
+    "slug": "santander",
+    "career_url": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+    "live_jobs_count": 40
+  },
+  {
+    "company": "TOOLS - Santander",
+    "ats": "Workday",
+    "slug": "santander",
+    "career_url": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+    "live_jobs_count": 40
+  },
+  {
+    "company": "Unicesumar - Maringá",
+    "ats": "Inhire",
+    "slug": "vitru",
+    "career_url": "https://vitru.inhire.app/vagas",
+    "live_jobs_count": 543
+  },
+  {
+    "company": "Unico ID Tech",
+    "ats": "Inhire",
+    "slug": "unicoskill",
+    "career_url": "https://unicoskill.inhire.app/vagas",
+    "live_jobs_count": 6
+  },
+  {
+    "company": "Unico IDTech",
+    "ats": "Inhire",
+    "slug": "unicoskill",
+    "career_url": "https://unicoskill.inhire.app/vagas",
+    "live_jobs_count": 6
+  },
+  {
+    "company": "Unimed Fortaleza",
+    "ats": "Gupy",
+    "slug": "unimedfortaleza",
+    "career_url": "https://unimedfortaleza.gupy.io",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Unimed Vitória",
+    "ats": "Portal Próprio",
+    "slug": "unimedvitoria",
+    "career_url": "https://www.unimed.coop.br/site/web/vitoria/trabalhe-conosco",
+    "live_jobs_count": 5
+  },
+  {
+    "company": "UOL",
+    "ats": "Gupy",
+    "slug": "uoledtech",
+    "career_url": "https://uoledtech.gupy.io",
+    "live_jobs_count": 16
+  },
+  {
+    "company": "UPS",
+    "ats": "Portal Próprio",
+    "slug": "ups",
+    "career_url": "https://www.jobs-ups.com",
+    "live_jobs_count": 10
+  },
+  {
+    "company": "Via Varejo",
+    "ats": "Gupy",
+    "slug": "corporativogrupocasasbahia",
+    "career_url": "https://corporativogrupocasasbahia.gupy.io",
+    "live_jobs_count": 9
+  },
+  {
+    "company": "Viavarejo (casas bahia)",
+    "ats": "Gupy",
+    "slug": "corporativogrupocasasbahia",
+    "career_url": "https://corporativogrupocasasbahia.gupy.io",
+    "live_jobs_count": 9
+  },
+  {
+    "company": "Vivaz/grupo cyrela",
+    "ats": "Gupy",
+    "slug": "cyrela",
+    "career_url": "https://cyrela.gupy.io",
+    "live_jobs_count": 35
+  },
+  {
+    "company": "Vivo Telefônica",
+    "ats": "Gupy",
+    "slug": "vivo",
+    "career_url": "https://vivo.gupy.io",
+    "live_jobs_count": 107
+  },
+  {
+    "company": "WebGlobal | Data • AI • Intelligence",
+    "ats": "Portal Próprio",
+    "slug": "webglobal",
+    "career_url": "https://webglobal.com.br",
+    "live_jobs_count": 2
+  },
+  {
+    "company": "Webhelp + Concentrix Brazil",
+    "ats": "Pandapé",
+    "slug": "concentrixbrasil",
+    "career_url": "https://concentrixbrasil.pandape.infojobs.com.br",
+    "live_jobs_count": 25
+  },
+  {
+    "company": "Wildlife Studios",
+    "ats": "Greenhouse",
+    "slug": "wildlifestudios",
+    "career_url": "https://boards.greenhouse.io/wildlifestudios",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Wipro",
+    "ats": "Portal Próprio",
+    "slug": "wipro",
+    "career_url": "https://careers.wipro.com",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "Wipro do Brasil",
+    "ats": "Portal Próprio",
+    "slug": "wipro",
+    "career_url": "https://careers.wipro.com",
+    "live_jobs_count": 20
+  },
+  {
+    "company": "XP Investimentos",
+    "ats": "Greenhouse",
+    "slug": "xpinc",
+    "career_url": "https://boards.greenhouse.io/xpinc",
+    "live_jobs_count": 129
+  },
+  {
+    "company": "Yeb Inteligência de Mercado",
+    "ats": "Portal Próprio",
+    "slug": "yeb",
+    "career_url": "https://www.yeb.com.br",
+    "live_jobs_count": 2
+  },
+  {
+    "company": "Zup",
+    "ats": "Greenhouse",
+    "slug": "zupinnovation",
+    "career_url": "https://boards.greenhouse.io/zupinnovation",
+    "live_jobs_count": 4
+  },
+  {
+    "company": "zurich",
+    "ats": "Workday",
+    "slug": "zurich",
+    "career_url": "https://zurich.wd3.myworkdayjobs.com/pt-BR/External",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Zurich Santander Insurance America",
+    "ats": "Workday",
+    "slug": "zurich",
+    "career_url": "https://zurich.wd3.myworkdayjobs.com/pt-BR/External",
+    "live_jobs_count": 15
+  },
+  {
+    "company": "Zurich Seguros",
+    "ats": "Workday",
+    "slug": "zurich",
+    "career_url": "https://zurich.wd3.myworkdayjobs.com/pt-BR/External",
+    "live_jobs_count": 15
+  }
+]

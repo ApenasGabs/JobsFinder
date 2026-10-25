@@ -4,7 +4,16 @@ import { runWithConcurrency } from "../utils/pool.js";
 import { ConfigService } from "./config.js";
 import { LoggerService } from "./logger.js";
 
-export type AtsPlatform = "GUPY" | "GREENHOUSE" | "LEVER" | "ASHBY" | "WORKABLE" | "INHIRE";
+export type AtsPlatform =
+  | "GUPY"
+  | "GREENHOUSE"
+  | "LEVER"
+  | "ASHBY"
+  | "WORKABLE"
+  | "INHIRE"
+  | "SOLIDES"
+  | "QUICKIN"
+  | "SMARTRECRUITERS";
 
 export interface VerifyResult {
   ok: boolean;
@@ -22,7 +31,19 @@ export class CompanyAuditorService {
 
   public static normalizeAts(ats: string): AtsPlatform | null {
     const upper = ats.trim().toUpperCase();
-    if (["GUPY", "GREENHOUSE", "LEVER", "ASHBY", "WORKABLE", "INHIRE"].includes(upper)) {
+    if (
+      [
+        "GUPY",
+        "GREENHOUSE",
+        "LEVER",
+        "ASHBY",
+        "WORKABLE",
+        "INHIRE",
+        "SOLIDES",
+        "QUICKIN",
+        "SMARTRECRUITERS",
+      ].includes(upper)
+    ) {
       return upper as AtsPlatform;
     }
     return null;
@@ -42,6 +63,12 @@ export class CompanyAuditorService {
         return "workableCompanies";
       case "INHIRE":
         return "inhireCompanies";
+      case "SOLIDES":
+        return "solidesCompanies";
+      case "QUICKIN":
+        return "quickinCompanies";
+      case "SMARTRECRUITERS":
+        return "smartrecruitersCompanies";
     }
   }
 
@@ -107,6 +134,35 @@ export class CompanyAuditorService {
             Origin: `https://${cleanSlug}.inhire.app`,
             Referer: `https://${cleanSlug}.inhire.app/`,
           },
+        };
+      }
+      case "SOLIDES": {
+        return {
+          url: `https://apigw.solides.com.br/jobs/v3/companies/${cleanSlug}/vacancies?page=1&take=25`,
+          method: "GET",
+          headers: {
+            ...defaultHeaders,
+            Origin: `https://${cleanSlug}.vagas.solides.com.br`,
+            Referer: `https://${cleanSlug}.vagas.solides.com.br/`,
+          },
+        };
+      }
+      case "QUICKIN": {
+        return {
+          url: `https://api.quickin.io/public/careersites/${cleanSlug}/jobs?limit=30&page=1`,
+          method: "GET",
+          headers: {
+            ...defaultHeaders,
+            Origin: "https://jobs.quickin.io",
+            Referer: `https://jobs.quickin.io/${cleanSlug}/jobs`,
+          },
+        };
+      }
+      case "SMARTRECRUITERS": {
+        return {
+          url: `https://api.smartrecruiters.com/v1/companies/${cleanSlug}/postings?limit=25`,
+          method: "GET",
+          headers: defaultHeaders,
         };
       }
     }
@@ -177,8 +233,16 @@ export class CompanyAuditorService {
             jobsCount = data.jobsPage.length;
           } else if (Array.isArray(data?.results)) {
             jobsCount = data.results.length;
+          } else if (typeof data?.count === "number") {
+            jobsCount = data.count;
           } else if (typeof data?.total === "number") {
             jobsCount = data.total;
+          } else if (Array.isArray(data?.data)) {
+            jobsCount = data.data.length;
+          } else if (Array.isArray(data?.docs)) {
+            jobsCount = data.docs.length;
+          } else if (Array.isArray(data?.content)) {
+            jobsCount = data.totalFound !== undefined ? data.totalFound : data.content.length;
           }
 
           if (ats === "INHIRE" && (!data?.tenantName || jobsCount === 0)) {
@@ -292,8 +356,16 @@ export class CompanyAuditorService {
             jobsCount = data.jobsPage.length;
           } else if (Array.isArray(data?.results)) {
             jobsCount = data.results.length;
+          } else if (typeof data?.count === "number") {
+            jobsCount = data.count;
           } else if (typeof data?.total === "number") {
             jobsCount = data.total;
+          } else if (Array.isArray(data?.data)) {
+            jobsCount = data.data.length;
+          } else if (Array.isArray(data?.docs)) {
+            jobsCount = data.docs.length;
+          } else if (Array.isArray(data?.content)) {
+            jobsCount = data.totalFound !== undefined ? data.totalFound : data.content.length;
           }
 
           if (ats === "INHIRE" && (!data?.tenantName || jobsCount === 0)) {
@@ -358,7 +430,16 @@ export class CompanyAuditorService {
 
       const platforms: AtsPlatform[] = targetAts
         ? [targetAts]
-        : ["GUPY", "GREENHOUSE", "LEVER", "ASHBY", "WORKABLE", "INHIRE"];
+        : [
+            "GUPY",
+            "GREENHOUSE",
+            "LEVER",
+            "ASHBY",
+            "WORKABLE",
+            "INHIRE",
+            "SOLIDES",
+            "QUICKIN",
+          ];
 
       for (const p of platforms) {
         const key = this.getConfigKeyForAts(p);

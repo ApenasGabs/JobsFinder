@@ -604,6 +604,9 @@ export class WhatsAppBot {
       ...(config.leverCompanies || []),
       ...(config.greenhouseCompanies || []),
       ...(config.workableCompanies || []),
+      ...(config.solidesCompanies || []),
+      ...(config.quickinCompanies || []),
+      ...(config.smartrecruitersCompanies || []),
     ].filter((c) => c.enabled !== false).length;
 
     const supabaseStats =

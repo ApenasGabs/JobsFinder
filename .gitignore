@@ -27,6 +27,9 @@ dist-ssr
 data/jobs.backup.*.json
 data/*.tmp
 data/whatsapp_queue.json
+data/whatsapp_digest_queue.json
+dist_old_root/
+data/logs_old_root/
 
 # Private local context and environments
 AGENTS.md

@@ -1,6 +1,14 @@
 import { resilientFetch } from "../utils/fetch.js";
 
-export type SupportedAts = "GUPY" | "GREENHOUSE" | "LEVER" | "ASHBY" | "INHIRE" | "WORKABLE";
+export type SupportedAts =
+  | "GUPY"
+  | "GREENHOUSE"
+  | "LEVER"
+  | "ASHBY"
+  | "INHIRE"
+  | "WORKABLE"
+  | "SOLIDES"
+  | "QUICKIN";
 
 export interface AtsMatch {
   ats: SupportedAts;
@@ -189,6 +197,40 @@ export function extractAtsFromUrl(url: string): AtsMatch | null {
           ats: "WORKABLE",
           slug,
           portalUrl: `https://apply.workable.com/${slug}`,
+          source: "direct_link",
+          confidence: 1.0,
+        };
+      }
+    }
+
+    // 7. Sólides: https://{slug}.vagas.solides.com.br...
+    if (host.endsWith(".vagas.solides.com.br")) {
+      const slug = host.replace(/\.vagas\.solides\.com\.br$/, "");
+      if (
+        slug &&
+        slug !== "www" &&
+        slug !== "perfil" &&
+        slug !== "auth" &&
+        slug !== "staging"
+      ) {
+        return {
+          ats: "SOLIDES",
+          slug,
+          portalUrl: `https://${slug}.vagas.solides.com.br`,
+          source: "direct_link",
+          confidence: 1.0,
+        };
+      }
+    }
+
+    // 8. Quickin: https://jobs.quickin.io/{slug}...
+    if (host === "jobs.quickin.io") {
+      const slug = pathname.split("/").filter(Boolean)[0];
+      if (slug && slug !== "jobs" && slug !== "apply" && slug !== "login") {
+        return {
+          ats: "QUICKIN",
+          slug,
+          portalUrl: `https://jobs.quickin.io/${slug}`,
           source: "direct_link",
           confidence: 1.0,
         };

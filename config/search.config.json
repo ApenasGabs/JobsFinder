@@ -26,7 +26,7 @@
   "sources": [
     {
       "id": "GUPY",
-      "name": "Gupy (508 Empresas)",
+      "name": "Gupy (510 Empresas)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
@@ -90,6 +90,27 @@
     {
       "id": "GEEKHUNTER",
       "name": "GeekHunter",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "SOLIDES",
+      "name": "Sólides (91 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "QUICKIN",
+      "name": "Quickin (36 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "SMARTRECRUITERS",
+      "name": "SmartRecruiters (8 Empresas)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
@@ -847,15 +868,15 @@
       "enabled": true
     },
     {
-      "name": "Colégio Ábaco",
-      "link": "https://abaco.gupy.io",
-      "slug": "abaco",
-      "enabled": true
-    },
-    {
       "name": "Colliers",
       "slug": "colliers",
       "link": "https://colliers.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Colégio Ábaco",
+      "link": "https://abaco.gupy.io",
+      "slug": "abaco",
       "enabled": true
     },
     {
@@ -913,12 +934,6 @@
       "enabled": true
     },
     {
-      "name": "Consórcio Mycon",
-      "slug": "mycon",
-      "link": "https://mycon.gupy.io",
-      "enabled": true
-    },
-    {
       "name": "Construct IN",
       "slug": "constructin",
       "link": "https://constructin.gupy.io",
@@ -928,6 +943,12 @@
       "name": "Construmarket",
       "slug": "construmarket",
       "link": "https://construmarket.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Consórcio Mycon",
+      "slug": "mycon",
+      "link": "https://mycon.gupy.io",
       "enabled": true
     },
     {
@@ -1225,21 +1246,27 @@
       "enabled": true
     },
     {
-      "name": "Estágio Tempest",
-      "link": "https://estagiotempest.gupy.io",
-      "slug": "estagiotempest",
-      "enabled": true
-    },
-    {
       "name": "Estante Mágica",
       "slug": "estante-magica",
       "link": "https://estante-magica.gupy.io",
       "enabled": true
     },
     {
+      "name": "Estágio Tempest",
+      "link": "https://estagiotempest.gupy.io",
+      "slug": "estagiotempest",
+      "enabled": true
+    },
+    {
       "name": "Evoluservices",
       "link": "https://evoluservices.gupy.io",
       "slug": "evoluservices",
+      "enabled": true
+    },
+    {
+      "name": "Evolux",
+      "link": "https://evolux.gupy.io",
+      "slug": "evolux",
       "enabled": true
     },
     {
@@ -2023,27 +2050,21 @@
       "enabled": true
     },
     {
-      "name": "Méliuz",
-      "slug": "meliuz",
-      "link": "https://meliuz.gupy.io",
-      "enabled": true
-    },
-    {
       "name": "Memed",
       "slug": "memed",
       "link": "https://memed.gupy.io",
       "enabled": true
     },
     {
-      "name": "Mercadão dos Óculos",
-      "link": "https://mercadaodosoculos.gupy.io",
-      "slug": "mercadaodosoculos",
-      "enabled": true
-    },
-    {
       "name": "Mercado Bitcoin",
       "slug": "mb",
       "link": "https://mb.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Mercadão dos Óculos",
+      "link": "https://mercadaodosoculos.gupy.io",
+      "slug": "mercadaodosoculos",
       "enabled": true
     },
     {
@@ -2146,6 +2167,12 @@
       "name": "Mutant",
       "link": "https://mutantbrvagas.gupy.io",
       "slug": "mutantbrvagas",
+      "enabled": true
+    },
+    {
+      "name": "Méliuz",
+      "slug": "meliuz",
+      "link": "https://meliuz.gupy.io",
       "enabled": true
     },
     {
@@ -2305,12 +2332,6 @@
       "enabled": true
     },
     {
-      "name": "Página de EuroChem",
-      "link": "https://carreiras.gupy.io",
-      "slug": "carreiras",
-      "enabled": true
-    },
-    {
       "name": "Petz",
       "slug": "petz",
       "link": "https://petz.gupy.io",
@@ -2371,12 +2392,6 @@
       "enabled": true
     },
     {
-      "name": "Portábilis",
-      "slug": "portabilis",
-      "link": "https://portabilis.gupy.io",
-      "enabled": true
-    },
-    {
       "name": "Portal Solar",
       "link": "https://portalsolar.gupy.io",
       "slug": "portalsolar",
@@ -2386,6 +2401,12 @@
       "name": "Porto",
       "slug": "porto",
       "link": "https://porto.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Portábilis",
+      "slug": "portabilis",
+      "link": "https://portabilis.gupy.io",
       "enabled": true
     },
     {
@@ -2422,6 +2443,12 @@
       "name": "Pulsus",
       "slug": "pulsus",
       "link": "https://pulsus.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Página de EuroChem",
+      "link": "https://carreiras.gupy.io",
+      "slug": "carreiras",
       "enabled": true
     },
     {
@@ -3001,6 +3028,12 @@
       "enabled": true
     },
     {
+      "name": "Vetta",
+      "link": "https://vetta.gupy.io",
+      "slug": "vetta",
+      "enabled": true
+    },
+    {
       "name": "VExpenses",
       "slug": "vexpenses",
       "link": "https://vexpenses.gupy.io",
@@ -3010,12 +3043,6 @@
       "name": "Viaflow",
       "link": "https://viaflow.gupy.io",
       "slug": "viaflow",
-      "enabled": true
-    },
-    {
-      "name": "Víssimo Group",
-      "slug": "vissimo",
-      "link": "https://vissimo.gupy.io",
       "enabled": true
     },
     {
@@ -3085,6 +3112,12 @@
       "enabled": true
     },
     {
+      "name": "Víssimo Group",
+      "slug": "vissimo",
+      "link": "https://vissimo.gupy.io",
+      "enabled": true
+    },
+    {
       "name": "W3haus",
       "slug": "w3hauscarreiras",
       "link": "https://w3hauscarreiras.gupy.io",
@@ -3142,6 +3175,96 @@
       "name": "ZG Soluções",
       "slug": "zgteam",
       "link": "https://zgteam.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Algar Tech",
+      "slug": "algar",
+      "link": "https://algar.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Alterdata",
+      "slug": "alterdata",
+      "link": "https://alterdata.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Atacadão",
+      "slug": "grupocarrefourbrasil",
+      "link": "https://grupocarrefourbrasil.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Banco Daycoval",
+      "slug": "bancodaycoval",
+      "link": "https://bancodaycoval.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Banco Safra",
+      "slug": "venhasersafra",
+      "link": "https://venhasersafra.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "E aí Ipiranga",
+      "slug": "ipiranga",
+      "link": "https://ipiranga.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Equatorial Energia Goiás",
+      "slug": "equatorialenergia",
+      "link": "https://equatorialenergia.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Faculdade Unimed",
+      "slug": "faculdadeunimed",
+      "link": "https://faculdadeunimed.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Farmácias Pague Menos",
+      "slug": "paguemenosextrafarma",
+      "link": "https://paguemenosextrafarma.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Grendene",
+      "slug": "facapartegrendene",
+      "link": "https://facapartegrendene.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Hapvida",
+      "slug": "hapvidandi",
+      "link": "https://hapvidandi.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Intelipost",
+      "slug": "intelipost",
+      "link": "https://intelipost.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Paschoalotto",
+      "slug": "paschoalotto",
+      "link": "https://paschoalotto.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Raizen",
+      "slug": "genteraizen",
+      "link": "https://genteraizen.gupy.io",
+      "enabled": true
+    },
+    {
+      "name": "Unimed Fortaleza",
+      "slug": "unimedfortaleza",
+      "link": "https://unimedfortaleza.gupy.io",
       "enabled": true
     }
   ],
@@ -4653,6 +4776,66 @@
       "slug": "zig",
       "link": "https://zig.inhire.app",
       "enabled": true
+    },
+    {
+      "name": "Banco Bradesco",
+      "slug": "bradesco",
+      "link": "https://bradesco.inhire.app/vagas",
+      "enabled": true
+    },
+    {
+      "name": "Carrefour Icatu brasil",
+      "slug": "icatu",
+      "link": "https://icatu.inhire.app/vagas",
+      "enabled": true
+    },
+    {
+      "name": "Deloitte",
+      "slug": "deloitte",
+      "link": "https://deloitte.inhire.app/vagas",
+      "enabled": true
+    },
+    {
+      "name": "KPMG",
+      "slug": "kpmg",
+      "link": "https://kpmg.inhire.app/vagas",
+      "enabled": true
+    },
+    {
+      "name": "luiza labs",
+      "slug": "magalu",
+      "link": "https://magalu.inhire.app/vagas",
+      "enabled": true
+    },
+    {
+      "name": "Mapfre",
+      "slug": "mapfrepoc",
+      "link": "https://mapfrepoc.inhire.app/vagas",
+      "enabled": true
+    },
+    {
+      "name": "Samsung",
+      "slug": "samsung",
+      "link": "https://samsung.inhire.app/vagas",
+      "enabled": true
+    },
+    {
+      "name": "SulAmérica",
+      "slug": "sulamerica",
+      "link": "https://sulamerica.inhire.app/vagas",
+      "enabled": true
+    },
+    {
+      "name": "TIVIT",
+      "slug": "tivit-poc",
+      "link": "https://tivit-poc.inhire.app/vagas",
+      "enabled": true
+    },
+    {
+      "name": "Unicesumar - Maringá",
+      "slug": "vitru",
+      "link": "https://vitru.inhire.app/vagas",
+      "enabled": true
     }
   ],
   "ashbyCompanies": [
@@ -5233,6 +5416,12 @@
       "slug": "zoox",
       "link": "https://jobs.lever.co/zoox",
       "enabled": true
+    },
+    {
+      "name": "Decolar",
+      "slug": "despegar",
+      "link": "https://jobs.lever.co/despegar",
+      "enabled": true
     }
   ],
   "greenhouseCompanies": [
@@ -5529,6 +5718,24 @@
       "slug": "zupinnovation",
       "link": "https://boards.greenhouse.io/zupinnovation",
       "enabled": true
+    },
+    {
+      "name": "Pinterest",
+      "slug": "pinterest",
+      "link": "https://boards.greenhouse.io/pinterest",
+      "enabled": true
+    },
+    {
+      "name": "ThoughtWorks",
+      "slug": "thoughtworks",
+      "link": "https://boards.greenhouse.io/thoughtworks",
+      "enabled": true
+    },
+    {
+      "name": "Wildlife Studios",
+      "slug": "wildlifestudios",
+      "link": "https://boards.greenhouse.io/wildlifestudios",
+      "enabled": true
     }
   ],
   "workableCompanies": [
@@ -5668,6 +5875,822 @@
       "name": "Weekday AI",
       "slug": "weekday-1",
       "link": "https://apply.workable.com/weekday-1",
+      "enabled": true
+    }
+  ],
+  "solidesCompanies": [
+    {
+      "name": "AAWZ Partners",
+      "slug": "aawzpartners",
+      "link": "https://aawzpartners.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "ACOM Sistemas",
+      "slug": "acomsistemas",
+      "link": "https://acomsistemas.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "ALCANS",
+      "slug": "alcans",
+      "link": "https://alcans.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Alcans Telecom",
+      "slug": "alcans",
+      "link": "https://alcans.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "ALTAVE",
+      "slug": "carreirasaltave",
+      "link": "https://carreirasaltave.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Amorim Global",
+      "slug": "amorimglobal",
+      "link": "https://amorimglobal.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "AOGE SISTEMAS S.A.",
+      "slug": "eloca",
+      "link": "https://eloca.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Autoconf",
+      "slug": "autoconf",
+      "link": "https://autoconf.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Be - Currículo Bilíngue",
+      "slug": "be",
+      "link": "https://be.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Benvista Oftalmologia",
+      "slug": "benvistaoftalmologia",
+      "link": "https://benvistaoftalmologia.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Besser Home",
+      "slug": "besserhome",
+      "link": "https://besserhome.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "BMP",
+      "slug": "bmp",
+      "link": "https://bmp.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Book Fair",
+      "slug": "bookfair",
+      "link": "https://bookfair.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Bulbe Energia",
+      "slug": "bulbe",
+      "link": "https://bulbe.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Canal Verde - Cooperativa de Energias Renováveis",
+      "slug": "canalverdeenergia",
+      "link": "https://canalverdeenergia.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Captei - Inteligência em Negócios Imobiliários",
+      "slug": "capteii",
+      "link": "https://capteii.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Carneiros Temporada",
+      "slug": "carneirostemporada",
+      "link": "https://carneirostemporada.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Central dos Benefícios",
+      "slug": "centraldosbeneficiosnl",
+      "link": "https://centraldosbeneficiosnl.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Centro Universitário FAMINAS BH",
+      "slug": "faminasbh",
+      "link": "https://faminasbh.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Chaintech",
+      "slug": "chaintech",
+      "link": "https://chaintech.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Check Commerce",
+      "slug": "checkcommerce",
+      "link": "https://checkcommerce.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "ClickCannabis",
+      "slug": "clickcannabis",
+      "link": "https://clickcannabis.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Contmatic",
+      "slug": "trabalhecomacontmatic",
+      "link": "https://trabalhecomacontmatic.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Delfos",
+      "slug": "delfosim",
+      "link": "https://delfosim.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Develcode",
+      "slug": "develcode",
+      "link": "https://develcode.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Dialog",
+      "slug": "dialog",
+      "link": "https://vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Digital Work Computer Services",
+      "slug": "digitalwork",
+      "link": "https://digitalwork.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Dynamox",
+      "slug": "dynamox",
+      "link": "https://dynamox.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "EAG Educação",
+      "slug": "eag",
+      "link": "https://eag.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Eixo.Digital",
+      "slug": "eixodigital",
+      "link": "https://eixodigital.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Escriba",
+      "slug": "escriba",
+      "link": "https://escriba.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Estrelas Internet",
+      "slug": "estrelasinternet",
+      "link": "https://estrelasinternet.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Fama Empresarial",
+      "slug": "famaempresarial",
+      "link": "https://famaempresarial.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Farmácia Artesanal",
+      "slug": "vagasfarmaciaartesanal",
+      "link": "https://vagasfarmaciaartesanal.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "FGR Incorporações SA",
+      "slug": "fgr",
+      "link": "https://fgr.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Financy",
+      "slug": "financy",
+      "link": "https://financy.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "FIT Economia de Energia",
+      "slug": "fitenergia",
+      "link": "https://fitenergia.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "FUTURO MARKETING DIGITAL",
+      "slug": "futuromarketingdigital",
+      "link": "https://futuromarketingdigital.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Green RH",
+      "slug": "greenrh",
+      "link": "https://vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Adriano Cobuccio",
+      "slug": "grupoadrianocobuccio",
+      "link": "https://grupoadrianocobuccio.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Grupo CLIGED",
+      "slug": "grupocliged",
+      "link": "https://grupocliged.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Constancy",
+      "slug": "vagasgrupoconstancy",
+      "link": "https://vagasgrupoconstancy.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Grupo HOF 360",
+      "slug": "hof360",
+      "link": "https://hof360.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Revise",
+      "slug": "gruporevise",
+      "link": "https://gruporevise.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Hiper Saúde",
+      "slug": "grupohipersaude",
+      "link": "https://grupohipersaude.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Hospcom Hospitalar",
+      "slug": "hospcom",
+      "link": "https://hospcom.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "inChurch",
+      "slug": "inchurch",
+      "link": "https://inchurch.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "INDECX",
+      "slug": "indecx",
+      "link": "https://indecx.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Inove Ideias e Soluções",
+      "slug": "inoveideiasesolucoes",
+      "link": "https://inoveideiasesolucoes.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Integrativa",
+      "slug": "integrativa",
+      "link": "https://integrativa.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Invenzi",
+      "slug": "invenzi",
+      "link": "https://invenzi.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Iqnus Tecnologia",
+      "slug": "iqnus",
+      "link": "https://iqnus.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Jetimob",
+      "slug": "jetimob",
+      "link": "https://jetimob.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Karizoda Growth & IA",
+      "slug": "karizoda",
+      "link": "https://karizoda.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "LCR Contadores Associados",
+      "slug": "lcr",
+      "link": "https://lcr.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Link School",
+      "slug": "linkschool",
+      "link": "https://linkschool.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Litroz | Gestão Inteligente de Combustível",
+      "slug": "litroz",
+      "link": "https://litroz.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Loovi",
+      "slug": "loovi",
+      "link": "https://loovi.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "MakeOne",
+      "slug": "makeone",
+      "link": "https://makeone.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Maxtrack",
+      "slug": "maxtrack",
+      "link": "https://maxtrack.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "MED Review",
+      "slug": "medreview",
+      "link": "https://vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Meep",
+      "slug": "meep",
+      "link": "https://meep.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Motorista PX",
+      "slug": "motoristapx",
+      "link": "https://motoristapx.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "MOURA'S RH",
+      "slug": "mourasrh",
+      "link": "https://vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "MULTIPEDIDOS",
+      "slug": "multipedidos",
+      "link": "https://multipedidos.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "MundoMaker",
+      "slug": "mundomaker",
+      "link": "https://mundomaker.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Muskinha Design que cuida",
+      "slug": "muskinha",
+      "link": "https://muskinha.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Nutrição Sem Fronteiras",
+      "slug": "nutricaosemfronteiras",
+      "link": "https://nutricaosemfronteiras.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Opet",
+      "slug": "editoraopet",
+      "link": "https://editoraopet.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "OTTIMIZZA",
+      "slug": "ottimizza",
+      "link": "https://ottimizza.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Paketá",
+      "slug": "paketa",
+      "link": "https://paketa.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Pinbank",
+      "slug": "vemserpinbank",
+      "link": "https://vemserpinbank.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "PORTAL TELEMEDICINA",
+      "slug": "portaltelemedicina",
+      "link": "https://portaltelemedicina.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Prismafive",
+      "slug": "prismafivetech",
+      "link": "https://prismafivetech.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "PsicoManager",
+      "slug": "psicomanager",
+      "link": "https://psicomanager.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Reaqt Water Technologies",
+      "slug": "reaqtwater",
+      "link": "https://reaqtwater.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Roots Gestão de Pessoas",
+      "slug": "rootsgestao",
+      "link": "https://rootsgestao.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Rvops",
+      "slug": "rvops",
+      "link": "https://rvops.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Senhor Contábil",
+      "slug": "senhorcontabil",
+      "link": "https://senhorcontabil.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Sicoob Credicitrus",
+      "slug": "credicitrus",
+      "link": "https://credicitrus.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "SIEG",
+      "slug": "carreirasieg",
+      "link": "https://carreirasieg.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "SIEG Soluções Fiscais Estratégicas",
+      "slug": "carreirasieg",
+      "link": "https://carreirasieg.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Solumedi Franquias",
+      "slug": "rhsolumedi",
+      "link": "https://rhsolumedi.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Sweet Secrets",
+      "slug": "sweetsecrets",
+      "link": "https://sweetsecrets.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Track.co",
+      "slug": "trackindecx",
+      "link": "https://trackindecx.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Trentini",
+      "slug": "trentini",
+      "link": "https://trentini.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Uncover",
+      "slug": "uncover",
+      "link": "https://vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Unit",
+      "slug": "somosunit",
+      "link": "https://somosunit.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "VASCO DA GAMA SAF",
+      "slug": "vascodagamasaf",
+      "link": "https://vascodagamasaf.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Very Tecnologia",
+      "slug": "verytecnologia",
+      "link": "https://verytecnologia.vagas.solides.com.br",
+      "enabled": true
+    },
+    {
+      "name": "WEBCONTINENTAL",
+      "slug": "webcontinental",
+      "link": "https://webcontinental.vagas.solides.com.br",
+      "enabled": true
+    }
+  ],
+  "quickinCompanies": [
+    {
+      "name": "Aceleradora Bluefields",
+      "slug": "bluefieldsdev",
+      "link": "https://jobs.quickin.io/bluefieldsdev",
+      "enabled": true
+    },
+    {
+      "name": "alt.bank",
+      "slug": "altbank",
+      "link": "https://jobs.quickin.io/altbank",
+      "enabled": true
+    },
+    {
+      "name": "Apostou.Bet",
+      "slug": "betbr",
+      "link": "https://jobs.quickin.io/betbr",
+      "enabled": true
+    },
+    {
+      "name": "Associated Nerd Global",
+      "slug": "anerd",
+      "link": "https://jobs.quickin.io/anerd",
+      "enabled": true
+    },
+    {
+      "name": "Beyond Soluções",
+      "slug": "imaginebeyond",
+      "link": "https://jobs.quickin.io/imaginebeyond",
+      "enabled": true
+    },
+    {
+      "name": "BotCity",
+      "slug": "botcity",
+      "link": "https://jobs.quickin.io/botcity",
+      "enabled": true
+    },
+    {
+      "name": "Credits Brasil",
+      "slug": "creditsbrasil",
+      "link": "https://jobs.quickin.io/creditsbrasil",
+      "enabled": true
+    },
+    {
+      "name": "dbm contact center",
+      "slug": "dbmcontactcenter",
+      "link": "https://jobs.quickin.io/dbmcontactcenter",
+      "enabled": true
+    },
+    {
+      "name": "eLaw",
+      "slug": "elaw",
+      "link": "https://jobs.quickin.io/elaw",
+      "enabled": true
+    },
+    {
+      "name": "ESTADÃO",
+      "slug": "estadao",
+      "link": "https://jobs.quickin.io/estadao",
+      "enabled": true
+    },
+    {
+      "name": "Estoca",
+      "slug": "estoca",
+      "link": "https://jobs.quickin.io/estoca",
+      "enabled": true
+    },
+    {
+      "name": "Eyecare Health",
+      "slug": "eyecarehealth",
+      "link": "https://jobs.quickin.io/eyecarehealth",
+      "enabled": true
+    },
+    {
+      "name": "Gestão Inovada",
+      "slug": "gestaoinovada",
+      "link": "https://jobs.quickin.io/gestaoinovada",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Acelerador",
+      "slug": "aceleradorempresarial",
+      "link": "https://jobs.quickin.io/aceleradorempresarial",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Hinova",
+      "slug": "hinova",
+      "link": "https://jobs.quickin.io/hinova",
+      "enabled": true
+    },
+    {
+      "name": "H2 Club",
+      "slug": "h2club",
+      "link": "https://jobs.quickin.io/h2club",
+      "enabled": true
+    },
+    {
+      "name": "iestro",
+      "slug": "iestro",
+      "link": "https://jobs.quickin.io/iestro",
+      "enabled": true
+    },
+    {
+      "name": "IPM",
+      "slug": "ipm",
+      "link": "https://jobs.quickin.io/ipm",
+      "enabled": true
+    },
+    {
+      "name": "JOYn Group",
+      "slug": "joynrh",
+      "link": "https://jobs.quickin.io/joynrh",
+      "enabled": true
+    },
+    {
+      "name": "JOYn RH",
+      "slug": "joynrh",
+      "link": "https://jobs.quickin.io/joynrh",
+      "enabled": true
+    },
+    {
+      "name": "Laqus",
+      "slug": "laqus",
+      "link": "https://jobs.quickin.io/laqus",
+      "enabled": true
+    },
+    {
+      "name": "Logical IT",
+      "slug": "logicalit",
+      "link": "https://jobs.quickin.io/logicalit",
+      "enabled": true
+    },
+    {
+      "name": "Mollica IT",
+      "slug": "mollicait",
+      "link": "https://jobs.quickin.io/mollicait",
+      "enabled": true
+    },
+    {
+      "name": "NDD Tech | Brasil",
+      "slug": "nddtech",
+      "link": "https://jobs.quickin.io/nddtech",
+      "enabled": true
+    },
+    {
+      "name": "OZmap",
+      "slug": "ozmap",
+      "link": "https://jobs.quickin.io/ozmap",
+      "enabled": true
+    },
+    {
+      "name": "People Talent",
+      "slug": "peopletalent",
+      "link": "https://jobs.quickin.io/peopletalent",
+      "enabled": true
+    },
+    {
+      "name": "PROAUTO",
+      "slug": "proauto",
+      "link": "https://jobs.quickin.io/proauto",
+      "enabled": true
+    },
+    {
+      "name": "Quickin",
+      "slug": "quickin",
+      "link": "https://jobs.quickin.io/quickin",
+      "enabled": true
+    },
+    {
+      "name": "Quickin.io",
+      "slug": "quickin",
+      "link": "https://jobs.quickin.io/quickin",
+      "enabled": true
+    },
+    {
+      "name": "Reprotel",
+      "slug": "reprotel",
+      "link": "https://jobs.quickin.io/reprotel",
+      "enabled": true
+    },
+    {
+      "name": "SEIDOR",
+      "slug": "seidor",
+      "link": "https://jobs.quickin.io/seidor",
+      "enabled": true
+    },
+    {
+      "name": "Sioux digital 1:1",
+      "slug": "sioux",
+      "link": "https://jobs.quickin.io/sioux",
+      "enabled": true
+    },
+    {
+      "name": "TopMed Saúde Digital",
+      "slug": "topmed",
+      "link": "https://jobs.quickin.io/topmed",
+      "enabled": true
+    },
+    {
+      "name": "Velox Contact Center",
+      "slug": "veloxcontactcenter",
+      "link": "https://jobs.quickin.io/veloxcontactcenter",
+      "enabled": true
+    },
+    {
+      "name": "WeOn",
+      "slug": "weon",
+      "link": "https://jobs.quickin.io/weon",
+      "enabled": true
+    },
+    {
+      "name": "WeON - Plataforma Omnichannel",
+      "slug": "weon",
+      "link": "https://jobs.quickin.io/weon",
+      "enabled": true
+    }
+  ],
+  "smartrecruitersCompanies": [
+    {
+      "name": "Bosch Group",
+      "slug": "BoschGroup",
+      "link": "https://careers.smartrecruiters.com/BoschGroup",
+      "enabled": true
+    },
+    {
+      "name": "Serasa Experian",
+      "slug": "experian",
+      "link": "https://careers.smartrecruiters.com/experian",
+      "enabled": true
+    },
+    {
+      "name": "CI&T",
+      "slug": "CIAndT",
+      "link": "https://careers.smartrecruiters.com/CIAndT",
+      "enabled": true
+    },
+    {
+      "name": "Canva",
+      "slug": "canva",
+      "link": "https://careers.smartrecruiters.com/canva",
+      "enabled": true
+    },
+    {
+      "name": "LinkedIn",
+      "slug": "linkedin",
+      "link": "https://careers.smartrecruiters.com/linkedin",
+      "enabled": true
+    },
+    {
+      "name": "Globant",
+      "slug": "globant",
+      "link": "https://careers.smartrecruiters.com/globant",
+      "enabled": true
+    },
+    {
+      "name": "Visa",
+      "slug": "visa",
+      "link": "https://careers.smartrecruiters.com/visa",
+      "enabled": true
+    },
+    {
+      "name": "Square / Block",
+      "slug": "Square",
+      "link": "https://careers.smartrecruiters.com/Square",
       "enabled": true
     }
   ]

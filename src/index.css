@@ -376,6 +376,21 @@ body {
   color: white;
 }
 
+.source-badge.solides {
+  background: #ea580c;
+  color: white;
+}
+
+.source-badge.quickin {
+  background: #0d9488;
+  color: white;
+}
+
+.source-badge.smartrecruiters {
+  background: #0284c7;
+  color: white;
+}
+
 .job-company {
   font-size: 0.88rem;
   color: #94a3b8;

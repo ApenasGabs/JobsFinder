@@ -272,4 +272,21 @@ describe("StorageService", () => {
     assert.equal(StorageService.isStorageDirty(), true, "Mudança de conteúdo DEVE marcar storage como dirty");
     assert.equal(res.job.salary, "R$ 18.000");
   });
+
+  it("should return weekly tech jobs collected in the last 7 days or pending", () => {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const weeklyJobs = StorageService.getWeeklyJobs(sevenDaysAgo, 20);
+    assert.ok(Array.isArray(weeklyJobs));
+    assert.ok(weeklyJobs.length <= 20);
+    for (const job of weeklyJobs) {
+      assert.notEqual(job.isTech, false);
+      const isRecent =
+        new Date(job.scrapedAt).getTime() >= sevenDaysAgo.getTime();
+      const isPending = !job.notifiedAt && !job.expiredAt;
+      assert.ok(
+        isRecent || isPending,
+        "Vaga deve ser recente ou estar pendente",
+      );
+    }
+  });
 });

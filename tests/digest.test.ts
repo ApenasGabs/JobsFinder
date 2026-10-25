@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   buildDigest,
   buildWeeklySummary,
+  buildWeeklySummaryResult,
   DEFAULT_RADAR_URL,
   DIGESTS,
   DigestJob,
@@ -402,5 +403,116 @@ describe("Digest Builder (digest.ts)", () => {
       topVotedSuggestions: [],
     });
     assert.equal(empty, null);
+  });
+
+  it("gera o resumo semanal com curadoria de vagas por categoria e chamada de compartilhamento", () => {
+    const entryJob1 = makeJob({
+      id: "entry-1",
+      title: "Desenvolvedor Frontend Júnior",
+      company: "Nubank",
+      location: "São Paulo, SP",
+      workModel: "REMOTO",
+      seniorityLevel: "JUNIOR",
+      stack: ["React"],
+    });
+    const entryJob2 = makeJob({
+      id: "entry-2",
+      title: "Estágio em Engenharia de Software",
+      company: "Itaú",
+      location: "São Paulo, SP",
+      workModel: "PRESENCIAL",
+      seniorityLevel: "ESTAGIO",
+      stack: ["Python"],
+    });
+    const seniorJob1 = makeJob({
+      id: "senior-1",
+      title: "Engenheiro de Software Sênior",
+      company: "Mercado Livre",
+      location: "Florianópolis, SC",
+      workModel: "HIBRIDO",
+      seniority: "SENIOR",
+      seniorityLevel: "SENIOR",
+      stack: ["Go"],
+    });
+    const seniorJob2 = makeJob({
+      id: "senior-2",
+      title: "Desenvolvedor Backend Pleno",
+      company: "PagBank",
+      location: "São Paulo, SP",
+      workModel: "REMOTO",
+      seniority: "PLENO",
+      seniorityLevel: "PLENO",
+      stack: ["Java"],
+    });
+
+    const result = buildWeeklySummaryResult({
+      monitoredCompaniesCount: 799,
+      weeklyTechJobsCount: 983,
+      weeklyJobs: [entryJob1, entryJob2, seniorJob1, seniorJob2],
+      radarUrl: DEFAULT_RADAR_URL,
+      now: fixedNow,
+    });
+
+    assert.ok(result);
+    assert.ok(result.text.includes("📊 *RADAR DA COMUNIDADE — RESUMO SEMANAL*"));
+    assert.ok(result.text.includes("🏢 *Empresas vigiadas pelo robô:* 799"));
+    assert.ok(result.text.includes("💻 *Vagas de TI encontradas na semana:* 983"));
+    assert.ok(
+      result.text.includes(
+        "✨ *SELEÇÃO DA SEMANA — TOP VAGAS PARA COMPARTILHAR* 🔥",
+      ),
+    );
+    assert.ok(result.text.includes("🎓 *Estágio, Trainee e Júnior:*"));
+    assert.ok(result.text.includes("• Desenvolvedor Frontend Júnior [React] — Nubank (Remoto)"));
+    assert.ok(result.text.includes("• Estágio em Engenharia de Software [Python] — Itaú · São Paulo, SP"));
+    assert.ok(result.text.includes("🚀 *Pleno e Sênior:*"));
+    assert.ok(result.text.includes("• Engenheiro de Software Sênior [Go] — Mercado Livre · Florianópolis, SC (híbrido)"));
+    assert.ok(result.text.includes("• Desenvolvedor Backend Pleno [Java] — PagBank (Remoto)"));
+    assert.ok(
+      result.text.includes(
+        "📢 *Curtiu essa seleção? Compartilhe com quem está buscando vagas de TI!*",
+      ),
+    );
+    assert.ok(
+      result.text.includes(
+        `Sugira uma empresa ou vote nas próximas da fila em: ${DEFAULT_RADAR_URL}`,
+      ),
+    );
+
+    // IDs de todas as vagas incluídas
+    assert.deepEqual(result.includedIds.sort(), [
+      "entry-1",
+      "entry-2",
+      "senior-1",
+      "senior-2",
+    ].sort());
+  });
+
+  it("diversifica empresas no resumo semanal evitando que uma única empresa domine a lista", () => {
+    const jobs: DigestJob[] = [
+      makeJob({ id: "j1", title: "Dev Jr 1", company: "EmpresaMonopolio", seniorityLevel: "JUNIOR" }),
+      makeJob({ id: "j2", title: "Dev Jr 2", company: "EmpresaMonopolio", seniorityLevel: "JUNIOR" }),
+      makeJob({ id: "j3", title: "Dev Jr 3", company: "EmpresaMonopolio", seniorityLevel: "JUNIOR" }),
+      makeJob({ id: "j4", title: "Dev Jr 4", company: "EmpresaMonopolio", seniorityLevel: "JUNIOR" }),
+      makeJob({ id: "j5", title: "Dev Jr 5", company: "EmpresaMonopolio", seniorityLevel: "JUNIOR" }),
+      makeJob({ id: "j6", title: "Dev Jr A", company: "EmpresaLegal", seniorityLevel: "JUNIOR" }),
+      makeJob({ id: "j7", title: "Dev Jr B", company: "EmpresaInovadora", seniorityLevel: "JUNIOR" }),
+    ];
+
+    const result = buildWeeklySummaryResult({
+      monitoredCompaniesCount: 100,
+      weeklyTechJobsCount: 50,
+      weeklyJobs: jobs,
+      maxJobsPerCategory: 5,
+      now: fixedNow,
+    });
+
+    assert.ok(result);
+    // Deve incluir EmpresaLegal e EmpresaInovadora, limitando a repetição de EmpresaMonopolio
+    assert.ok(result.text.includes("EmpresaLegal"));
+    assert.ok(result.text.includes("EmpresaInovadora"));
+    assert.ok(result.text.includes("EmpresaMonopolio"));
+    // Deve ter no máximo 5 vagas de Júnior no total
+    assert.equal(result.includedIds.length, 5);
   });
 });

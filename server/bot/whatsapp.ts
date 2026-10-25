@@ -18,6 +18,7 @@ import { Job, WhatsAppStatus } from "../types.js";
 import {
   buildDigest,
   buildWeeklySummary,
+  buildWeeklySummaryResult,
   DEFAULT_RADAR_URL,
   DIGESTS,
   DigestKind,
@@ -615,8 +616,9 @@ export class WhatsAppBot {
     );
     const weeklyTechJobsCount =
       StorageService.getTechJobsCountSince(sevenDaysAgo);
+    const weeklyJobs = StorageService.getWeeklyJobs(sevenDaysAgo, 100);
 
-    const text = buildWeeklySummary({
+    const summaryResult = buildWeeklySummaryResult({
       monitoredCompaniesCount:
         monitoredCompaniesCount > 0 ? monitoredCompaniesCount : null,
       weeklyTechJobsCount:
@@ -625,9 +627,11 @@ export class WhatsAppBot {
       topVotedSuggestions: supabaseStats.topVotedSuggestions,
       radarUrl: runtimeCfg.radarUrl,
       now,
+      weeklyJobs,
+      maxChars: runtimeCfg.maxChars,
     });
 
-    if (!text) {
+    if (!summaryResult) {
       console.log(
         "[WhatsApp Weekly] 🤫 Nenhum dado confiável disponível para o resumo semanal.",
       );
@@ -638,13 +642,17 @@ export class WhatsAppBot {
       };
     }
 
+    const { text, includedIds } = summaryResult;
+
     if (runtimeCfg.dryRun) {
-      console.log(`\n[WhatsApp Weekly][DRY_RUN] (${slotKey}):\n${text}\n`);
+      console.log(
+        `\n[WhatsApp Weekly][DRY_RUN] (${slotKey} | ${includedIds.length} vagas):\n${text}\n`,
+      );
       LoggerService.info(
         "WHATSAPP",
         "WA_WEEKLY_DRY_RUN",
-        `[DRY_RUN] Resumo semanal gerado (${text.length} chars)`,
-        { slotKey, textLength: text.length },
+        `[DRY_RUN] Resumo semanal gerado (${text.length} chars, ${includedIds.length} vagas)`,
+        { slotKey, textLength: text.length, includedCount: includedIds.length },
       );
       return {
         sent: false,
@@ -659,7 +667,7 @@ export class WhatsAppBot {
       kind: "weekly",
       slotKey,
       text,
-      includedIds: [],
+      includedIds,
       expiredIds: [],
       createdAt: now.toISOString(),
     };

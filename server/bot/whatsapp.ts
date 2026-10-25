@@ -605,6 +605,20 @@ export class WhatsAppBot {
       ...(config.leverCompanies || []),
       ...(config.greenhouseCompanies || []),
       ...(config.workableCompanies || []),
+      ...(config.solidesCompanies || []),
+      ...(config.quickinCompanies || []),
+      ...(config.smartrecruitersCompanies || []),
+      ...(config.workdayCompanies || []),
+      ...(config.pandapeCompanies || []),
+      ...(config.totvsCompanies || []),
+      ...(config.mindsightCompanies || []),
+      ...(config.ablerCompanies || []),
+      ...(config.recrutaiCompanies || []),
+      ...(config.eightfoldCompanies || []),
+      ...(config.recruteiCompanies || []),
+      ...(config.recruiteeCompanies || []),
+      ...(config.teamtailorCompanies || []),
+      ...(config.selectyCompanies || []),
     ].filter((c) => c.enabled !== false).length;
 
     const supabaseStats =

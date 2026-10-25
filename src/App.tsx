@@ -68,6 +68,20 @@ interface AppConfig {
   leverCompanies?: CompanyConfig[];
   greenhouseCompanies?: CompanyConfig[];
   workableCompanies?: CompanyConfig[];
+  solidesCompanies?: CompanyConfig[];
+  quickinCompanies?: CompanyConfig[];
+  smartrecruitersCompanies?: CompanyConfig[];
+  workdayCompanies?: CompanyConfig[];
+  pandapeCompanies?: CompanyConfig[];
+  totvsCompanies?: CompanyConfig[];
+  mindsightCompanies?: CompanyConfig[];
+  ablerCompanies?: CompanyConfig[];
+  recrutaiCompanies?: CompanyConfig[];
+  eightfoldCompanies?: CompanyConfig[];
+  recruteiCompanies?: CompanyConfig[];
+  recruiteeCompanies?: CompanyConfig[];
+  teamtailorCompanies?: CompanyConfig[];
+  selectyCompanies?: CompanyConfig[];
   whatsapp?: {
     enabled: boolean;
     targetGroupJid: string;
@@ -178,7 +192,7 @@ export default function App() {
 
   // Parâmetros de execução do crawler
   const [selectedTerms, setSelectedTerms] = useState<string[]>(['java', 'react', 'node']);
-  const [selectedSources, setSelectedSources] = useState<string[]>(['GUPY', 'INHIRE', 'ASHBY', 'LEVER', 'GREENHOUSE', 'WORKABLE', 'REMOTEOK', 'PROGRAMATHOR', 'FREELAS_99', 'GEEKHUNTER']);
+  const [selectedSources, setSelectedSources] = useState<string[]>(['GUPY', 'INHIRE', 'ASHBY', 'LEVER', 'GREENHOUSE', 'WORKABLE', 'SOLIDES', 'QUICKIN', 'SMARTRECRUITERS', 'WORKDAY', 'PANDAPE', 'TOTVS', 'MINDSIGHT', 'ABLER', 'RECRUTAI', 'EIGHTFOLD', 'RECRUTEI', 'RECRUITEE', 'TEAMTAILOR', 'SELECTY', 'REMOTEOK', 'PROGRAMATHOR', 'FREELAS_99', 'GEEKHUNTER', 'IBM']);
   const [newCustomTerm, setNewCustomTerm] = useState('');
 
   // Estado da execução / SSE
@@ -191,10 +205,10 @@ export default function App() {
   }>({ message: 'Pronto para iniciar busca', percent: 0, totalFound: 0 });
 
   const [showConfigModal, setShowConfigModal] = useState(false);
-  const [configModalTab, setConfigModalTab] = useState<'TODAS' | 'GUPY' | 'INHIRE' | 'ASHBY' | 'LEVER' | 'GREENHOUSE' | 'WORKABLE'>('TODAS');
+  const [configModalTab, setConfigModalTab] = useState<'TODAS' | 'GUPY' | 'INHIRE' | 'ASHBY' | 'LEVER' | 'GREENHOUSE' | 'WORKABLE' | 'SOLIDES' | 'QUICKIN' | 'SMARTRECRUITERS' | 'WORKDAY' | 'PANDAPE' | 'TOTVS' | 'MINDSIGHT' | 'ABLER' | 'RECRUTAI' | 'EIGHTFOLD' | 'RECRUTEI' | 'RECRUITEE' | 'TEAMTAILOR' | 'SELECTY'>('TODAS');
   const [configSearchTerm, setConfigSearchTerm] = useState('');
   const [showAddCompanyForm, setShowAddCompanyForm] = useState(false);
-  const [newCompanyAts, setNewCompanyAts] = useState<'GUPY' | 'GREENHOUSE' | 'LEVER' | 'ASHBY' | 'WORKABLE' | 'INHIRE'>('GREENHOUSE');
+  const [newCompanyAts, setNewCompanyAts] = useState<'GUPY' | 'GREENHOUSE' | 'LEVER' | 'ASHBY' | 'WORKABLE' | 'INHIRE' | 'SOLIDES' | 'QUICKIN' | 'SMARTRECRUITERS' | 'WORKDAY' | 'PANDAPE' | 'TOTVS' | 'MINDSIGHT' | 'ABLER' | 'RECRUTAI' | 'EIGHTFOLD' | 'RECRUTEI' | 'RECRUITEE' | 'TEAMTAILOR' | 'SELECTY'>('GREENHOUSE');
   const [newCompanyName, setNewCompanyName] = useState('');
   const [newCompanySlug, setNewCompanySlug] = useState('');
   const [newCompanyLink, setNewCompanyLink] = useState('');
@@ -1871,10 +1885,13 @@ export default function App() {
                 { id: 'LEVER', label: `Lever (${config?.leverCompanies?.length || 25})`, type: 'CLT' },
                 { id: 'GREENHOUSE', label: `Greenhouse (${config?.greenhouseCompanies?.length || 7})`, type: 'CLT' },
                 { id: 'WORKABLE', label: `Workable (${config?.workableCompanies?.length || 22})`, type: 'CLT' },
+                { id: 'SOLIDES', label: `Sólides (${config?.solidesCompanies?.length || 91})`, type: 'CLT' },
+                { id: 'QUICKIN', label: `Quickin (${config?.quickinCompanies?.length || 36})`, type: 'CLT' },
                 { id: 'REMOTEOK', label: 'RemoteOK (Global)', type: 'FREELANCE' },
                 { id: 'PROGRAMATHOR', label: 'Programathor', type: 'CLT' },
                 { id: 'FREELAS_99', label: '99Freelas', type: 'FREELANCE' },
-                { id: 'GEEKHUNTER', label: 'GeekHunter', type: 'CLT' }
+                { id: 'GEEKHUNTER', label: 'GeekHunter', type: 'CLT' },
+                { id: 'IBM', label: 'IBM Careers', type: 'CLT' }
               ].map((s) => (
                 <div
                   key={s.id}
@@ -1989,10 +2006,13 @@ export default function App() {
           <option value="LEVER">Lever</option>
           <option value="GREENHOUSE">Greenhouse</option>
           <option value="WORKABLE">Workable</option>
+          <option value="SOLIDES">Sólides</option>
+          <option value="QUICKIN">Quickin</option>
           <option value="REMOTEOK">RemoteOK</option>
           <option value="PROGRAMATHOR">Programathor</option>
           <option value="FREELAS_99">99Freelas</option>
           <option value="GEEKHUNTER">GeekHunter</option>
+          <option value="IBM">IBM Careers</option>
         </select>
 
         <select
@@ -2367,7 +2387,7 @@ export default function App() {
             }}>
               <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
                 Total monitorado: <strong style={{ color: '#f8fafc' }}>
-                  {(config.gupyCompanies?.length || 0) + (config.inhireCompanies?.length || 0) + (config.ashbyCompanies?.length || 0) + (config.leverCompanies?.length || 0) + (config.greenhouseCompanies?.length || 0) + (config.workableCompanies?.length || 0)}
+                  {(config.gupyCompanies?.length || 0) + (config.inhireCompanies?.length || 0) + (config.ashbyCompanies?.length || 0) + (config.leverCompanies?.length || 0) + (config.greenhouseCompanies?.length || 0) + (config.workableCompanies?.length || 0) + (config.solidesCompanies?.length || 0) + (config.quickinCompanies?.length || 0) + (config.smartrecruitersCompanies?.length || 0) + (config.workdayCompanies?.length || 0) + (config.pandapeCompanies?.length || 0) + (config.totvsCompanies?.length || 0) + (config.mindsightCompanies?.length || 0) + (config.ablerCompanies?.length || 0) + (config.recrutaiCompanies?.length || 0) + (config.eightfoldCompanies?.length || 0) + (config.recruteiCompanies?.length || 0) + (config.recruiteeCompanies?.length || 0) + (config.teamtailorCompanies?.length || 0) + (config.selectyCompanies?.length || 0)}
                 </strong> empresas
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -2462,13 +2482,27 @@ export default function App() {
             {/* ATS Tabs */}
             <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
               {[
-                { id: 'TODAS', label: 'Todas', count: (config.gupyCompanies?.length || 0) + (config.inhireCompanies?.length || 0) + (config.ashbyCompanies?.length || 0) + (config.leverCompanies?.length || 0) + (config.greenhouseCompanies?.length || 0) + (config.workableCompanies?.length || 0), color: '#38bdf8' },
-                { id: 'GREENHOUSE', label: 'Greenhouse', count: config.greenhouseCompanies?.length || 0, color: '#f59e0b' },
+                { id: 'TODAS', label: 'Todas', count: (config.gupyCompanies?.length || 0) + (config.inhireCompanies?.length || 0) + (config.ashbyCompanies?.length || 0) + (config.leverCompanies?.length || 0) + (config.greenhouseCompanies?.length || 0) + (config.workableCompanies?.length || 0) + (config.solidesCompanies?.length || 0) + (config.quickinCompanies?.length || 0) + (config.smartrecruitersCompanies?.length || 0) + (config.workdayCompanies?.length || 0) + (config.pandapeCompanies?.length || 0) + (config.totvsCompanies?.length || 0) + (config.mindsightCompanies?.length || 0) + (config.ablerCompanies?.length || 0) + (config.recrutaiCompanies?.length || 0) + (config.eightfoldCompanies?.length || 0) + (config.recruteiCompanies?.length || 0) + (config.recruiteeCompanies?.length || 0) + (config.teamtailorCompanies?.length || 0) + (config.selectyCompanies?.length || 0), color: '#38bdf8' },
                 { id: 'GUPY', label: 'Gupy', count: config.gupyCompanies?.length || 0, color: '#3b82f6' },
-                { id: 'LEVER', label: 'Lever', count: config.leverCompanies?.length || 0, color: '#10b981' },
-                { id: 'ASHBY', label: 'Ashby', count: config.ashbyCompanies?.length || 0, color: '#8b5cf6' },
                 { id: 'INHIRE', label: 'InHire', count: config.inhireCompanies?.length || 0, color: '#06b6d4' },
+                { id: 'SOLIDES', label: 'Sólides', count: config.solidesCompanies?.length || 0, color: '#f97316' },
+                { id: 'ASHBY', label: 'Ashby', count: config.ashbyCompanies?.length || 0, color: '#8b5cf6' },
+                { id: 'GREENHOUSE', label: 'Greenhouse', count: config.greenhouseCompanies?.length || 0, color: '#f59e0b' },
+                { id: 'WORKDAY', label: 'Workday', count: config.workdayCompanies?.length || 0, color: '#2563eb' },
+                { id: 'PANDAPE', label: 'Pandapé', count: config.pandapeCompanies?.length || 0, color: '#6366f1' },
+                { id: 'LEVER', label: 'Lever', count: config.leverCompanies?.length || 0, color: '#10b981' },
+                { id: 'QUICKIN', label: 'Quickin', count: config.quickinCompanies?.length || 0, color: '#14b8a6' },
                 { id: 'WORKABLE', label: 'Workable', count: config.workableCompanies?.length || 0, color: '#ec4899' },
+                { id: 'TOTVS', label: 'TOTVS ATS', count: config.totvsCompanies?.length || 0, color: '#0ea5e9' },
+                { id: 'MINDSIGHT', label: 'Mindsight', count: config.mindsightCompanies?.length || 0, color: '#a855f7' },
+                { id: 'SMARTRECRUITERS', label: 'SmartRecruiters', count: config.smartrecruitersCompanies?.length || 0, color: '#0284c7' },
+                { id: 'ABLER', label: 'Abler', count: config.ablerCompanies?.length || 0, color: '#84cc16' },
+                { id: 'RECRUTAI', label: 'Recrut.ai', count: config.recrutaiCompanies?.length || 0, color: '#ec4899' },
+                { id: 'EIGHTFOLD', label: 'Eightfold', count: config.eightfoldCompanies?.length || 0, color: '#eab308' },
+                { id: 'RECRUTEI', label: 'Recrutei', count: config.recruteiCompanies?.length || 0, color: '#22c55e' },
+                { id: 'RECRUITEE', label: 'Recruitee', count: config.recruiteeCompanies?.length || 0, color: '#3b82f6' },
+                { id: 'TEAMTAILOR', label: 'Teamtailor', count: config.teamtailorCompanies?.length || 0, color: '#f43f5e' },
+                { id: 'SELECTY', label: 'Selecty', count: config.selectyCompanies?.length || 0, color: '#06b6d4' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -2542,6 +2576,20 @@ export default function App() {
                       <option value="ASHBY">Ashby (Global Tech)</option>
                       <option value="INHIRE">InHire (Startups BR)</option>
                       <option value="WORKABLE">Workable (Global)</option>
+                      <option value="SOLIDES">Sólides (Brasil)</option>
+                      <option value="QUICKIN">Quickin (Brasil)</option>
+                      <option value="SMARTRECRUITERS">SmartRecruiters (Global)</option>
+                      <option value="WORKDAY">Workday (Enterprise)</option>
+                      <option value="PANDAPE">Pandapé Infojobs (Brasil)</option>
+                      <option value="TOTVS">TOTVS ATS (Brasil)</option>
+                      <option value="MINDSIGHT">Mindsight (Brasil)</option>
+                      <option value="ABLER">Abler (Brasil)</option>
+                      <option value="RECRUTAI">Recrut.ai (Brasil)</option>
+                      <option value="EIGHTFOLD">Eightfold (Meli, Netflix & Global)</option>
+                      <option value="RECRUTEI">Recrutei (Brasil)</option>
+                      <option value="RECRUITEE">Recruitee (Global)</option>
+                      <option value="TEAMTAILOR">Teamtailor (Global)</option>
+                      <option value="SELECTY">Selecty (Brasil)</option>
                     </select>
                   </div>
 
@@ -2702,7 +2750,7 @@ export default function App() {
             {/* Company List & Search First Flow */}
             {(() => {
               const allList: Array<{
-                ats: 'GUPY' | 'GREENHOUSE' | 'LEVER' | 'ASHBY' | 'WORKABLE' | 'INHIRE';
+                ats: 'GUPY' | 'GREENHOUSE' | 'LEVER' | 'ASHBY' | 'WORKABLE' | 'INHIRE' | 'SOLIDES' | 'QUICKIN' | 'SMARTRECRUITERS' | 'WORKDAY' | 'PANDAPE' | 'TOTVS' | 'MINDSIGHT' | 'ABLER' | 'RECRUTAI' | 'EIGHTFOLD' | 'RECRUTEI' | 'RECRUITEE' | 'TEAMTAILOR' | 'SELECTY';
                 company: CompanyConfig;
                 color: string;
               }> = [];
@@ -2712,6 +2760,48 @@ export default function App() {
               }
               if (configModalTab === 'TODAS' || configModalTab === 'GUPY') {
                 (config.gupyCompanies || []).forEach((c) => allList.push({ ats: 'GUPY', company: c, color: '#3b82f6' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'SOLIDES') {
+                (config.solidesCompanies || []).forEach((c) => allList.push({ ats: 'SOLIDES', company: c, color: '#f97316' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'QUICKIN') {
+                (config.quickinCompanies || []).forEach((c) => allList.push({ ats: 'QUICKIN', company: c, color: '#14b8a6' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'SMARTRECRUITERS') {
+                (config.smartrecruitersCompanies || []).forEach((c) => allList.push({ ats: 'SMARTRECRUITERS', company: c, color: '#0284c7' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'WORKDAY') {
+                (config.workdayCompanies || []).forEach((c) => allList.push({ ats: 'WORKDAY', company: c, color: '#2563eb' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'PANDAPE') {
+                (config.pandapeCompanies || []).forEach((c) => allList.push({ ats: 'PANDAPE', company: c, color: '#6366f1' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'TOTVS') {
+                (config.totvsCompanies || []).forEach((c) => allList.push({ ats: 'TOTVS', company: c, color: '#0ea5e9' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'MINDSIGHT') {
+                (config.mindsightCompanies || []).forEach((c) => allList.push({ ats: 'MINDSIGHT', company: c, color: '#a855f7' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'ABLER') {
+                (config.ablerCompanies || []).forEach((c) => allList.push({ ats: 'ABLER', company: c, color: '#84cc16' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'RECRUTAI') {
+                (config.recrutaiCompanies || []).forEach((c) => allList.push({ ats: 'RECRUTAI', company: c, color: '#ec4899' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'EIGHTFOLD') {
+                (config.eightfoldCompanies || []).forEach((c) => allList.push({ ats: 'EIGHTFOLD', company: c, color: '#eab308' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'RECRUTEI') {
+                (config.recruteiCompanies || []).forEach((c) => allList.push({ ats: 'RECRUTEI', company: c, color: '#22c55e' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'RECRUITEE') {
+                (config.recruiteeCompanies || []).forEach((c) => allList.push({ ats: 'RECRUITEE', company: c, color: '#3b82f6' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'TEAMTAILOR') {
+                (config.teamtailorCompanies || []).forEach((c) => allList.push({ ats: 'TEAMTAILOR', company: c, color: '#f43f5e' }));
+              }
+              if (configModalTab === 'TODAS' || configModalTab === 'SELECTY') {
+                (config.selectyCompanies || []).forEach((c) => allList.push({ ats: 'SELECTY', company: c, color: '#06b6d4' }));
               }
               if (configModalTab === 'TODAS' || configModalTab === 'LEVER') {
                 (config.leverCompanies || []).forEach((c) => allList.push({ ats: 'LEVER', company: c, color: '#10b981' }));

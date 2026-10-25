@@ -310,6 +310,8 @@ export class SheetImporterService {
       LEVER: new Set<string>((searchConfig.leverCompanies || []).map((c: any) => c.slug.toLowerCase())),
       ASHBY: new Set<string>((searchConfig.ashbyCompanies || []).map((c: any) => c.slug.toLowerCase())),
       WORKABLE: new Set<string>((searchConfig.workableCompanies || []).map((c: any) => c.slug.toLowerCase())),
+      SOLIDES: new Set<string>((searchConfig.solidesCompanies || []).map((c: any) => c.slug.toLowerCase())),
+      QUICKIN: new Set<string>((searchConfig.quickinCompanies || []).map((c: any) => c.slug.toLowerCase())),
     };
 
     const existingUrls = new Set<string>();
@@ -330,6 +332,8 @@ export class SheetImporterService {
       LEVER: { new: 0, existing: 0 },
       ASHBY: { new: 0, existing: 0 },
       WORKABLE: { new: 0, existing: 0 },
+      SOLIDES: { new: 0, existing: 0 },
+      QUICKIN: { new: 0, existing: 0 },
     };
 
     let matchedCount = 0;
@@ -401,6 +405,13 @@ export class SheetImporterService {
             else if (ats === "LEVER") searchConfig.leverCompanies.push(companyEntry);
             else if (ats === "ASHBY") searchConfig.ashbyCompanies.push(companyEntry);
             else if (ats === "WORKABLE") searchConfig.workableCompanies.push(companyEntry);
+            else if (ats === "SOLIDES") {
+              searchConfig.solidesCompanies = searchConfig.solidesCompanies || [];
+              searchConfig.solidesCompanies.push(companyEntry);
+            } else if (ats === "QUICKIN") {
+              searchConfig.quickinCompanies = searchConfig.quickinCompanies || [];
+              searchConfig.quickinCompanies.push(companyEntry);
+            }
           }
         }
       } else {

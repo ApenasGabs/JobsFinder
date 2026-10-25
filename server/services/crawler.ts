@@ -1,14 +1,29 @@
+import { AblerScraper } from "../scrapers/abler.js";
 import { AshbyScraper } from "../scrapers/ashby.js";
 import { ScraperRegistry } from "../scrapers/base.js";
+import { EightfoldScraper } from "../scrapers/eightfold.js";
 import { Freelas99Scraper } from "../scrapers/freelas99.js";
 import { GeekHunterScraper } from "../scrapers/geekhunter.js";
 import { GreenhouseScraper } from "../scrapers/greenhouse.js";
 import { GupyScraper } from "../scrapers/gupy.js";
+import { IbmScraper } from "../scrapers/ibm.js";
 import { InHireScraper } from "../scrapers/inhire.js";
 import { LeverScraper } from "../scrapers/lever.js";
+import { MindsightScraper } from "../scrapers/mindsight.js";
+import { PandapeScraper } from "../scrapers/pandape.js";
 import { ProgramathorScraper } from "../scrapers/programathor.js";
+import { QuickinScraper } from "../scrapers/quickin.js";
+import { RecruiteeScraper } from "../scrapers/recruitee.js";
+import { RecrutaiScraper } from "../scrapers/recrutai.js";
+import { RecruteiScraper } from "../scrapers/recrutei.js";
 import { RemoteOKScraper } from "../scrapers/remoteok.js";
+import { SelectyScraper } from "../scrapers/selecty.js";
+import { SmartRecruitersScraper } from "../scrapers/smartrecruiters.js";
+import { SolidesScraper } from "../scrapers/solides.js";
+import { TeamtailorScraper } from "../scrapers/teamtailor.js";
+import { TotvsScraper } from "../scrapers/totvs.js";
 import { WorkableScraper } from "../scrapers/workable.js";
+import { WorkdayScraper } from "../scrapers/workday.js";
 import { Job, ScrapeOptions, ScrapeProgressEvent } from "../types.js";
 import { TechClassifierService } from "./classifier.js";
 import { LoggerService } from "./logger.js";
@@ -30,15 +45,30 @@ export class CrawlerService {
     ScraperRegistry.register(new LeverScraper());
     ScraperRegistry.register(new GreenhouseScraper());
     ScraperRegistry.register(new WorkableScraper());
+    ScraperRegistry.register(new SolidesScraper());
+    ScraperRegistry.register(new QuickinScraper());
+    ScraperRegistry.register(new SmartRecruitersScraper());
+    ScraperRegistry.register(new WorkdayScraper());
+    ScraperRegistry.register(new PandapeScraper());
+    ScraperRegistry.register(new TotvsScraper());
+    ScraperRegistry.register(new MindsightScraper());
+    ScraperRegistry.register(new AblerScraper());
+    ScraperRegistry.register(new RecrutaiScraper());
+    ScraperRegistry.register(new EightfoldScraper());
+    ScraperRegistry.register(new RecruteiScraper());
+    ScraperRegistry.register(new RecruiteeScraper());
+    ScraperRegistry.register(new TeamtailorScraper());
+    ScraperRegistry.register(new SelectyScraper());
     ScraperRegistry.register(new RemoteOKScraper());
     ScraperRegistry.register(new ProgramathorScraper());
     ScraperRegistry.register(new Freelas99Scraper());
     ScraperRegistry.register(new GeekHunterScraper());
+    ScraperRegistry.register(new IbmScraper());
 
     StorageService.initialize();
     this.isRegistered = true;
     console.log(
-      "[CrawlerService] Todos os 10 scrapers registrados com sucesso.",
+      "[CrawlerService] Todos os 25 scrapers registrados com sucesso.",
     );
   }
 
@@ -77,6 +107,20 @@ export class CrawlerService {
               "LEVER",
               "GREENHOUSE",
               "WORKABLE",
+              "SOLIDES",
+              "QUICKIN",
+              "SMARTRECRUITERS",
+              "WORKDAY",
+              "PANDAPE",
+              "TOTVS",
+              "MINDSIGHT",
+              "ABLER",
+              "RECRUTAI",
+              "EIGHTFOLD",
+              "RECRUTEI",
+              "RECRUITEE",
+              "TEAMTAILOR",
+              "SELECTY",
               "REMOTEOK",
               "PROGRAMATHOR",
               "FREELAS_99",
@@ -139,7 +183,7 @@ export class CrawlerService {
               // Descarta vagas que não sejam de Tecnologia/TI
               if (
                 newJob.isTech === false ||
-                !TechClassifierService.isTechSync(newJob.title)
+                !TechClassifierService.isTechSync(newJob)
               ) {
                 return;
               }

@@ -465,6 +465,14 @@ function formatWeeklyItem(g: Grouped): string {
   return `• ${cleanTitle(job.title)}${tag} — ${cleanCompany}${where}\n  ${job.url}`;
 }
 
+function isGenericTalentPool(title: string): boolean {
+  const normTitle = norm(title || "");
+  if (!normTitle.includes("banco de talentos")) return false;
+  return !/desenvolv|engenhe|software|backend|frontend|fullstack|dados|data|qa|devops|cloud|tech|programad|analista/i.test(
+    normTitle,
+  );
+}
+
 function pickDiverse(items: Grouped[], limit: number, maxPerCompany = 2): Grouped[] {
   const selected: Grouped[] = [];
   const companyCount = new Map<string, number>();
@@ -534,7 +542,7 @@ export function buildWeeklySummaryResult(
 
   // Filtra e agrupa vagas da semana
   const eligibleWeekly = (weeklyJobs || []).filter(
-    (j) => !isExcludedFromDigest(j),
+    (j) => !isExcludedFromDigest(j) && !isGenericTalentPool(j.title),
   );
   const groupedWeekly = groupDuplicates(eligibleWeekly);
 

@@ -110,7 +110,84 @@
     },
     {
       "id": "SMARTRECRUITERS",
-      "name": "SmartRecruiters (8 Empresas)",
+      "name": "SmartRecruiters (13 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "WORKDAY",
+      "name": "Workday (51 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "PANDAPE",
+      "name": "Pandapé (46 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "TOTVS",
+      "name": "TOTVS ATS (21 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "MINDSIGHT",
+      "name": "Mindsight (14 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "ABLER",
+      "name": "Abler (9 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "RECRUTAI",
+      "name": "Recrut.ai (7 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "EIGHTFOLD",
+      "name": "Eightfold (6 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "RECRUTEI",
+      "name": "Recrutei (5 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "RECRUITEE",
+      "name": "Recruitee (4 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "TEAMTAILOR",
+      "name": "Teamtailor (4 Empresas)",
+      "type": "CLT",
+      "enabled": true,
+      "fastMode": true
+    },
+    {
+      "id": "SELECTY",
+      "name": "Selecty (3 Empresas)",
       "type": "CLT",
       "enabled": true,
       "fastMode": true
@@ -6653,8 +6730,8 @@
     },
     {
       "name": "Serasa Experian",
-      "slug": "experian",
-      "link": "https://careers.smartrecruiters.com/experian",
+      "slug": "Experian",
+      "link": "https://careers.smartrecruiters.com/Experian",
       "enabled": true
     },
     {
@@ -6664,21 +6741,27 @@
       "enabled": true
     },
     {
+      "name": "CI&T (Portal CIT)",
+      "slug": "CIT",
+      "link": "https://jobs.smartrecruiters.com/CIT",
+      "enabled": true
+    },
+    {
       "name": "Canva",
-      "slug": "canva",
-      "link": "https://careers.smartrecruiters.com/canva",
+      "slug": "Canva",
+      "link": "https://careers.smartrecruiters.com/Canva",
       "enabled": true
     },
     {
       "name": "LinkedIn",
-      "slug": "linkedin",
-      "link": "https://careers.smartrecruiters.com/linkedin",
+      "slug": "LinkedIn3",
+      "link": "https://jobs.smartrecruiters.com/LinkedIn3",
       "enabled": true
     },
     {
       "name": "Globant",
-      "slug": "globant",
-      "link": "https://careers.smartrecruiters.com/globant",
+      "slug": "Globant",
+      "link": "https://careers.smartrecruiters.com/Globant",
       "enabled": true
     },
     {
@@ -6691,6 +6774,1072 @@
       "name": "Square / Block",
       "slug": "Square",
       "link": "https://careers.smartrecruiters.com/Square",
+      "enabled": true
+    },
+    {
+      "name": "Wise",
+      "slug": "Wise",
+      "link": "https://jobs.smartrecruiters.com/Wise",
+      "enabled": true
+    },
+    {
+      "name": "Sportradar",
+      "slug": "Sportradar",
+      "link": "https://jobs.smartrecruiters.com/Sportradar",
+      "enabled": true
+    },
+    {
+      "name": "Syngenta Group",
+      "slug": "SyngentaGroup",
+      "link": "https://jobs.smartrecruiters.com/SyngentaGroup",
+      "enabled": true
+    },
+    {
+      "name": "MSX International",
+      "slug": "MSXInternational",
+      "link": "https://jobs.smartrecruiters.com/MSXInternational",
+      "enabled": true
+    }
+  ],
+  "workdayCompanies": [
+    {
+      "name": "A.P. Moller - Maersk",
+      "slug": "maersk",
+      "link": "https://maersk.wd3.myworkdayjobs.com/pt-BR/Maersk_Careers",
+      "enabled": true
+    },
+    {
+      "name": "Accenture",
+      "slug": "accenture",
+      "link": "https://accenture.wd103.myworkdayjobs.com/pt-BR/AccentureCareers",
+      "enabled": true
+    },
+    {
+      "name": "APM Terminals",
+      "slug": "maersk",
+      "link": "https://maersk.wd3.myworkdayjobs.com/pt-BR/Maersk_Careers",
+      "enabled": true
+    },
+    {
+      "name": "Aspen Technology",
+      "slug": "aspentech",
+      "link": "https://aspentech.wd5.myworkdayjobs.com/aspentech/job",
+      "enabled": true
+    },
+    {
+      "name": "Banco Santander",
+      "slug": "santander",
+      "link": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+      "enabled": true
+    },
+    {
+      "name": "Bracell",
+      "slug": "averis",
+      "link": "https://averis.wd3.myworkdayjobs.com/pt-BR/RGE",
+      "enabled": true
+    },
+    {
+      "name": "Brink’s Inc",
+      "slug": "brinks",
+      "link": "https://brinks.wd5.myworkdayjobs.com/pt-BR/Carreiras_Brinks",
+      "enabled": true
+    },
+    {
+      "name": "Ciena",
+      "slug": "ciena",
+      "link": "https://ciena.wd5.myworkdayjobs.com/en-US/Careers",
+      "enabled": true
+    },
+    {
+      "name": "CrowdStrike",
+      "slug": "crowdstrike",
+      "link": "https://crowdstrike.wd5.myworkdayjobs.com/crowdstrikecareers/job",
+      "enabled": true
+    },
+    {
+      "name": "CSG",
+      "slug": "csgi",
+      "link": "https://csgi.wd5.myworkdayjobs.com/CSGCareers/job",
+      "enabled": true
+    },
+    {
+      "name": "F1rst - Santander",
+      "slug": "santander",
+      "link": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+      "enabled": true
+    },
+    {
+      "name": "F1RST empresa do Santander",
+      "slug": "santander",
+      "link": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+      "enabled": true
+    },
+    {
+      "name": "F1rst Tecnologia - Banco Santander",
+      "slug": "santander",
+      "link": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+      "enabled": true
+    },
+    {
+      "name": "First - Grupo Santander",
+      "slug": "santander",
+      "link": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+      "enabled": true
+    },
+    {
+      "name": "Forcepoint",
+      "slug": "forcepoint",
+      "link": "https://forcepoint.wd1.myworkdayjobs.com/pt-BR/external-careers",
+      "enabled": true
+    },
+    {
+      "name": "General Motors South America",
+      "slug": "generalmotors",
+      "link": "https://generalmotors.wd5.myworkdayjobs.com/pt-BR/Careers_GM",
+      "enabled": true
+    },
+    {
+      "name": "Genesys",
+      "slug": "genesys",
+      "link": "https://genesys.wd1.myworkdayjobs.com/Genesys/job",
+      "enabled": true
+    },
+    {
+      "name": "Infobip",
+      "slug": "infobip",
+      "link": "https://infobip.wd3.myworkdayjobs.com/en-US/InfobipCareers",
+      "enabled": true
+    },
+    {
+      "name": "Intel Brasil",
+      "slug": "intel",
+      "link": "https://intel.wd1.myworkdayjobs.com/External",
+      "enabled": true
+    },
+    {
+      "name": "LexisNexis Risk Solutions",
+      "slug": "relx",
+      "link": "https://relx.wd3.myworkdayjobs.com/pt-BR/RiskSolutions",
+      "enabled": true
+    },
+    {
+      "name": "LSEG",
+      "slug": "lseg",
+      "link": "https://lseg.wd3.myworkdayjobs.com/Careers/job",
+      "enabled": true
+    },
+    {
+      "name": "Marsh",
+      "slug": "mmc",
+      "link": "https://mmc.wd1.myworkdayjobs.com/pt-BR/MMC",
+      "enabled": true
+    },
+    {
+      "name": "Mondelēz International",
+      "slug": "mondelez",
+      "link": "https://mondelez.wd3.myworkdayjobs.com/pt-BR/External",
+      "enabled": true
+    },
+    {
+      "name": "Natura",
+      "slug": "natura",
+      "link": "https://natura.wd501.myworkdayjobs.com/pt-BR/NaturaCarreiras",
+      "enabled": true
+    },
+    {
+      "name": "NeoEnergia",
+      "slug": "iberdrola",
+      "link": "https://iberdrola.wd3.myworkdayjobs.com/pt-BR/Iberdrola",
+      "enabled": true
+    },
+    {
+      "name": "Otis Elevator Co.",
+      "slug": "otis",
+      "link": "https://otis.wd5.myworkdayjobs.com/pt-BR/REC_Ext_Gateway",
+      "enabled": true
+    },
+    {
+      "name": "P&G Procter and Gamble",
+      "slug": "pgprocterandgamble",
+      "link": "https://www.pgcareers.com",
+      "enabled": true
+    },
+    {
+      "name": "Philips",
+      "slug": "philips",
+      "link": "https://philips.wd3.myworkdayjobs.com/pt-BR/jobs-and-careers",
+      "enabled": true
+    },
+    {
+      "name": "Philips EMR Brasil",
+      "slug": "philips",
+      "link": "https://philips.wd3.myworkdayjobs.com/pt-BR/jobs-and-careers",
+      "enabled": true
+    },
+    {
+      "name": "Pismo",
+      "slug": "visa",
+      "link": "https://visa.wd5.myworkdayjobs.com/Visa/page/3b371539a3c810015ae4164c71d70000",
+      "enabled": true
+    },
+    {
+      "name": "Pitney Bowes",
+      "slug": "pitneybowes",
+      "link": "https://pitneybowes.wd1.myworkdayjobs.com/PBCareers/job",
+      "enabled": true
+    },
+    {
+      "name": "PTC",
+      "slug": "ptc",
+      "link": "https://ptc.wd1.myworkdayjobs.com/pt-BR/PTC",
+      "enabled": true
+    },
+    {
+      "name": "PwC",
+      "slug": "pwc",
+      "link": "https://pwc.wd3.myworkdayjobs.com/Global_Experienced_Careers",
+      "enabled": true
+    },
+    {
+      "name": "Rappi",
+      "slug": "rappi",
+      "link": "https://rappi.wd12.myworkdayjobs.com/es/Rappi_jobs",
+      "enabled": true
+    },
+    {
+      "name": "Red Hat",
+      "slug": "redhat",
+      "link": "https://redhat.wd5.myworkdayjobs.com/jobs/job",
+      "enabled": true
+    },
+    {
+      "name": "SailPoint",
+      "slug": "sailpoint",
+      "link": "https://sailpoint.wd1.myworkdayjobs.com/SailPoint/job",
+      "enabled": true
+    },
+    {
+      "name": "Salesforce",
+      "slug": "salesforce",
+      "link": "https://salesforce.wd12.myworkdayjobs.com/External_Career_Site/job",
+      "enabled": true
+    },
+    {
+      "name": "Santander",
+      "slug": "santander",
+      "link": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+      "enabled": true
+    },
+    {
+      "name": "Santander / F1RST",
+      "slug": "santander",
+      "link": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+      "enabled": true
+    },
+    {
+      "name": "Solenis",
+      "slug": "solenis",
+      "link": "https://solenis.wd1.myworkdayjobs.com/pt-BR/Solenis",
+      "enabled": true
+    },
+    {
+      "name": "Solventum",
+      "slug": "healthcare",
+      "link": "https://healthcare.wd1.myworkdayjobs.com/pt-BR/Search",
+      "enabled": true
+    },
+    {
+      "name": "Sprinklr",
+      "slug": "sprinklr",
+      "link": "https://sprinklr.wd1.myworkdayjobs.com/careers/job",
+      "enabled": true
+    },
+    {
+      "name": "Thomson Reuters Brasil",
+      "slug": "thomsonreuters",
+      "link": "https://thomsonreuters.wd5.myworkdayjobs.com/en-US/External_Career_Site",
+      "enabled": true
+    },
+    {
+      "name": "Tools",
+      "slug": "santander",
+      "link": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+      "enabled": true
+    },
+    {
+      "name": "TOOLS - Santander",
+      "slug": "santander",
+      "link": "https://santander.wd3.myworkdayjobs.com/pt-BR/SantanderCareers",
+      "enabled": true
+    },
+    {
+      "name": "TransUnion",
+      "slug": "transunion",
+      "link": "https://transunion.wd5.myworkdayjobs.com/pt-BR/TransUnion",
+      "enabled": true
+    },
+    {
+      "name": "TrendAI",
+      "slug": "trendmicro",
+      "link": "https://trendmicro.wd3.myworkdayjobs.com/en-US/External",
+      "enabled": true
+    },
+    {
+      "name": "Zendesk",
+      "slug": "zendesk",
+      "link": "https://zendesk.wd1.myworkdayjobs.com/en-US/zendesk",
+      "enabled": true
+    },
+    {
+      "name": "zurich",
+      "slug": "zurich",
+      "link": "https://zurich.wd3.myworkdayjobs.com/pt-BR/External",
+      "enabled": true
+    },
+    {
+      "name": "Zurich Santander Insurance America",
+      "slug": "zurich",
+      "link": "https://zurich.wd3.myworkdayjobs.com/pt-BR/External",
+      "enabled": true
+    },
+    {
+      "name": "Zurich Seguros",
+      "slug": "zurich",
+      "link": "https://zurich.wd3.myworkdayjobs.com/pt-BR/External",
+      "enabled": true
+    }
+  ],
+  "pandapeCompanies": [
+    {
+      "name": "AeC",
+      "slug": "aec",
+      "link": "https://aec.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "AlmavivA Experience",
+      "slug": "almavivaexperience",
+      "link": "https://almavivaexperience.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "AmorSaúde",
+      "slug": "amorsaude1",
+      "link": "https://amorsaude1.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Autopark Estacionamentos",
+      "slug": "autopark",
+      "link": "https://autopark.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Britânia Eletrodomésticos",
+      "slug": "britania",
+      "link": "https://britania.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "CARGLASS",
+      "slug": "carglass",
+      "link": "https://carglass.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Cel.Lep Idiomas",
+      "slug": "cellepensinodeidiomas",
+      "link": "https://cellepensinodeidiomas.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Concentrix",
+      "slug": "concentrixbrasil",
+      "link": "https://concentrixbrasil.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Conversão Jurídica",
+      "slug": "rmeducacaoonline",
+      "link": "https://rmeducacaoonline.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Fundacred",
+      "slug": "fundacred",
+      "link": "https://fundacred.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "GM Promo",
+      "slug": "gmprecursoshumanosltda",
+      "link": "https://gmprecursoshumanosltda.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Planning",
+      "slug": "planning",
+      "link": "https://planning.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Zelo",
+      "slug": "grupozelo",
+      "link": "https://grupozelo.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Infojobs",
+      "slug": "infojobs",
+      "link": "https://infojobs.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Instituto GL",
+      "slug": "institutogli-medicinaltda",
+      "link": "https://institutogli-medicinaltda.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "IVI Energia",
+      "slug": "ivienergia",
+      "link": "https://ivienergia.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "JC Decor",
+      "slug": "jcdecor",
+      "link": "https://jcdecor.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "JECTIX TELECOM",
+      "slug": "jectixtelecomunicacoeseservicosltda",
+      "link": "https://jectixtelecomunicacoeseservicosltda.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Konecta",
+      "slug": "konecta",
+      "link": "https://konecta.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Lojas Marisa",
+      "slug": "lojasmarisa",
+      "link": "https://lojasmarisa.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "MasterTax",
+      "slug": "masterintelligencetax",
+      "link": "https://masterintelligencetax.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Mercadocar",
+      "slug": "mercadocar",
+      "link": "https://mercadocar.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Neobpo",
+      "slug": "neohype",
+      "link": "https://neohype.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Next Fit",
+      "slug": "nextfit",
+      "link": "https://nextfit.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Omnilink",
+      "slug": "omnilink",
+      "link": "https://omnilink.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Orsegups Participações S/A",
+      "slug": "orsegups",
+      "link": "https://orsegups.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Pabum RH",
+      "slug": "pabum",
+      "link": "https://pabum.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Pandapé",
+      "slug": "empregos",
+      "link": "https://empregos.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Pulse Client Experts",
+      "slug": "pulse",
+      "link": "https://pulse.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Redarbor Brasil (Infojobs)",
+      "slug": "infojobs",
+      "link": "https://infojobs.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "SAVI COSMETICOS",
+      "slug": "savicosmeticosltda",
+      "link": "https://savicosmeticosltda.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "SIGhRA Sistemas Inovadores",
+      "slug": "sighratecnologiasistemainovadores",
+      "link": "https://sighratecnologiasistemainovadores.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Softys",
+      "slug": "softys",
+      "link": "https://softys.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Talentum RH Desenvolvimento Humano",
+      "slug": "talentumrh",
+      "link": "https://talentumrh.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Tel Contact Center",
+      "slug": "tel",
+      "link": "https://tel.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Telehelp",
+      "slug": "telehelp",
+      "link": "https://telehelp.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Telemática Sistemas Inteligentes",
+      "slug": "icatel",
+      "link": "https://icatel.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "TimeCerto",
+      "slug": "empregos",
+      "link": "https://empregos.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "TotalPass",
+      "slug": "vempratotalpass",
+      "link": "https://vempratotalpass.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Unifisa",
+      "slug": "unifisa",
+      "link": "https://unifisa.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Up Brasil",
+      "slug": "upbrasilservicos",
+      "link": "https://upbrasilservicos.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Vittude",
+      "slug": "empregos",
+      "link": "https://empregos.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Web Automação Industrial",
+      "slug": "webservice",
+      "link": "https://webservice.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Webhelp + Concentrix Brazil",
+      "slug": "concentrixbrasil",
+      "link": "https://concentrixbrasil.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "WePink",
+      "slug": "savicosmeticosltda",
+      "link": "https://savicosmeticosltda.pandape.infojobs.com.br",
+      "enabled": true
+    },
+    {
+      "name": "YH Brasil",
+      "slug": "yhbrasil",
+      "link": "https://yhbrasil.pandape.infojobs.com.br",
+      "enabled": true
+    }
+  ],
+  "totvsCompanies": [
+    {
+      "name": "Brudam",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Bulla",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Deskfy",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "E-inscrição Tecnologia e Inovação",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Estuda.com",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "FF Solutions a Symetri Company",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Fucape Business School",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "HSystem",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Hyperflow",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Lemit Brasil",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Morada.ai",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "SG VIAGENS E TURISMO",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Spark",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Starbem",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Techfin ERP Finance - uma empresa TOTVS e Itaú",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "TOTVS",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "TOTVS Linx",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Universo E-commerce",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Watch Brasil",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "Watch TV",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    },
+    {
+      "name": "WiFeed",
+      "slug": "vempratotvs",
+      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "enabled": true
+    }
+  ],
+  "mindsightCompanies": [
+    {
+      "name": "Asis",
+      "slug": "sankhya",
+      "link": "https://oportunidades.mindsight.com.br/sankhya",
+      "enabled": true
+    },
+    {
+      "name": "Flowbiz",
+      "slug": "flowbiz",
+      "link": "https://oportunidades.mindsight.com.br/flowbiz",
+      "enabled": true
+    },
+    {
+      "name": "Fluencypass",
+      "slug": "fluencypass",
+      "link": "https://oportunidades.mindsight.com.br/fluencypass",
+      "enabled": true
+    },
+    {
+      "name": "LIQUIDZ",
+      "slug": "liquidz",
+      "link": "https://oportunidades.mindsight.com.br/liquidz",
+      "enabled": true
+    },
+    {
+      "name": "MATH Group",
+      "slug": "mathgroup",
+      "link": "https://oportunidades.mindsight.com.br/mathgroup",
+      "enabled": true
+    },
+    {
+      "name": "Mindsight",
+      "slug": "mindsight",
+      "link": "https://oportunidades.mindsight.com.br/mindsight",
+      "enabled": true
+    },
+    {
+      "name": "Nexforce",
+      "slug": "nexforce",
+      "link": "https://oportunidades.mindsight.com.br/nexforce",
+      "enabled": true
+    },
+    {
+      "name": "Ollie",
+      "slug": "ollie",
+      "link": "https://oportunidades.mindsight.com.br/ollie",
+      "enabled": true
+    },
+    {
+      "name": "Pontotel",
+      "slug": "pontotel",
+      "link": "https://oportunidades.mindsight.com.br/pontotel",
+      "enabled": true
+    },
+    {
+      "name": "Sankhya",
+      "slug": "mindsight",
+      "link": "https://oportunidades.mindsight.com.br/mindsight",
+      "enabled": true
+    },
+    {
+      "name": "Siteware",
+      "slug": "siteware",
+      "link": "https://oportunidades.mindsight.com.br/siteware",
+      "enabled": true
+    },
+    {
+      "name": "Teddy Open Finance",
+      "slug": "teddydigital",
+      "link": "https://oportunidades.mindsight.com.br/teddydigital",
+      "enabled": true
+    },
+    {
+      "name": "True",
+      "slug": "true",
+      "link": "https://oportunidades.mindsight.com.br/true",
+      "enabled": true
+    },
+    {
+      "name": "Vixting",
+      "slug": "vixting",
+      "link": "https://oportunidades.mindsight.com.br/vixting",
+      "enabled": true
+    }
+  ],
+  "ablerCompanies": [
+    {
+      "name": "BairrU",
+      "slug": "vemserbairru",
+      "link": "https://ats.abler.com.br/jobs/vemserbairru",
+      "enabled": true
+    },
+    {
+      "name": "Conecta Consultoria Contábil",
+      "slug": "5371",
+      "link": "https://ats.abler.com.br/jobs/5371",
+      "enabled": true
+    },
+    {
+      "name": "Direção Marcas & Patentes",
+      "slug": "direcaomarcasepatentes",
+      "link": "https://ats.abler.com.br/jobs/direcaomarcasepatentes",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Barigui",
+      "slug": "grupobarigui",
+      "link": "https://ats.abler.com.br/jobs/grupobarigui",
+      "enabled": true
+    },
+    {
+      "name": "HubLocal",
+      "slug": "hublocal",
+      "link": "https://ats.abler.com.br/jobs/hublocal",
+      "enabled": true
+    },
+    {
+      "name": "kedu",
+      "slug": "kedu",
+      "link": "https://ats.abler.com.br/jobs/kedu",
+      "enabled": true
+    },
+    {
+      "name": "Solucionare",
+      "slug": "solucionare",
+      "link": "https://ats.abler.com.br/jobs/solucionare",
+      "enabled": true
+    },
+    {
+      "name": "Talentflix",
+      "slug": "talentflix",
+      "link": "https://ats.abler.com.br/jobs/talentflix",
+      "enabled": true
+    },
+    {
+      "name": "Trackmob",
+      "slug": "venhaparaatrack",
+      "link": "https://ats.abler.com.br/jobs/venhaparaatrack",
+      "enabled": true
+    }
+  ],
+  "recrutaiCompanies": [
+    {
+      "name": "Apdata",
+      "slug": "apdata",
+      "link": "https://apdata.jobs.recrut.ai",
+      "enabled": true
+    },
+    {
+      "name": "Great Place To Work",
+      "slug": "greatpeople",
+      "link": "https://greatpeople.jobs.recrut.ai",
+      "enabled": true
+    },
+    {
+      "name": "Grupo Bamaq",
+      "slug": "grupobamaq",
+      "link": "https://grupobamaq.jobs.recrut.ai",
+      "enabled": true
+    },
+    {
+      "name": "Grupo D'avó",
+      "slug": "davo",
+      "link": "https://davo.jobs.recrut.ai",
+      "enabled": true
+    },
+    {
+      "name": "Mart Minas Atacado e Varejo",
+      "slug": "martminasedom",
+      "link": "https://martminasedom.jobs.recrut.ai",
+      "enabled": true
+    },
+    {
+      "name": "Petlove",
+      "slug": "petlove",
+      "link": "https://petlove.jobs.recrut.ai",
+      "enabled": true
+    },
+    {
+      "name": "Trivento Educação",
+      "slug": "gruposfa",
+      "link": "https://gruposfa.jobs.recrut.ai",
+      "enabled": true
+    }
+  ],
+  "eightfoldCompanies": [
+    {
+      "name": "Coca-Cola FEMSA",
+      "slug": "coca-colafemsa",
+      "link": "https://coca-colafemsa.eightfold.ai/careers",
+      "enabled": true
+    },
+    {
+      "name": "Fluke Corporation",
+      "slug": "fortive",
+      "link": "https://fortive.eightfold.ai/careers",
+      "enabled": true
+    },
+    {
+      "name": "Intelex Technologies ULC",
+      "slug": "fortive",
+      "link": "https://fortive.eightfold.ai/careers",
+      "enabled": true
+    },
+    {
+      "name": "Mercado Livre",
+      "slug": "mercadolibre",
+      "link": "https://mercadolibre.eightfold.ai/careers",
+      "enabled": true
+    },
+    {
+      "name": "Netflix",
+      "slug": "netflix",
+      "link": "https://explore.jobs.netflix.net/careers",
+      "enabled": true
+    },
+    {
+      "name": "Qualitrol",
+      "slug": "ralliant",
+      "link": "https://ralliant.eightfold.ai/careers",
+      "enabled": true
+    }
+  ],
+  "recruteiCompanies": [
+    {
+      "name": "Contratação Acelerada",
+      "slug": "singularis-rh",
+      "link": "https://jobs.recrutei.com.br/singularis-rh",
+      "enabled": true
+    },
+    {
+      "name": "Edtech",
+      "slug": "singularis-rh",
+      "link": "https://jobs.recrutei.com.br/singularis-rh",
+      "enabled": true
+    },
+    {
+      "name": "Full Sales System",
+      "slug": "full-sales-system",
+      "link": "https://jobs.recrutei.com.br/full-sales-system",
+      "enabled": true
+    },
+    {
+      "name": "Healthcare Compliance",
+      "slug": "singularis-rh",
+      "link": "https://jobs.recrutei.com.br/singularis-rh",
+      "enabled": true
+    },
+    {
+      "name": "InCicle",
+      "slug": "incicle-sistemas",
+      "link": "https://jobs.recrutei.com.br/incicle-sistemas",
+      "enabled": true
+    }
+  ],
+  "recruiteeCompanies": [
+    {
+      "name": "Asksuite",
+      "slug": "asksuite",
+      "link": "https://asksuite.recruitee.com",
+      "enabled": true
+    },
+    {
+      "name": "CPQD",
+      "slug": "cpqd",
+      "link": "https://cpqd.recruitee.com",
+      "enabled": true
+    },
+    {
+      "name": "Kaizo",
+      "slug": "kaizo",
+      "link": "https://kaizo.recruitee.com",
+      "enabled": true
+    },
+    {
+      "name": "SuperSummary",
+      "slug": "supersummary",
+      "link": "https://supersummary.recruitee.com",
+      "enabled": true
+    }
+  ],
+  "teamtailorCompanies": [
+    {
+      "name": "edrone",
+      "slug": "edrone",
+      "link": "https://edrone.teamtailor.com",
+      "enabled": true
+    },
+    {
+      "name": "Insense | TikTok & Meta Partner",
+      "slug": "insense",
+      "link": "https://insense.na.teamtailor.com",
+      "enabled": true
+    },
+    {
+      "name": "Instaleap",
+      "slug": "instaleap",
+      "link": "https://instaleap.na.teamtailor.com",
+      "enabled": true
+    },
+    {
+      "name": "Loft",
+      "slug": "loft",
+      "link": "https://loft.teamtailor.com",
+      "enabled": true
+    }
+  ],
+  "selectyCompanies": [
+    {
+      "name": "Amplimed",
+      "slug": "amplimed",
+      "link": "https://amplimed.selecty.com.br",
+      "enabled": true
+    },
+    {
+      "name": "Hospital Santa Lúcia",
+      "slug": "gruposanta",
+      "link": "https://gruposanta.selecty.com.br",
+      "enabled": true
+    },
+    {
+      "name": "projeto22",
+      "slug": "projeto22",
+      "link": "https://projeto22.selecty.com.br",
       "enabled": true
     }
   ]

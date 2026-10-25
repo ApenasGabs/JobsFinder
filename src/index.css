@@ -391,6 +391,61 @@ body {
   color: white;
 }
 
+.source-badge.workday {
+  background: #2563eb;
+  color: white;
+}
+
+.source-badge.pandape {
+  background: #6366f1;
+  color: white;
+}
+
+.source-badge.totvs {
+  background: #0ea5e9;
+  color: white;
+}
+
+.source-badge.mindsight {
+  background: #a855f7;
+  color: white;
+}
+
+.source-badge.abler {
+  background: #65a30d;
+  color: white;
+}
+
+.source-badge.recrutai {
+  background: #db2777;
+  color: white;
+}
+
+.source-badge.eightfold {
+  background: #ca8a04;
+  color: white;
+}
+
+.source-badge.recrutei {
+  background: #16a34a;
+  color: white;
+}
+
+.source-badge.recruitee {
+  background: #3b82f6;
+  color: white;
+}
+
+.source-badge.teamtailor {
+  background: #e11d48;
+  color: white;
+}
+
+.source-badge.selecty {
+  background: #0891b2;
+  color: white;
+}
+
 .job-company {
   font-size: 0.88rem;
   color: #94a3b8;

@@ -217,6 +217,17 @@ export interface AppConfig {
   solidesCompanies?: CompanyConfig[];
   quickinCompanies?: CompanyConfig[];
   smartrecruitersCompanies?: CompanyConfig[];
+  workdayCompanies?: CompanyConfig[];
+  pandapeCompanies?: CompanyConfig[];
+  totvsCompanies?: CompanyConfig[];
+  mindsightCompanies?: CompanyConfig[];
+  ablerCompanies?: CompanyConfig[];
+  recrutaiCompanies?: CompanyConfig[];
+  eightfoldCompanies?: CompanyConfig[];
+  recruteiCompanies?: CompanyConfig[];
+  recruiteeCompanies?: CompanyConfig[];
+  teamtailorCompanies?: CompanyConfig[];
+  selectyCompanies?: CompanyConfig[];
   whatsapp?: WhatsAppConfig;
   scheduler?: SchedulerConfig;
 }

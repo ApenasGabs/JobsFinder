@@ -402,6 +402,33 @@ app.get("/api/whatsapp/groups", async (req: Request, res: Response) => {
   res.json({ groups });
 });
 
+app.post("/api/whatsapp/weekly/trigger", async (req: Request, res: Response) => {
+  try {
+    const force = req.body?.force !== false;
+    const result = await WhatsAppBot.runWeeklySummary({ force });
+    res.json({ success: true, result });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      error: err?.message || "Erro ao disparar resumo semanal",
+    });
+  }
+});
+
+app.post("/api/whatsapp/digest/trigger", async (req: Request, res: Response) => {
+  try {
+    const kind = req.body?.kind === "senior" ? "senior" : "entry";
+    const force = req.body?.force !== false;
+    const result = await WhatsAppBot.runDigest(kind, { force });
+    res.json({ success: true, result });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      error: err?.message || "Erro ao disparar digest",
+    });
+  }
+});
+
 app.post("/api/whatsapp/test", async (_req: Request, res: Response) => {
   const result = await WhatsAppBot.sendTestMessage();
   res.json(result);

@@ -25,6 +25,7 @@ services:
       - LIGHTPANDA_WS=ws://lightpanda:9222
       - SUPABASE_URL=${SUPABASE_URL:-}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-}
+      - WHATSAPP_GROUP_JID=${WHATSAPP_GROUP_JID:-}
       # CASO 2: Se no futuro quiser rodar o navegador na máquina Ubuntu Server externa, basta trocar para:
       # - LIGHTPANDA_HTTP=http://192.168.1.X:9222
       # - LIGHTPANDA_WS=ws://192.168.1.X:9222

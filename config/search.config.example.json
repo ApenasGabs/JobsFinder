@@ -166,7 +166,11 @@
     "enabled": false,
     "targetGroupJid": "",
     "targetGroupName": "",
-    "sendDigestIfMoreThan": 5
+    "batchSize": 4,
+    "batchIntervalMinutes": 5,
+    "targetCategories": [
+      "TODAS"
+    ]
   },
   "scheduler": {
     "enabled": true,

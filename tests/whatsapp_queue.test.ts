@@ -111,4 +111,28 @@ describe("WhatsApp Bot Queue, Backoff and Cold Start", () => {
     WhatsAppBot.resetColdStart();
     assert.equal(WhatsAppBot.isColdStartExecuted(), false, "Inicialmente o cold start não foi executado");
   });
+
+  it("deve executar triggerQueueProcessing com segurança mesmo com fila vazia ou bot desconectado", () => {
+    assert.doesNotThrow(() => {
+      WhatsAppBot.triggerQueueProcessing();
+    });
+  });
+
+  it("deve persistir e reter envelope de digest na fila", () => {
+    WhatsAppBot.clearQueue();
+    WhatsAppBot.enqueueDigestEnvelope({
+      id: "test-digest-retention",
+      kind: "entry",
+      slotKey: "entry:test",
+      text: "Vagas de teste",
+      includedIds: ["id-1", "id-2"],
+      expiredIds: [],
+      createdAt: new Date().toISOString(),
+    });
+
+    const queue = WhatsAppBot.getDigestQueue();
+    assert.equal(queue.length, 1);
+    assert.equal(queue[0].id, "test-digest-retention");
+    assert.equal(queue[0].kind, "entry");
+  });
 });

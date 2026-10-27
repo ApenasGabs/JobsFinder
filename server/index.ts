@@ -362,6 +362,13 @@ app.post("/api/whatsapp/config", (req: Request, res: Response) => {
     },
   });
 
+  if (
+    updatedConfig.whatsapp?.enabled &&
+    updatedConfig.whatsapp?.targetGroupJid
+  ) {
+    WhatsAppBot.triggerQueueProcessing();
+  }
+
   res.json({ success: true, whatsapp: updatedConfig.whatsapp });
 });
 

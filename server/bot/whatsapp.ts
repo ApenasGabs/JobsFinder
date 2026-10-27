@@ -722,6 +722,19 @@ export class WhatsAppBot {
   }
 
   /**
+   * Aciona o processamento da fila persistida se houver mensagens e a fila não estiver rodando
+   */
+  public static triggerQueueProcessing(): void {
+    this.ensureQueueLoaded();
+    if (
+      !this.isProcessingQueue &&
+      (this.digestQueue.length > 0 || this.messageQueue.length > 0)
+    ) {
+      this.processQueue();
+    }
+  }
+
+  /**
    * Adiciona vagas à fila sem duplicar e garantindo que sejam 100% de Tecnologia/TI
    */
   public static enqueueJobs(jobs: Job[]): number {
@@ -1036,12 +1049,21 @@ export class WhatsAppBot {
       }
 
       if (this.digestQueue.length > 0) {
-        const envelope = this.digestQueue.shift()!;
+        const envelope = this.digestQueue[0];
         const target = envelope.targetGroupJid || defaultTarget;
         if (!target) {
+          console.warn(
+            `[WhatsApp] ⚠️ Nenhum grupo de destino configurado (targetGroupJid vazio). Digest "${envelope.kind}" permanecerá retido na fila aguardando configuração.`,
+          );
+          LoggerService.warn(
+            "WHATSAPP",
+            "WA_NO_TARGET_GROUP",
+            `Digest "${envelope.kind}" retido na fila: nenhum grupo de destino configurado`,
+          );
           this.isProcessingQueue = false;
           return;
         }
+        this.digestQueue.shift();
         this.saveDigestQueueToDisk();
 
         console.log(
@@ -1094,6 +1116,14 @@ export class WhatsAppBot {
         }
       } else if (this.messageQueue.length > 0) {
         if (!defaultTarget) {
+          console.warn(
+            "[WhatsApp] ⚠️ Nenhum grupo de destino configurado (targetGroupJid vazio). Vagas individuais permanecerão retidas na fila.",
+          );
+          LoggerService.warn(
+            "WHATSAPP",
+            "WA_NO_TARGET_GROUP",
+            "Vagas retidas na fila: nenhum grupo de destino configurado",
+          );
           this.isProcessingQueue = false;
           return;
         }

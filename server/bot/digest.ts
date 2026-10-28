@@ -69,6 +69,36 @@ const BR_UF = new Set([
   "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
 ]);
 
+const BR_STATES_NORMALIZED = [
+  "distrito federal",
+  "espirito santo",
+  "mato grosso do sul",
+  "mato grosso",
+  "minas gerais",
+  "rio de janeiro",
+  "rio grande do norte",
+  "rio grande do sul",
+  "santa catarina",
+  "sao paulo",
+  "acre",
+  "alagoas",
+  "amapa",
+  "amazonas",
+  "bahia",
+  "ceara",
+  "goias",
+  "maranhao",
+  "paraiba",
+  "parana",
+  "para",
+  "pernambuco",
+  "piaui",
+  "rondonia",
+  "roraima",
+  "sergipe",
+  "tocantins",
+];
+
 const HIDDEN_COMPANIES = [
   /confidencial/i,
   /confidential/i,
@@ -93,14 +123,34 @@ export function isBrazil(location: string): boolean {
   if (/brasil|brazil|remoto|remote|diversos|nao[_\s]?informado/i.test(loc)) {
     return true;
   }
-  if (/,\s*(?:BR|Brasil)$/i.test(loc)) {
-    const withoutCountry = loc.replace(/,\s*(?:BR|Brasil)$/i, "").trim();
+  // Se for código ou nome do país isolado
+  if (/^(?:br|bra|brasil|brazil)$/i.test(loc)) {
+    return true;
+  }
+  // Se termina com ", BR", "- BR", "/ BR", ", Brasil", etc.
+  if (/(?:,|-|\/)\s*(?:BR|Brasil)$/i.test(loc)) {
+    const withoutCountry = loc.replace(/(?:,|-|\/)\s*(?:BR|Brasil)$/i, "").trim();
     const mCountry = withoutCountry.match(/(?:,|-|\/)\s*([A-Z]{2})$/);
     if (mCountry) return BR_UF.has(mCountry[1]);
     return true;
   }
-  const m = loc.match(/(?:,|-|\/)\s*([A-Z]{2})$/); // "Brasília, DF"
-  return !!m && BR_UF.has(m[1]);
+  // Sigla UF de 2 letras maiúsculas: "Belo Horizonte, MG" ou "São Paulo - SP"
+  const m = loc.match(/(?:,|-|\/)\s*([A-Z]{2})$/);
+  if (m && BR_UF.has(m[1])) return true;
+
+  // Reconhece estados brasileiros por extenso e capital Brasília
+  const nLoc = norm(loc);
+  if (/\bbrasilia\b/i.test(nLoc)) {
+    return true;
+  }
+  for (const state of BR_STATES_NORMALIZED) {
+    const re = new RegExp(`(^|\\s)${state}(\\s|$)`, "i");
+    if (re.test(nLoc)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /** Vagas que não devem ir ao grupo (dado ruim / sem empresa identificável). Continuam no banco. */
@@ -781,8 +831,8 @@ export function getDigestRuntimeConfig(): DigestRuntimeConfig {
       DIGESTS.senior.options.minJobs,
     ),
     maxAgeDays: parseEnvInt(process.env.DIGEST_MAX_AGE_DAYS, 5),
-    entryCron: process.env.DIGEST_ENTRY_CRON?.trim() || "0 12 * * *",
-    seniorCron: process.env.DIGEST_SENIOR_CRON?.trim() || "0 18 * * *",
+    entryCron: process.env.DIGEST_ENTRY_CRON?.trim() || "5 12 * * *",
+    seniorCron: process.env.DIGEST_SENIOR_CRON?.trim() || "5 18 * * *",
     weeklyCron: process.env.DIGEST_WEEKLY_CRON?.trim() || "0 11 * * 0",
     timezone: process.env.DIGEST_TIMEZONE?.trim() || "America/Sao_Paulo",
     dryRun: parseEnvBool(process.env.DIGEST_DRY_RUN, false),

@@ -191,7 +191,7 @@ export class SchedulerService {
 
       if (newJobsCollected.length > 0) {
         console.log(
-          `[Scheduler] ${newJobsCollected.length} nova(s) vaga(s) de TI aguardando o próximo digest agendado (12h / 18h).`,
+          `[Scheduler] ${newJobsCollected.length} nova(s) vaga(s) de TI aguardando o próximo digest agendado (12:05 / 18:05).`,
         );
       }
 

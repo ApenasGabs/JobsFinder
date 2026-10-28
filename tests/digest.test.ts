@@ -7,6 +7,7 @@ import {
   DEFAULT_RADAR_URL,
   DIGESTS,
   DigestJob,
+  getDigestRuntimeConfig,
   groupDuplicates,
   isBrazil,
   isExcludedFromDigest,
@@ -357,8 +358,27 @@ describe("Digest Builder (digest.ts)", () => {
     assert.equal(isBrazil("Macapá, AP, BR"), true);
     assert.equal(isBrazil("Remoto"), true);
     assert.equal(isBrazil("Brasil"), true);
+    assert.equal(isBrazil("BR"), true);
+    assert.equal(isBrazil("Belo Horizonte, Minas Gerais"), true);
+    assert.equal(isBrazil("São Bernardo do Campo, São Paulo"), true);
+    assert.equal(isBrazil("São Paulo, São Paulo"), true);
+    assert.equal(isBrazil("Brasília"), true);
+    assert.equal(isBrazil("Curitiba, Paraná"), true);
+    assert.equal(isBrazil("Florianópolis, Santa Catarina"), true);
+    assert.equal(isBrazil("Porto Alegre, Rio Grande do Sul"), true);
     assert.equal(isBrazil("London, United Kingdom"), false);
     assert.equal(isBrazil("New York, NY"), false);
+    assert.equal(isBrazil("Toronto, Canada"), false);
+    assert.equal(isBrazil("San Salvador, El Salvador"), false);
+    assert.equal(isBrazil("Warszawa, Poland"), false);
+    assert.equal(isBrazil("Gurugram"), false);
+    assert.equal(isBrazil("India - Pune"), false);
+  });
+
+  it("configura horários de cron dos digests desfasados da varredura periódica (:00)", () => {
+    const cfg = getDigestRuntimeConfig();
+    assert.equal(cfg.entryCron, "5 12 * * *", "Digest de estágio/júnior deve rodar às 12:05");
+    assert.equal(cfg.seniorCron, "5 18 * * *", "Digest de pleno/sênior deve rodar às 18:05");
   });
 
   it("gera o resumo semanal de domingo omitindo itens sem dados confiáveis e agradecendo quem sugeriu", () => {

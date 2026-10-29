@@ -47,13 +47,21 @@ describe("Digest Builder (digest.ts)", () => {
     assert.equal(res, null);
   });
 
-  it("envia digest de estagio e junior mesmo com apenas 1 vaga elegivel (minJobs: 1)", () => {
+  it("envia digest de estagio, junior e pleno mesmo com apenas 1 vaga elegivel (minJobs: 1)", () => {
+    assert.deepEqual(DIGESTS.entry.seniorities, ["ESTAGIO", "JUNIOR", "PLENO"]);
+    assert.deepEqual(DIGESTS.senior.seniorities, [
+      "SENIOR",
+      "ESPECIALISTA",
+      "NAO_INFORMADO",
+    ]);
+    assert.equal(DIGESTS.senior.options.minJobs, 4);
+
     const jobs = [
       makeJob({
         id: "j1",
-        title: "Estagiário de Desenvolvimento",
+        title: "Desenvolvedor Backend Pleno",
         company: "Empresa A",
-        seniorityLevel: "ESTAGIO",
+        seniorityLevel: "PLENO",
       }),
     ];
 
@@ -62,9 +70,9 @@ describe("Digest Builder (digest.ts)", () => {
       now: fixedNow,
     });
 
-    assert.ok(res, "Deve gerar o digest mesmo com apenas 1 vaga");
+    assert.ok(res, "Deve gerar o digest de pleno mesmo com apenas 1 vaga");
     assert.equal(res.includedIds.length, 1);
-    assert.ok(res.text.includes("Estagiário de Desenvolvimento"));
+    assert.ok(res.text.includes("Desenvolvedor Backend Pleno"));
   });
 
   it("agrupa duplicatas da mesma empresa e título em diferentes cidades e inclui todos os IDs em includedIds", () => {

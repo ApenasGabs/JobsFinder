@@ -57,7 +57,7 @@ export class SchedulerService {
     );
 
     console.log(
-      `[Scheduler] 🎓 Digest Estágio/Trainee/Júnior agendado: "${digestCfg.entryCron}" (${digestCfg.timezone})`,
+      `[Scheduler] 🎓 Digest Estágio/Trainee/Júnior/Pleno agendado: "${digestCfg.entryCron}" (${digestCfg.timezone})`,
     );
     this.entryDigestTask = cron.schedule(
       digestCfg.entryCron,
@@ -75,7 +75,7 @@ export class SchedulerService {
     );
 
     console.log(
-      `[Scheduler] 🚀 Digest Pleno/Sênior agendado: "${digestCfg.seniorCron}" (${digestCfg.timezone})`,
+      `[Scheduler] 🚀 Digest Sênior/Especialista agendado: "${digestCfg.seniorCron}" (${digestCfg.timezone})`,
     );
     this.seniorDigestTask = cron.schedule(
       digestCfg.seniorCron,

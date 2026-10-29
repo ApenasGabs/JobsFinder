@@ -776,7 +776,7 @@ export const DIGESTS = {
       emoji: "🎓",
       radarUrl: DEFAULT_RADAR_URL,
       includeAbroad: false,
-      minJobs: 3,
+      minJobs: 1,
     },
   },
   senior: {

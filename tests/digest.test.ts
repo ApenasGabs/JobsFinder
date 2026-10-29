@@ -47,6 +47,26 @@ describe("Digest Builder (digest.ts)", () => {
     assert.equal(res, null);
   });
 
+  it("envia digest de estagio e junior mesmo com apenas 1 vaga elegivel (minJobs: 1)", () => {
+    const jobs = [
+      makeJob({
+        id: "j1",
+        title: "Estagiário de Desenvolvimento",
+        company: "Empresa A",
+        seniorityLevel: "ESTAGIO",
+      }),
+    ];
+
+    const res = buildDigest(jobs, {
+      ...DIGESTS.entry.options,
+      now: fixedNow,
+    });
+
+    assert.ok(res, "Deve gerar o digest mesmo com apenas 1 vaga");
+    assert.equal(res.includedIds.length, 1);
+    assert.ok(res.text.includes("Estagiário de Desenvolvimento"));
+  });
+
   it("agrupa duplicatas da mesma empresa e título em diferentes cidades e inclui todos os IDs em includedIds", () => {
     const jobs = [
       makeJob({

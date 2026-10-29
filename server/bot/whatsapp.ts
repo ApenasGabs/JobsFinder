@@ -797,11 +797,12 @@ export class WhatsAppBot {
 
     const catUpper = (category || "TODAS").toUpperCase().trim();
     const kinds: DigestKind[] =
-      catUpper === "ESTAGIO" || catUpper === "JUNIOR" || catUpper === "ENTRY"
+      catUpper === "ESTAGIO" ||
+      catUpper === "JUNIOR" ||
+      catUpper === "PLENO" ||
+      catUpper === "ENTRY"
         ? ["entry"]
-        : catUpper === "PLENO" ||
-            catUpper === "SENIOR" ||
-            catUpper === "ESPECIALISTA"
+        : catUpper === "SENIOR" || catUpper === "ESPECIALISTA"
           ? ["senior"]
           : ["entry", "senior"];
 
@@ -869,12 +870,13 @@ export class WhatsAppBot {
     const wantedSet = new Set((seniorities || []).map((s) => s.toUpperCase()));
     const isOnlyEntry =
       wantedSet.size > 0 &&
-      Array.from(wantedSet).every((s) => s === "ESTAGIO" || s === "JUNIOR");
+      Array.from(wantedSet).every(
+        (s) => s === "ESTAGIO" || s === "JUNIOR" || s === "PLENO",
+      );
     const isOnlySenior =
       wantedSet.size > 0 &&
       Array.from(wantedSet).every(
         (s) =>
-          s === "PLENO" ||
           s === "SENIOR" ||
           s === "ESPECIALISTA" ||
           s === "NAO_INFORMADO",
@@ -1207,9 +1209,13 @@ export class WhatsAppBot {
     const isEntry =
       catUpper === "ESTAGIO" ||
       catUpper === "JUNIOR" ||
+      catUpper === "PLENO" ||
       catUpper === "ENTRY" ||
       jobs.every(
-        (j) => j.seniorityLevel === "ESTAGIO" || j.seniorityLevel === "JUNIOR",
+        (j) =>
+          j.seniorityLevel === "ESTAGIO" ||
+          j.seniorityLevel === "JUNIOR" ||
+          j.seniorityLevel === "PLENO",
       );
 
     const preset = isEntry ? DIGESTS.entry.options : DIGESTS.senior.options;

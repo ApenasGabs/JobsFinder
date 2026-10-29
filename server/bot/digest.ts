@@ -770,24 +770,23 @@ function parseEnvBool(value: string | undefined, fallback: boolean): boolean {
 
 export const DIGESTS = {
   entry: {
-    seniorities: ["ESTAGIO", "JUNIOR"] as Seniority[],
+    seniorities: ["ESTAGIO", "JUNIOR", "PLENO"] as Seniority[],
     options: {
-      title: "ESTÁGIO, TRAINEE E JÚNIOR",
+      title: "ESTÁGIO, TRAINEE, JÚNIOR E PLENO",
       emoji: "🎓",
       radarUrl: DEFAULT_RADAR_URL,
       includeAbroad: false,
-      minJobs: 3,
+      minJobs: 1,
     },
   },
   senior: {
     seniorities: [
-      "PLENO",
       "SENIOR",
       "ESPECIALISTA",
       "NAO_INFORMADO",
     ] as Seniority[],
     options: {
-      title: "VAGAS PLENO E SÊNIOR",
+      title: "VAGAS SÊNIOR E ESPECIALISTA",
       emoji: "🚀",
       radarUrl: DEFAULT_RADAR_URL,
       includeAbroad: false,

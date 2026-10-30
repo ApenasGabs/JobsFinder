@@ -34,6 +34,7 @@ const DEFAULT_SOURCES = [
   { id: "PROGRAMATHOR", name: "Programathor" },
   { id: "FREELAS_99", name: "99Freelas" },
   { id: "GEEKHUNTER", name: "GeekHunter" },
+  { id: "IBM", name: "IBM Careers (Brasil)" },
 ];
 
 export class ScraperHealthService {

@@ -244,7 +244,7 @@ export class RecruiteeScraper implements BaseScraper {
               if (!normalized) continue;
 
               const textToMatch =
-                `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")}`.toLowerCase();
+                `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")} ${normalized.description || ""}`.toLowerCase();
               if (keywords.length > 0) {
                 const matches = keywords.some((k) => textToMatch.includes(k));
                 if (!matches) continue;

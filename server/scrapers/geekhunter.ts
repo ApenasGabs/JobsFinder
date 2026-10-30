@@ -69,17 +69,34 @@ export class GeekHunterScraper implements BaseScraper {
         }
 
         const $ = cheerio.load(html);
+        const seenUrls = new Set<string>();
 
-        $('a[href*="/vaga/"], .job-card, .vaga-item').each((_, elem) => {
-          const title = $(elem).find('h2, h3, .job-title').first().text().trim() || $(elem).text().trim().split('\n')[0];
-          if (!title || title.length < 4 || title.length > 120) return;
+        $('a[href*="/jobs/"]').each((_, elem) => {
+          const rawHref = $(elem).attr('href') || '';
+          if (!rawHref || seenUrls.has(rawHref)) return;
+          seenUrls.add(rawHref);
 
-          const rawHref = $(elem).attr('href') || $(elem).find('a').attr('href') || '';
-          if (!rawHref) return;
-          const jobUrl = rawHref.startsWith('http') ? rawHref : `https://www.geekhunter.com.br${rawHref}`;
+          const jobUrl = rawHref.startsWith('http')
+            ? rawHref
+            : `https://www.geekhunter.com${rawHref}`;
 
-          const company = $(elem).find('.company-name, .empresa').text().trim() || 'Empresa parceira GeekHunter';
-          const details = $(elem).text().trim();
+          const title =
+            $(elem).text().trim() ||
+            $(elem).find('h3, h2, .job-title').first().text().trim();
+          if (!title || title.length < 3 || title.length > 140) return;
+
+          // Extrai o nome da empresa da URL (/pt/<company-slug>/jobs/...) ou do card
+          const companyMatch = jobUrl.match(/\/pt\/([^/]+)\/jobs\//i);
+          let company = 'Empresa parceira GeekHunter';
+          if (companyMatch) {
+            company = companyMatch[1]
+              .replace(/-\d+$/, '')
+              .replace(/-/g, ' ')
+              .replace(/\b\w/g, (c) => c.toUpperCase());
+          }
+
+          const card = $(elem).closest('div[class*="css-"]').parent();
+          const details = card.text().replace(/\s+/g, ' ').trim() || title;
 
           const model = detectWorkModel(`${title} ${details}`);
           const seniority = detectSeniority(`${title} ${details}`);
@@ -95,7 +112,7 @@ export class GeekHunterScraper implements BaseScraper {
             url: jobUrl,
             source: 'GEEKHUNTER',
             stack,
-            description: details.slice(0, 250)
+            description: details.slice(0, 300) || `Vaga de tecnologia via GeekHunter: ${title}`,
           };
 
           const { job, isNew } = StorageService.upsertJob(jobData);

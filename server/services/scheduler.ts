@@ -12,6 +12,7 @@ export class SchedulerService {
   private static task: ScheduledTask | null = null;
   private static auditTask: ScheduledTask | null = null;
   private static entryDigestTask: ScheduledTask | null = null;
+  private static plenoDigestTask: ScheduledTask | null = null;
   private static seniorDigestTask: ScheduledTask | null = null;
   private static weeklySummaryTask: ScheduledTask | null = null;
   private static isRunningNow = false;
@@ -57,7 +58,7 @@ export class SchedulerService {
     );
 
     console.log(
-      `[Scheduler] 🎓 Digest Estágio/Trainee/Júnior/Pleno agendado: "${digestCfg.entryCron}" (${digestCfg.timezone})`,
+      `[Scheduler] 🎓 Digest Estágio/Trainee/Júnior agendado: "${digestCfg.entryCron}" (${digestCfg.timezone})`,
     );
     this.entryDigestTask = cron.schedule(
       digestCfg.entryCron,
@@ -69,6 +70,24 @@ export class SchedulerService {
           await WhatsAppBot.runDigest("entry");
         } catch (err) {
           console.error("[Scheduler] Erro ao executar digest entry:", err);
+        }
+      },
+      { timezone: digestCfg.timezone },
+    );
+
+    console.log(
+      `[Scheduler] 💻 Digest Pleno agendado: "${digestCfg.plenoCron}" (${digestCfg.timezone})`,
+    );
+    this.plenoDigestTask = cron.schedule(
+      digestCfg.plenoCron,
+      async () => {
+        console.log(
+          `[Scheduler] 💻 Disparando digest agendado (pleno) [${new Date().toISOString()}]`,
+        );
+        try {
+          await WhatsAppBot.runDigest("pleno");
+        } catch (err) {
+          console.error("[Scheduler] Erro ao executar digest pleno:", err);
         }
       },
       { timezone: digestCfg.timezone },
@@ -223,6 +242,7 @@ export class SchedulerService {
       enabled: config.scheduler?.enabled ?? true,
       cronSchedule: config.scheduler?.cronSchedule || "*/30 * * * *",
       entryDigestCron: digestCfg.entryCron,
+      plenoDigestCron: digestCfg.plenoCron,
       seniorDigestCron: digestCfg.seniorCron,
       weeklySummaryCron: digestCfg.weeklyCron,
       timezone: digestCfg.timezone,
@@ -242,6 +262,10 @@ export class SchedulerService {
     if (this.entryDigestTask) {
       this.entryDigestTask.stop();
       this.entryDigestTask = null;
+    }
+    if (this.plenoDigestTask) {
+      this.plenoDigestTask.stop();
+      this.plenoDigestTask = null;
     }
     if (this.seniorDigestTask) {
       this.seniorDigestTask.stop();

@@ -770,10 +770,20 @@ function parseEnvBool(value: string | undefined, fallback: boolean): boolean {
 
 export const DIGESTS = {
   entry: {
-    seniorities: ["ESTAGIO", "JUNIOR", "PLENO"] as Seniority[],
+    seniorities: ["ESTAGIO", "JUNIOR"] as Seniority[],
     options: {
-      title: "ESTÁGIO, TRAINEE, JÚNIOR E PLENO",
+      title: "ESTÁGIO, TRAINEE E JÚNIOR",
       emoji: "🎓",
+      radarUrl: DEFAULT_RADAR_URL,
+      includeAbroad: false,
+      minJobs: 1,
+    },
+  },
+  pleno: {
+    seniorities: ["PLENO"] as Seniority[],
+    options: {
+      title: "VAGAS PLENO",
+      emoji: "💻",
       radarUrl: DEFAULT_RADAR_URL,
       includeAbroad: false,
       minJobs: 1,
@@ -804,9 +814,11 @@ export interface DigestRuntimeConfig {
   maxChars: number;
   includeAbroad: boolean;
   entryMinJobs: number;
+  plenoMinJobs: number;
   seniorMinJobs: number;
   maxAgeDays: number;
   entryCron: string;
+  plenoCron: string;
   seniorCron: string;
   weeklyCron: string;
   timezone: string;
@@ -825,12 +837,17 @@ export function getDigestRuntimeConfig(): DigestRuntimeConfig {
       process.env.DIGEST_ENTRY_MIN_JOBS,
       DIGESTS.entry.options.minJobs,
     ),
+    plenoMinJobs: parseEnvInt(
+      process.env.DIGEST_PLENO_MIN_JOBS,
+      DIGESTS.pleno.options.minJobs,
+    ),
     seniorMinJobs: parseEnvInt(
       process.env.DIGEST_SENIOR_MIN_JOBS,
       DIGESTS.senior.options.minJobs,
     ),
     maxAgeDays: parseEnvInt(process.env.DIGEST_MAX_AGE_DAYS, 5),
     entryCron: process.env.DIGEST_ENTRY_CRON?.trim() || "5 12 * * *",
+    plenoCron: process.env.DIGEST_PLENO_CRON?.trim() || "5 18 * * *",
     seniorCron: process.env.DIGEST_SENIOR_CRON?.trim() || "5 18 * * *",
     weeklyCron: process.env.DIGEST_WEEKLY_CRON?.trim() || "0 11 * * 0",
     timezone: process.env.DIGEST_TIMEZONE?.trim() || "America/Sao_Paulo",
@@ -845,6 +862,12 @@ export function getDigestOptionsForKind(
 ): { seniorities: Seniority[]; options: DigestOptions } {
   const preset = DIGESTS[kind];
   const cfg = getDigestRuntimeConfig();
+  const minJobs =
+    kind === "entry"
+      ? cfg.entryMinJobs
+      : kind === "pleno"
+        ? cfg.plenoMinJobs
+        : cfg.seniorMinJobs;
   return {
     seniorities: [...preset.seniorities],
     options: {
@@ -855,7 +878,7 @@ export function getDigestOptionsForKind(
       maxTotal: cfg.maxTotal,
       maxChars: cfg.maxChars,
       includeAbroad: cfg.includeAbroad,
-      minJobs: kind === "entry" ? cfg.entryMinJobs : cfg.seniorMinJobs,
+      minJobs,
       maxAgeDays: cfg.maxAgeDays,
       now,
     },

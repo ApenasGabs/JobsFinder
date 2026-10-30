@@ -799,12 +799,13 @@ export class WhatsAppBot {
     const kinds: DigestKind[] =
       catUpper === "ESTAGIO" ||
       catUpper === "JUNIOR" ||
-      catUpper === "PLENO" ||
       catUpper === "ENTRY"
         ? ["entry"]
-        : catUpper === "SENIOR" || catUpper === "ESPECIALISTA"
-          ? ["senior"]
-          : ["entry", "senior"];
+        : catUpper === "PLENO" || catUpper === "MID"
+          ? ["pleno"]
+          : catUpper === "SENIOR" || catUpper === "ESPECIALISTA"
+            ? ["senior"]
+            : ["entry", "pleno", "senior"];
 
     let totalIncluded = 0;
     for (const k of kinds) {
@@ -870,9 +871,10 @@ export class WhatsAppBot {
     const wantedSet = new Set((seniorities || []).map((s) => s.toUpperCase()));
     const isOnlyEntry =
       wantedSet.size > 0 &&
-      Array.from(wantedSet).every(
-        (s) => s === "ESTAGIO" || s === "JUNIOR" || s === "PLENO",
-      );
+      Array.from(wantedSet).every((s) => s === "ESTAGIO" || s === "JUNIOR");
+    const isOnlyPleno =
+      wantedSet.size > 0 &&
+      Array.from(wantedSet).every((s) => s === "PLENO");
     const isOnlySenior =
       wantedSet.size > 0 &&
       Array.from(wantedSet).every(
@@ -884,10 +886,12 @@ export class WhatsAppBot {
 
     const defaultTitle = isOnlyEntry
       ? DIGESTS.entry.options.title
-      : isOnlySenior
-        ? DIGESTS.senior.options.title
-        : "VAGAS DE TI SELECIONADAS";
-    const defaultEmoji = isOnlyEntry ? "🎓" : "🚀";
+      : isOnlyPleno
+        ? DIGESTS.pleno.options.title
+        : isOnlySenior
+          ? DIGESTS.senior.options.title
+          : "VAGAS DE TI SELECIONADAS";
+    const defaultEmoji = isOnlyEntry ? "🎓" : isOnlyPleno ? "💻" : "🚀";
     const headerTitle = input.title?.trim() || defaultTitle;
 
     const maxChars =
@@ -1209,16 +1213,20 @@ export class WhatsAppBot {
     const isEntry =
       catUpper === "ESTAGIO" ||
       catUpper === "JUNIOR" ||
-      catUpper === "PLENO" ||
       catUpper === "ENTRY" ||
       jobs.every(
-        (j) =>
-          j.seniorityLevel === "ESTAGIO" ||
-          j.seniorityLevel === "JUNIOR" ||
-          j.seniorityLevel === "PLENO",
+        (j) => j.seniorityLevel === "ESTAGIO" || j.seniorityLevel === "JUNIOR",
       );
+    const isPleno =
+      catUpper === "PLENO" ||
+      catUpper === "MID" ||
+      jobs.every((j) => j.seniorityLevel === "PLENO");
 
-    const preset = isEntry ? DIGESTS.entry.options : DIGESTS.senior.options;
+    const preset = isEntry
+      ? DIGESTS.entry.options
+      : isPleno
+        ? DIGESTS.pleno.options
+        : DIGESTS.senior.options;
     const runtimeCfg = getDigestRuntimeConfig();
 
     const result = buildDigest(jobs, {

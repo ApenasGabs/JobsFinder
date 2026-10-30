@@ -424,7 +424,9 @@ app.post("/api/whatsapp/weekly/trigger", async (req: Request, res: Response) => 
 
 app.post("/api/whatsapp/digest/trigger", async (req: Request, res: Response) => {
   try {
-    const kind = req.body?.kind === "senior" ? "senior" : "entry";
+    const rawKind = req.body?.kind;
+    const kind =
+      rawKind === "senior" ? "senior" : rawKind === "pleno" ? "pleno" : "entry";
     const force = req.body?.force !== false;
     const result = await WhatsAppBot.runDigest(kind, { force });
     res.json({ success: true, result });

@@ -47,32 +47,55 @@ describe("Digest Builder (digest.ts)", () => {
     assert.equal(res, null);
   });
 
-  it("envia digest de estagio, junior e pleno mesmo com apenas 1 vaga elegivel (minJobs: 1)", () => {
-    assert.deepEqual(DIGESTS.entry.seniorities, ["ESTAGIO", "JUNIOR", "PLENO"]);
+  it("envia digest de estagio/junior e digest de pleno separadamente mesmo com apenas 1 vaga elegivel (minJobs: 1)", () => {
+    assert.deepEqual(DIGESTS.entry.seniorities, ["ESTAGIO", "JUNIOR"]);
+    assert.deepEqual(DIGESTS.pleno.seniorities, ["PLENO"]);
     assert.deepEqual(DIGESTS.senior.seniorities, [
       "SENIOR",
       "ESPECIALISTA",
       "NAO_INFORMADO",
     ]);
+    assert.equal(DIGESTS.entry.options.minJobs, 1);
+    assert.equal(DIGESTS.pleno.options.minJobs, 1);
     assert.equal(DIGESTS.senior.options.minJobs, 4);
 
-    const jobs = [
+    const plenoJob = [
       makeJob({
-        id: "j1",
+        id: "p1",
         title: "Desenvolvedor Backend Pleno",
-        company: "Empresa A",
+        company: "Empresa Pleno",
         seniorityLevel: "PLENO",
       }),
     ];
 
-    const res = buildDigest(jobs, {
+    const resPleno = buildDigest(plenoJob, {
+      ...DIGESTS.pleno.options,
+      now: fixedNow,
+    });
+
+    assert.ok(resPleno, "Deve gerar o digest de pleno mesmo com apenas 1 vaga");
+    assert.equal(resPleno.includedIds.length, 1);
+    assert.ok(resPleno.text.includes("💻 *VAGAS PLENO*"));
+    assert.ok(resPleno.text.includes("Desenvolvedor Backend Pleno"));
+
+    const entryJob = [
+      makeJob({
+        id: "e1",
+        title: "Desenvolvedor Júnior",
+        company: "Empresa Jr",
+        seniorityLevel: "JUNIOR",
+      }),
+    ];
+
+    const resEntry = buildDigest(entryJob, {
       ...DIGESTS.entry.options,
       now: fixedNow,
     });
 
-    assert.ok(res, "Deve gerar o digest de pleno mesmo com apenas 1 vaga");
-    assert.equal(res.includedIds.length, 1);
-    assert.ok(res.text.includes("Desenvolvedor Backend Pleno"));
+    assert.ok(resEntry, "Deve gerar o digest de entry mesmo com apenas 1 vaga");
+    assert.equal(resEntry.includedIds.length, 1);
+    assert.ok(resEntry.text.includes("🎓 *ESTÁGIO, TRAINEE E JÚNIOR*"));
+    assert.ok(resEntry.text.includes("Desenvolvedor Júnior"));
   });
 
   it("agrupa duplicatas da mesma empresa e título em diferentes cidades e inclui todos os IDs em includedIds", () => {
@@ -406,7 +429,8 @@ describe("Digest Builder (digest.ts)", () => {
   it("configura horários de cron dos digests desfasados da varredura periódica (:00)", () => {
     const cfg = getDigestRuntimeConfig();
     assert.equal(cfg.entryCron, "5 12 * * *", "Digest de estágio/júnior deve rodar às 12:05");
-    assert.equal(cfg.seniorCron, "5 18 * * *", "Digest de pleno/sênior deve rodar às 18:05");
+    assert.equal(cfg.plenoCron, "5 18 * * *", "Digest de pleno deve rodar às 18:05");
+    assert.equal(cfg.seniorCron, "5 18 * * *", "Digest de sênior deve rodar às 18:05");
   });
 
   it("gera o resumo semanal de domingo omitindo itens sem dados confiáveis e agradecendo quem sugeriu", () => {

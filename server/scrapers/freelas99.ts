@@ -29,7 +29,8 @@ export class Freelas99Scraper implements BaseScraper {
       }
 
       try {
-        const url = `https://www.99freelas.com.br/projetos?q=${encodeURIComponent(term)}`;
+        const queryParam = term ? `?q=${encodeURIComponent(term)}` : '';
+        const url = `https://www.99freelas.com.br/projects${queryParam}`;
 
         const response = await resilientFetch(url, {
           timeoutMs: 10000,
@@ -69,15 +70,16 @@ export class Freelas99Scraper implements BaseScraper {
 
         const $ = cheerio.load(html);
 
-        $('.result-item').each((_, elem) => {
-          const titleLink = $(elem).find('.title a');
+        $('.result-item, li.project-item').each((_, elem) => {
+          const titleLink = $(elem).find('.title a, h1.title a, h1 a, a[href*="/project/"]').first();
           const title = titleLink.text().trim();
           if (!title) return;
 
           const relativeUrl = titleLink.attr('href') || '';
+          if (!relativeUrl || relativeUrl.includes('/project/new')) return;
           const projectUrl = relativeUrl.startsWith('http') ? relativeUrl : `https://www.99freelas.com.br${relativeUrl}`;
 
-          const description = $(elem).find('.item-text').text().trim();
+          const description = $(elem).find('.item-text, .description').text().trim();
           const info = $(elem).find('.item-details').text().trim();
           const skills = $(elem).find('.skills span').map((_, s) => $(s).text().trim()).get();
 

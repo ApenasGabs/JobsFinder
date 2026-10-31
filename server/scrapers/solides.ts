@@ -145,7 +145,7 @@ export class SolidesScraper implements BaseScraper {
     await runWithConcurrency(companies, concurrency, async (company) => {
       try {
         const cleanSlug = company.slug.trim().toLowerCase();
-        const apiUrl = `https://apigw.solides.com.br/jobs/v3/companies/${encodeURIComponent(cleanSlug)}/vacancies?take=100`;
+        const apiUrl = `https://apigw.solides.com.br/jobs/v3/companies/${encodeURIComponent(cleanSlug)}/vacancies?take=25`;
         const response = await resilientFetch(apiUrl, {
           timeoutMs: 12000,
           maxRetries: 1,
@@ -165,7 +165,8 @@ export class SolidesScraper implements BaseScraper {
             const normalized = normalizeSolidesVacancy(raw, company);
             if (!normalized) continue;
 
-            const textToMatch = `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")}`.toLowerCase();
+            const textToMatch =
+              `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")} ${normalized.description || ""}`.toLowerCase();
             if (keywords.length > 0) {
               const matches = keywords.some((k) => textToMatch.includes(k));
               if (!matches) continue;

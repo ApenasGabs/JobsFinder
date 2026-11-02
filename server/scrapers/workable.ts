@@ -6,6 +6,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
+  normalizeForMatch,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { resilientFetch } from "../utils/fetch.js";
@@ -45,7 +46,7 @@ export class WorkableScraper implements BaseScraper {
       (c) => c.enabled !== false,
     );
     const keywords = (options.keywords || [])
-      .map((k) => k.toLowerCase().trim())
+      .map((k) => normalizeForMatch(k))
       .filter(Boolean);
 
     const foundJobs: Job[] = [];
@@ -76,7 +77,7 @@ export class WorkableScraper implements BaseScraper {
           for (const item of jobsList) {
             const title = item.title || "Vaga sem título";
             const depts = (item.department || []).join(" ");
-            const textToMatch = `${title} ${depts}`.toLowerCase();
+            const textToMatch = normalizeForMatch(`${title} ${depts}`);
 
             if (keywords.length > 0) {
               const matches = keywords.some((k) => textToMatch.includes(k));

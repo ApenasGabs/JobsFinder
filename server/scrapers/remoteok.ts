@@ -1,6 +1,7 @@
 import { BaseScraper } from './base.js';
 import { Job, ScrapeOptions } from '../types.js';
-import { detectSeniority, extractStack } from '../utils/normalizer.js';
+import { detectSeniority, extractStack,
+  normalizeForMatch } from '../utils/normalizer.js';
 import { resilientFetch } from '../utils/fetch.js';
 import { StorageService } from '../services/storage.js';
 import { LoggerService } from '../services/logger.js';
@@ -30,7 +31,7 @@ export class RemoteOKScraper implements BaseScraper {
     onJobFound: (job: Job, isNew?: boolean) => void,
     onProgress?: (progress: { message: string; percent?: number }) => void
   ): Promise<Job[]> {
-    const keywords = (options.keywords || []).map((k) => k.toLowerCase().trim()).filter(Boolean);
+    const keywords = (options.keywords || []).map((k) => normalizeForMatch(k)).filter(Boolean);
     const foundJobs: Job[] = [];
 
     if (onProgress) {
@@ -76,7 +77,7 @@ export class RemoteOKScraper implements BaseScraper {
         const title = item.position || 'Sem título';
         const company = item.company || 'RemoteOK Company';
         const tags = Array.isArray(item.tags) ? item.tags : [];
-        const fullText = `${title} ${tags.join(' ')} ${item.description || ''}`.toLowerCase();
+        const fullText = normalizeForMatch(`${title} ${tags.join(' ')} ${item.description || ''}`);
 
         // Se o usuário especificou palavras-chave, filtra
         if (keywords.length > 0) {

@@ -13,6 +13,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
+  normalizeForMatch,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { resilientFetch } from "../utils/fetch.js";
@@ -189,7 +190,7 @@ export class SmartRecruitersScraper implements BaseScraper {
       return true;
     });
     const keywords = (options.keywords || [])
-      .map((k) => k.toLowerCase().trim())
+      .map((k) => normalizeForMatch(k))
       .filter(Boolean);
 
     const foundJobs: Job[] = [];
@@ -224,7 +225,7 @@ export class SmartRecruitersScraper implements BaseScraper {
             if (!normalized) continue;
 
             const textToMatch =
-              `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")}`.toLowerCase();
+              normalizeForMatch(`${normalized.title} ${normalized.location} ${normalized.stack.join(" ")}`);
             if (keywords.length > 0) {
               const matches = keywords.some((k) => textToMatch.includes(k));
               if (!matches) continue;
@@ -257,7 +258,7 @@ export class SmartRecruitersScraper implements BaseScraper {
             const ciJobs = parseCiandtPortalHtml(html, "CI&T");
             for (const normalized of ciJobs) {
               const textToMatch =
-                `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")}`.toLowerCase();
+                normalizeForMatch(`${normalized.title} ${normalized.location} ${normalized.stack.join(" ")}`);
               if (keywords.length > 0) {
                 const matches = keywords.some((k) => textToMatch.includes(k));
                 if (!matches) continue;

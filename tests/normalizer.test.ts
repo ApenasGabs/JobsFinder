@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   detectContractType,
+  detectExplicitSeniority,
   detectSeniority,
   detectWorkModel,
   extractStack,
+  matchesSearchKeywords,
+  normalizeForMatch,
   slugifyInHire,
 } from "../server/utils/normalizer.js";
 
@@ -68,6 +71,11 @@ describe("Normalizer Utility", () => {
       assert.equal(detectSeniority("Desenvolvedor Frontend Júnior"), "JUNIOR");
       assert.equal(detectSeniority("Junior Backend Developer"), "JUNIOR");
       assert.equal(detectSeniority("Dev Jr (Node.js)"), "JUNIOR");
+      assert.equal(
+        detectSeniority("Software Developer - STUDENT CONVERSION Entry Level"),
+        "JUNIOR",
+      );
+      assert.equal(detectExplicitSeniority("Data Scientist"), null);
     });
 
     it("should detect PLENO correctly (including default when unspecified)", () => {
@@ -243,5 +251,111 @@ describe("Normalizer Utility", () => {
         assert.equal(slugifyInHire(input), expected);
       });
     }
+  });
+
+  describe("normalizeForMatch & matchesSearchKeywords", () => {
+    const productionSearchTerms = [
+      "java",
+      "react",
+      "node",
+      "typescript",
+      "fullstack",
+      "frontend",
+      "backend",
+      "python",
+      "devops",
+      "estagio",
+      "junior",
+    ];
+
+    it("should strip Portuguese diacritics and lowercase text", () => {
+      assert.equal(
+        normalizeForMatch("  Estágio em Desenvolvimento — São Paulo (Júnior) "),
+        "estagio em desenvolvimento — sao paulo (junior)",
+      );
+      assert.equal(normalizeForMatch(""), "");
+    });
+
+    it("should match accented job titles against unaccented keywords (NFD)", () => {
+      assert.equal(
+        matchesSearchKeywords(
+          "Estágio em Desenvolvimento de Software",
+          ["estagio"],
+        ),
+        true,
+      );
+      assert.equal(
+        matchesSearchKeywords(
+          "Pessoa Desenvolvedora Júnior Front-End",
+          ["junior"],
+        ),
+        true,
+      );
+      assert.equal(
+        matchesSearchKeywords(
+          "Engenheiro Full-Stack Sênior",
+          ["fullstack"],
+        ),
+        true,
+      );
+    });
+
+    it("should match semantic engineering roles during broad radar sweeps without matching non-tech roles", () => {
+      assert.equal(
+        matchesSearchKeywords(
+          "Software Developer - STUDENT CONVERSION Software Engineering",
+          productionSearchTerms,
+          { semanticRoleText: "Software Developer Software Engineering" },
+        ),
+        true,
+      );
+      assert.equal(
+        matchesSearchKeywords(
+          "Líder de Engenharia de Software (Tech Lead) TI",
+          productionSearchTerms,
+          { semanticRoleText: "Líder de Engenharia de Software (Tech Lead) TI" },
+        ),
+        true,
+      );
+      assert.equal(
+        matchesSearchKeywords(
+          "Google Cloud Platform Engineer Engineering",
+          productionSearchTerms,
+          { semanticRoleText: "Google Cloud Platform Engineer Engineering" },
+        ),
+        true,
+      );
+      assert.equal(
+        matchesSearchKeywords(
+          "Data Scientist AI",
+          productionSearchTerms,
+          { semanticRoleText: "Data Scientist AI" },
+        ),
+        true,
+      );
+      assert.equal(
+        matchesSearchKeywords(
+          "Account Executive - LATAM Vendas",
+          productionSearchTerms,
+          { semanticRoleText: "Account Executive - LATAM Vendas" },
+        ),
+        false,
+      );
+    });
+
+    it("should stay strict on single-keyword manual searches", () => {
+      assert.equal(
+        matchesSearchKeywords("Data Scientist AI", ["rust"], {
+          semanticRoleText: "Data Scientist AI",
+        }),
+        false,
+      );
+      assert.equal(
+        matchesSearchKeywords("Data Scientist AI", ["frontend"], {
+          semanticRoleText: "Data Scientist AI",
+        }),
+        false,
+      );
+    });
   });
 });

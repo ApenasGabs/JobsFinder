@@ -8,6 +8,10 @@ import {
   RecruiteeScraper,
 } from "../server/scrapers/recruitee.js";
 import { TechClassifierService } from "../server/services/classifier.js";
+import { ConfigService } from "../server/services/config.js";
+import { ScraperHealthService } from "../server/services/scraper-health.js";
+import { StorageService } from "../server/services/storage.js";
+import { Job } from "../server/types.js";
 import { resilientFetch } from "../server/utils/fetch.js";
 
 const mockRecruiteeJobs: RecruiteeRawJob[] = [
@@ -189,6 +193,163 @@ describe("Recruitee Scraper & E2E Pipeline", () => {
       }
     } catch {
       // Tratamento resiliente para ambientes sem rede externa
+    }
+  });
+
+  it("should extract stack past 1000 chars of company boilerplate and honor experience_code fallback", () => {
+    const longIntro = `<p>${"Sobre a nossa cultura institucional de atendimento global. ".repeat(30)}</p>`;
+    const jobWithLateRequirements: RecruiteeRawJob = {
+      id: 888001,
+      title: "Data Scientist",
+      slug: "data-scientist",
+      department: "AI",
+      description: longIntro,
+      requirements:
+        "<ul><li>Experiência sólida com Python, Docker, Kubernetes e SQL.</li></ul>",
+      experience_code: "junior_level",
+      employment_type_code: "fulltime_permanent",
+      remote: true,
+      status: "published",
+    };
+
+    const normalized = normalizeRecruiteeJob(jobWithLateRequirements, {
+      name: "Kaizo",
+      slug: "kaizo",
+    });
+
+    assert.ok(normalized);
+    assert.equal(normalized.seniorityLevel, "JUNIOR");
+    assert.ok(normalized.stack.includes("Python"));
+    assert.ok(normalized.stack.includes("Docker"));
+    assert.ok(normalized.stack.includes("Kubernetes"));
+    assert.ok((normalized.description || "").length <= 1000);
+  });
+
+  it("should capture tech roles with unaccented searchTerms, reject RevOps/Sales, and emit SOURCE_SCHEMA_CHANGED on malformed payload", async () => {
+    const originalFetch = globalThis.fetch;
+    const originalUpsert = StorageService.upsertJob.bind(StorageService);
+    const originalGetConfig = ConfigService.getConfig.bind(ConfigService);
+
+    const baseConfig = originalGetConfig();
+    ConfigService.getConfig = () => ({
+      ...baseConfig,
+      recruiteeCompanies: [
+        {
+          name: "Asksuite",
+          slug: "asksuite",
+          link: "https://asksuite.recruitee.com",
+          enabled: true,
+        },
+        {
+          name: "BrokenSchemaCo",
+          slug: "brokenschema",
+          link: "https://brokenschema.recruitee.com",
+          enabled: true,
+        },
+      ],
+    });
+
+    StorageService.upsertJob = (jobData: Omit<Job, "id">) => {
+      const isTech = TechClassifierService.isTechSync(jobData.title);
+      return {
+        job: {
+          ...jobData,
+          id: `mock-${jobData.url}`,
+          scrapedAt: new Date().toISOString(),
+          isTech,
+        },
+        isNew: isTech,
+      };
+    };
+
+    globalThis.fetch = async (input: string | URL | Request) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.includes("brokenschema.recruitee.com")) {
+        return new Response(JSON.stringify({ invalidRoot: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response(
+        JSON.stringify({
+          offers: [
+            {
+              id: 101,
+              title: "Líder de Engenharia de Software (Tech Lead)",
+              slug: "lider-de-engenharia",
+              department: "TI",
+              description: `<p>${"Texto institucional longo. ".repeat(60)}</p>`,
+              requirements: "<p>Domínio de Node.js, TypeScript e AWS.</p>",
+              experience_code: "senior_level",
+              remote: true,
+              status: "published",
+            },
+            {
+              id: 102,
+              title: "Analista de RevOps (Revenue Operations)",
+              slug: "analista-revops",
+              department: "RevOps",
+              description: "<p>Operações comerciais com consultas SQL.</p>",
+              status: "published",
+            },
+            {
+              id: 103,
+              title: "Estágio em Marketing",
+              slug: "estagio-marketing",
+              department: "Marketing",
+              employment_type_code: "internship",
+              status: "published",
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    };
+
+    ScraperHealthService.reset();
+    try {
+      ScraperHealthService.recordStart("RECRUITEE", "Recruitee");
+      const scraper = new RecruiteeScraper();
+      const jobs = await scraper.scrape(
+        {
+          keywords: [
+            "java",
+            "react",
+            "node",
+            "typescript",
+            "fullstack",
+            "frontend",
+            "backend",
+            "python",
+            "devops",
+            "estagio",
+            "junior",
+          ],
+          sources: ["RECRUITEE"],
+        },
+        () => {},
+      );
+
+      assert.equal(jobs.length, 1);
+      assert.equal(
+        jobs[0].title,
+        "Líder de Engenharia de Software (Tech Lead)",
+      );
+
+      ScraperHealthService.recordSuccess("RECRUITEE", jobs.length, 50);
+      const alerts = ScraperHealthService.getActiveAlerts();
+      const schemaAlert = alerts.find(
+        (a) => a.code === "SOURCE_SCHEMA_CHANGED" && a.source === "RECRUITEE",
+      );
+      assert.ok(
+        schemaAlert,
+        "Deve emitir alerta SOURCE_SCHEMA_CHANGED quando uma empresa retornar schema inválido",
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+      StorageService.upsertJob = originalUpsert;
+      ConfigService.getConfig = originalGetConfig;
+      ScraperHealthService.reset();
     }
   });
 });

@@ -16,10 +16,14 @@ FROM node:22-alpine
 
 WORKDIR /app
 
+# Instala git para suporte ao AutoUpdater no boot/restart
+RUN apk add --no-cache git
+
 ENV NODE_ENV=production
 ENV PORT=3001
 ENV HOST=0.0.0.0
 ENV AUTH_BAILEYS_DIR=/app/auth_baileys
+ENV NODE_OPTIONS="--max-old-space-size=384"
 
 # Copia package.json e instala dependências de produção
 COPY package.json yarn.lock ./

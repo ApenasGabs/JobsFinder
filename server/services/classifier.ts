@@ -11,6 +11,10 @@ const DICTIONARY_PATH = path.resolve(
   __dirname,
   "../../data/tech_dictionary.json",
 );
+const SEED_DICTIONARY_PATH = path.resolve(
+  __dirname,
+  "../../config/tech_dictionary.seed.json",
+);
 
 export type ClassificationSource = "USER" | "RULE" | "AI";
 
@@ -62,25 +66,45 @@ export class TechClassifierService {
     if (this.isInitialized) return;
 
     try {
+      let seedData: Partial<TechDictionaryData> = {};
+      if (fs.existsSync(SEED_DICTIONARY_PATH)) {
+        seedData = JSON.parse(fs.readFileSync(SEED_DICTIONARY_PATH, "utf-8"));
+      }
+
+      let runtimeData: Partial<TechDictionaryData> = {};
       if (fs.existsSync(DICTIONARY_PATH)) {
-        const raw = fs.readFileSync(DICTIONARY_PATH, "utf-8");
-        const data: TechDictionaryData = JSON.parse(raw);
+        runtimeData = JSON.parse(fs.readFileSync(DICTIONARY_PATH, "utf-8"));
+      }
 
-        this.whitelist = (data.keywords_whitelist || []).map((k) =>
-          k.toLowerCase().trim(),
-        );
-        this.blacklist = (data.keywords_blacklist || []).map((k) =>
-          k.toLowerCase().trim(),
-        );
+      const rawWhitelist =
+        runtimeData.keywords_whitelist && runtimeData.keywords_whitelist.length > 0
+          ? runtimeData.keywords_whitelist
+          : seedData.keywords_whitelist || [];
+      const rawBlacklist =
+        runtimeData.keywords_blacklist && runtimeData.keywords_blacklist.length > 0
+          ? runtimeData.keywords_blacklist
+          : seedData.keywords_blacklist || [];
 
-        for (const [title, entry] of Object.entries(data.exact_titles || {})) {
-          const canonical = canonicalizeTitle(title);
-          this.dictionaryMap.set(canonical, entry);
-        }
+      this.whitelist = rawWhitelist.map((k) => k.toLowerCase().trim());
+      this.blacklist = rawBlacklist.map((k) => k.toLowerCase().trim());
 
+      const mergedTitles: Record<string, TechEntry> = {
+        ...(seedData.exact_titles || {}),
+        ...(runtimeData.exact_titles || {}),
+      };
+
+      for (const [title, entry] of Object.entries(mergedTitles)) {
+        const canonical = canonicalizeTitle(title);
+        this.dictionaryMap.set(canonical, entry);
+      }
+
+      if (this.dictionaryMap.size > 0 || this.whitelist.length > 0) {
         console.log(
           `[TechClassifier] ✅ Dicionário inicializado com ${this.dictionaryMap.size} títulos conhecidos, ${this.whitelist.length} termos na whitelist e ${this.blacklist.length} na blacklist.`,
         );
+        if (!fs.existsSync(DICTIONARY_PATH) || !runtimeData.keywords_whitelist?.length) {
+          this.saveToDiskSync();
+        }
       } else {
         console.warn(
           `[TechClassifier] Arquivo ${DICTIONARY_PATH} não encontrado. Inicializando com mapa vazio.`,

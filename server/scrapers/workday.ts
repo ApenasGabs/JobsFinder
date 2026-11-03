@@ -13,6 +13,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
+  normalizeForMatch,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { BaseScraper } from "./base.js";
@@ -226,7 +227,7 @@ export class WorkdayScraper implements BaseScraper {
     });
 
     const keywords = (options.keywords || [])
-      .map((k) => k.toLowerCase().trim())
+      .map((k) => normalizeForMatch(k))
       .filter(Boolean);
 
     const foundJobs: Job[] = [];
@@ -269,7 +270,7 @@ export class WorkdayScraper implements BaseScraper {
               if (!normalized) continue;
 
               const textToMatch =
-                `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")}`.toLowerCase();
+                normalizeForMatch(`${normalized.title} ${normalized.location} ${normalized.stack.join(" ")}`);
               if (keywords.length > 0) {
                 const matches = keywords.some((k) => textToMatch.includes(k));
                 if (!matches) continue;

@@ -128,10 +128,10 @@ describe("Quickin Scraper & E2E Pipeline", () => {
       `Esperava vagas ativas na BotCity no Quickin, obteve ${verifyRes.jobsCount}`,
     );
 
-    // Testa também um tenant inexistente (ex: altbank que retornou 404)
+    // Testa também um tenant inexistente (HTTP 404)
     const brokenRes = await CompanyAuditorService.verifySingle(
       "QUICKIN",
-      "altbank",
+      "empresa-inexistente-404-teste",
     );
     assert.equal(brokenRes.ok, false);
     assert.equal(brokenRes.httpStatus, 404);

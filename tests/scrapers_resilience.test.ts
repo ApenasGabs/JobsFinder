@@ -226,5 +226,36 @@ describe("Scrapers Resilience, Circuit Breaker and System Health Alerts", () => 
       assert.ok(Array.isArray(reportHealthy.scrapers.sources));
       assert.ok(Array.isArray(reportHealthy.alerts));
     });
+
+    it("deve emitir SOURCE_NO_JOBS em zero-runs consecutivos desde o boot (totalJobsCaptured === 0) e SOURCE_SCHEMA_CHANGED em mudança de contrato", () => {
+      for (let i = 0; i < 5; i++) {
+        ScraperHealthService.recordStart("IBM", "IBM Careers (Brasil)");
+        ScraperHealthService.recordSuccess("IBM", 0, 120);
+      }
+
+      ScraperHealthService.recordStart("RECRUITEE", "Recruitee");
+      ScraperHealthService.recordSchemaChange(
+        "RECRUITEE",
+        "Campo offers ausente na resposta JSON",
+        "asksuite",
+      );
+
+      const alerts = ScraperHealthService.getActiveAlerts();
+      const noJobsAlert = alerts.find(
+        (a) => a.code === "SOURCE_NO_JOBS" && a.source === "IBM",
+      );
+      const schemaAlert = alerts.find(
+        (a) => a.code === "SOURCE_SCHEMA_CHANGED" && a.source === "RECRUITEE",
+      );
+
+      assert.ok(
+        noJobsAlert,
+        "Deve emitir alerta SOURCE_NO_JOBS mesmo quando totalJobsCaptured === 0",
+      );
+      assert.ok(
+        schemaAlert,
+        "Deve emitir alerta SOURCE_SCHEMA_CHANGED quando recordSchemaChange for acionado",
+      );
+    });
   });
 });

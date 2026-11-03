@@ -6,6 +6,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
+  normalizeForMatch,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { resilientFetch } from "../utils/fetch.js";
@@ -54,7 +55,7 @@ export class GupyScraper implements BaseScraper {
     const config = ConfigService.getConfig();
     const companies = config.gupyCompanies.filter((c) => c.enabled !== false);
     const keywords = (options.keywords || [])
-      .map((k) => k.toLowerCase().trim())
+      .map((k) => normalizeForMatch(k))
       .filter(Boolean);
 
     const foundJobs: Job[] = [];
@@ -92,8 +93,9 @@ export class GupyScraper implements BaseScraper {
 
             for (const item of jobsList) {
               const title = item.title || item.name || "Vaga sem título";
-              const textToMatch =
-                `${title} ${item.department || ""} ${item.type || ""}`.toLowerCase();
+              const textToMatch = normalizeForMatch(
+                `${title} ${item.department || ""} ${item.type || ""}`,
+              );
 
               // Se houver filtro de palavra-chave, verifica se bate com algum dos termos
               if (keywords.length > 0) {

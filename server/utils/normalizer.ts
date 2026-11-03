@@ -44,6 +44,90 @@ const KNOWN_STACKS = [
   "Kafka",
 ];
 
+export function normalizeForMatch(text: string): string {
+  if (!text) return "";
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+const BROAD_RADAR_INDICATOR_TERMS = new Set([
+  "fullstack",
+  "frontend",
+  "backend",
+  "devops",
+  "estagio",
+  "junior",
+]);
+
+export const SEMANTIC_TECH_TERMS = [
+  "desenvolvedor",
+  "desenvolvedora",
+  "desenvolvimento de software",
+  "software developer",
+  "software engineer",
+  "software engineering",
+  "engenharia de software",
+  "engenheiro de software",
+  "engenheira de software",
+  "tech lead",
+  "lider de engenharia",
+  "cloud engineer",
+  "platform engineer",
+  "cloud architect",
+  "data scientist",
+  "cientista de dados",
+  "data engineer",
+  "engenheiro de dados",
+  "engenheira de dados",
+  "security engineer",
+  "security architect",
+  "iam security",
+  "cybersecurity",
+  "ciberseguranca",
+  "site reliability",
+  "network services specialist",
+];
+
+export function matchesSearchKeywords(
+  rawText: string,
+  rawKeywords: string[],
+  options?: { semanticRoleText?: string },
+): boolean {
+  const normalizedKeywords = (rawKeywords || [])
+    .map((k) => normalizeForMatch(k))
+    .filter(Boolean);
+
+  if (normalizedKeywords.length === 0) return true;
+
+  const normalizedText = normalizeForMatch(rawText);
+  const dehyphenatedText = normalizedText.replace(/-/g, "");
+
+  const directMatch = normalizedKeywords.some((k) => {
+    if (normalizedText.includes(k)) return true;
+    const dehyphenatedKeyword = k.replace(/-/g, "");
+    return (
+      dehyphenatedKeyword.length >= 4 &&
+      dehyphenatedText.includes(dehyphenatedKeyword)
+    );
+  });
+
+  if (directMatch) return true;
+
+  const isBroadRadarSweep =
+    normalizedKeywords.length >= 3 &&
+    normalizedKeywords.some((k) => BROAD_RADAR_INDICATOR_TERMS.has(k));
+
+  if (isBroadRadarSweep) {
+    const roleTarget = normalizeForMatch(options?.semanticRoleText ?? rawText);
+    return SEMANTIC_TECH_TERMS.some((term) => roleTarget.includes(term));
+  }
+
+  return false;
+}
+
 export function canonicalizeTitle(title: string): string {
   if (!title) return "";
   let clean = title
@@ -57,7 +141,7 @@ export function canonicalizeTitle(title: string): string {
 
   // 2. Remove tags afirmativas/diversidade comuns
   clean = clean.replace(
-    /\(?\[?\b(afirmativ[ao]|exclusiv[ao]|pcd|mulheres|diversidade|negros?|lgbtqia\+?)\b[^\]\)]*\]?\)?/gi,
+    /\(?\[?\b(afirmativ[ao]|exclusiv[ao]|pcd|mulheres|diversidade|negros?|lgbtqia\+?)\b[^)\]]*\]?\)?/gi,
     " ",
   );
 
@@ -72,7 +156,7 @@ export function canonicalizeTitle(title: string): string {
   return clean.replace(/\s+/g, " ").trim();
 }
 
-export function detectSeniority(text: string): SeniorityLevel {
+export function detectExplicitSeniority(text: string): SeniorityLevel | null {
   const t = text.toLowerCase();
   // Regex estrita com word boundary para estágio e exclusão de "internal", "international" ou "internet"
   if (
@@ -81,7 +165,14 @@ export function detectSeniority(text: string): SeniorityLevel {
   ) {
     return "ESTAGIO";
   }
-  if (t.includes("júnior") || t.includes("junior") || /\bjr\b/i.test(t)) {
+  if (
+    t.includes("júnior") ||
+    t.includes("junior") ||
+    t.includes("entry level") ||
+    t.includes("entry-level") ||
+    t.includes("student conversion") ||
+    /\bjr\b/i.test(t)
+  ) {
     return "JUNIOR";
   }
   if (
@@ -111,8 +202,12 @@ export function detectSeniority(text: string): SeniorityLevel {
   ) {
     return "PLENO";
   }
+  return null;
+}
+
+export function detectSeniority(text: string): SeniorityLevel {
   // Regra de negócio: vagas sem senioridade explícita no título são tratadas como PLENO
-  return "PLENO";
+  return detectExplicitSeniority(text) ?? "PLENO";
 }
 
 export function detectWorkModel(text: string): WorkModel {

@@ -105,6 +105,7 @@ export type AlertCode =
   | "WHATSAPP_DISCONNECTED"
   | "SOURCE_CIRCUIT_OPEN"
   | "SOURCE_FAILING"
+  | "SOURCE_SCHEMA_CHANGED"
   | "SOURCE_NO_JOBS"
   | "SUPABASE_SYNC_FAILING";
 
@@ -115,7 +116,7 @@ export interface SystemAlert {
   source?: string;
   message: string;
   detectedAt: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SystemHealthReport {

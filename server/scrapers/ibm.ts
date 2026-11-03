@@ -1,3 +1,4 @@
+import { ScraperHealthService } from "../services/scraper-health.js";
 import { StorageService } from "../services/storage.js";
 import {
   Job,
@@ -11,6 +12,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
+  matchesSearchKeywords,
 } from "../utils/normalizer.js";
 import { resilientFetch } from "../utils/fetch.js";
 import { BaseScraper } from "./base.js";
@@ -118,91 +120,110 @@ export class IbmScraper implements BaseScraper {
       percent?: number;
     }) => void,
   ): Promise<Job[]> {
-    const keywords = (options.keywords || [])
-      .map((k) => k.toLowerCase().trim())
-      .filter(Boolean);
-
+    const rawKeywords = options.keywords || [];
     const foundJobs: Job[] = [];
 
-    try {
-      if (onProgress) {
-        onProgress({
-          message: "Consultando IBM Careers Brasil...",
-          currentCompany: "IBM",
-          percent: 20,
-        });
-      }
+    if (onProgress) {
+      onProgress({
+        message: "Consultando IBM Careers Brasil...",
+        currentCompany: "IBM",
+        percent: 20,
+      });
+    }
 
-      const payload = {
-        appId: "careers",
-        scopes: ["careers2"],
-        query: { bool: { must: [] } },
-        post_filter: { term: { field_keyword_05: "Brazil" } },
-        _source: [
-          "_id",
-          "title",
-          "url",
-          "description",
-          "language",
-          "entitled",
-          "field_keyword_08",
-          "field_keyword_05",
-          "field_keyword_17",
-          "field_keyword_18",
-          "field_keyword_19",
-        ],
-        size: 100,
-        lang: "zz",
-        localeSelector: { lc: "pt", cc: "br" },
-      };
+    const payload = {
+      appId: "careers",
+      scopes: ["careers2"],
+      query: { bool: { must: [] } },
+      post_filter: { term: { field_keyword_05: "Brazil" } },
+      _source: [
+        "_id",
+        "title",
+        "url",
+        "description",
+        "language",
+        "entitled",
+        "field_keyword_08",
+        "field_keyword_05",
+        "field_keyword_17",
+        "field_keyword_18",
+        "field_keyword_19",
+      ],
+      size: 100,
+      lang: "zz",
+      localeSelector: { lc: "pt", cc: "br" },
+    };
 
-      const response = await resilientFetch(
-        "https://www-api.ibm.com/search/api/v2",
-        {
-          method: "POST",
-          timeoutMs: 12000,
-          maxRetries: 1,
-          source: "IBM",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "User-Agent":
-              "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-          },
-          body: JSON.stringify(payload),
+    const response = await resilientFetch(
+      "https://www-api.ibm.com/search/api/v2",
+      {
+        method: "POST",
+        timeoutMs: 12000,
+        maxRetries: 1,
+        source: "IBM",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "User-Agent":
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         },
-      );
+        body: JSON.stringify(payload),
+      },
+    );
 
-      if (response.ok) {
-        const data = await response.json();
-        const hits: IbmRawHit[] = data?.hits?.hits || [];
+    if (!response.ok) {
+      throw new Error(`IBM Search API retornou HTTP ${response.status}`);
+    }
 
-        for (const hit of hits) {
-          const normalized = normalizeIbmJob(hit);
-          if (!normalized) continue;
+    const data = await response.json();
+    if (!data || !Array.isArray(data?.hits?.hits)) {
+      const receivedKeys =
+        data && typeof data === "object" ? Object.keys(data).join(",") : "non-object";
+      const schemaMsg = `Contrato inesperado na IBM Search API: campo hits.hits ausente ou inválido (keys: ${receivedKeys})`;
+      ScraperHealthService.recordSchemaChange("IBM", schemaMsg);
+      throw new Error(schemaMsg);
+    }
 
-          const textToMatch =
-            `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")} ${normalized.description || ""}`.toLowerCase();
-          if (keywords.length > 0) {
-            const matches = keywords.some((k) => textToMatch.includes(k));
-            if (!matches) continue;
-          }
+    const hits: IbmRawHit[] = data.hits.hits;
 
-          const { job, isNew } = StorageService.upsertJob(normalized);
-          foundJobs.push(job);
-          onJobFound(job, isNew);
-        }
+    for (const hit of hits) {
+      const normalized = normalizeIbmJob(hit);
+      if (!normalized) continue;
+
+      const rawCategory = (hit._source?.field_keyword_08 || "").trim();
+      const rawLevel = (hit._source?.field_keyword_18 || "").trim();
+      const textToMatch = [
+        normalized.title,
+        rawCategory,
+        rawLevel,
+        normalized.seniorityLevel,
+        normalized.contractType,
+        normalized.location,
+        normalized.stack.join(" "),
+        normalized.description || "",
+      ].join(" ");
+
+      if (
+        !matchesSearchKeywords(textToMatch, rawKeywords, {
+          semanticRoleText: `${normalized.title} ${rawCategory}`,
+        })
+      ) {
+        continue;
       }
 
-      if (onProgress) {
-        onProgress({
-          message: `IBM Careers concluído (${foundJobs.length} vagas)`,
-          currentCompany: "IBM",
-          percent: 100,
-        });
-      }
-    } catch {
-      // Ignora falhas isoladas
+      const { job, isNew } = StorageService.upsertJob(normalized);
+      if (job.isTech === false) continue;
+
+      foundJobs.push(job);
+      onJobFound(job, isNew);
+    }
+
+    if (onProgress) {
+      onProgress({
+        message: `IBM Careers concluído (${foundJobs.length} vagas)`,
+        currentCompany: "IBM",
+        percent: 100,
+      });
     }
 
     return foundJobs;

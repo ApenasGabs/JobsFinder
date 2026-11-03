@@ -13,6 +13,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
+  normalizeForMatch,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { BaseScraper } from "./base.js";
@@ -216,7 +217,7 @@ export class MindsightScraper implements BaseScraper {
     });
 
     const keywords = (options.keywords || [])
-      .map((k) => k.toLowerCase().trim())
+      .map((k) => normalizeForMatch(k))
       .filter(Boolean);
 
     const foundJobs: Job[] = [];
@@ -251,8 +252,9 @@ export class MindsightScraper implements BaseScraper {
               const normalized = normalizeMindsightJob(raw, company);
               if (!normalized) continue;
 
-              const textToMatch =
-                `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")} ${normalized.description || ""}`.toLowerCase();
+              const textToMatch = normalizeForMatch(
+                `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")} ${normalized.description || ""}`,
+              );
               if (keywords.length > 0) {
                 const matches = keywords.some((k) => textToMatch.includes(k));
                 if (!matches) continue;

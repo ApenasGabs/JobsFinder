@@ -2,7 +2,6 @@ import { WhatsAppBot } from "../bot/whatsapp.js";
 import {
   ScraperHealthInfo,
   ScraperRecentError,
-  ScraperStatusType,
   SystemAlert,
   SystemHealthReport,
 } from "../types.js";
@@ -39,6 +38,7 @@ const DEFAULT_SOURCES = [
 
 export class ScraperHealthService {
   private static scrapersMap: Map<string, ScraperHealthInfo> = new Map();
+  private static schemaErrorsMap: Map<string, ScraperRecentError> = new Map();
   private static isInitialized = false;
 
   public static initialize(): void {
@@ -151,14 +151,16 @@ export class ScraperHealthService {
 
   public static recordStart(scraperId: string, name?: string): void {
     const info = this.getOrCreateScraper(scraperId, name);
+    this.schemaErrorsMap.delete(info.id);
     info.lastRunAt = new Date().toISOString();
   }
 
   public static recordSuccess(
     scraperId: string,
     jobsFound: number,
-    durationMs: number,
+    _durationMs?: number,
   ): void {
+    void _durationMs;
     const info = this.getOrCreateScraper(scraperId);
     const now = new Date().toISOString();
 
@@ -173,10 +175,39 @@ export class ScraperHealthService {
       info.consecutiveZeroRuns = 0;
     }
 
-    // Se estava em circuit breaker ou degradado, restaura para saudável
+    // Se estava em circuit breaker ou degradado, restaura para saudável (salvo erro de contrato ativo)
     info.circuitBreakerOpen = false;
     info.circuitBreakerCooldownUntil = null;
-    info.status = info.consecutiveZeroRuns >= 5 ? "DEGRADED" : "HEALTHY";
+    info.status =
+      info.consecutiveZeroRuns >= 5 || this.schemaErrorsMap.has(info.id)
+        ? "DEGRADED"
+        : "HEALTHY";
+  }
+
+  public static recordSchemaChange(
+    scraperId: string,
+    message: string,
+    term?: string,
+  ): void {
+    const info = this.getOrCreateScraper(scraperId);
+    const errorEntry: ScraperRecentError = {
+      timestamp: new Date().toISOString(),
+      message,
+      term,
+    };
+    this.schemaErrorsMap.set(info.id, errorEntry);
+    info.lastError = errorEntry;
+    info.recentErrors.unshift(errorEntry);
+    if (info.recentErrors.length > 10) info.recentErrors.pop();
+
+    if (info.status === "HEALTHY") {
+      info.status = "DEGRADED";
+    }
+
+    LoggerService.error("CRAWLER", "SCRAPER_SCHEMA_CHANGED", message, {
+      scraperId: info.id,
+      term,
+    });
   }
 
   public static recordFailure(
@@ -270,6 +301,22 @@ export class ScraperHealthService {
 
     // 2. Alertas por Fonte de Vagas
     for (const scraper of this.scrapersMap.values()) {
+      const schemaErr = this.schemaErrorsMap.get(scraper.id);
+      if (schemaErr) {
+        alerts.push({
+          id: `alert-schema-${scraper.id.toLowerCase()}`,
+          code: "SOURCE_SCHEMA_CHANGED",
+          severity: "warning",
+          source: scraper.id,
+          message: `Mudança de contrato detectada em ${scraper.name}: ${schemaErr.message}`,
+          detectedAt: schemaErr.timestamp,
+          metadata: {
+            term: schemaErr.term,
+            lastError: schemaErr.message,
+          },
+        });
+      }
+
       if (scraper.circuitBreakerOpen) {
         alerts.push({
           id: `alert-circuit-${scraper.id.toLowerCase()}`,
@@ -296,21 +343,17 @@ export class ScraperHealthService {
             lastError: scraper.lastError?.message,
           },
         });
-      } else if (
-        scraper.totalJobsCaptured > 0 &&
-        scraper.consecutiveZeroRuns >= 5 &&
-        scraper.lastSuccessAt &&
-        Date.now() - new Date(scraper.lastSuccessAt).getTime() > 24 * 3600 * 1000
-      ) {
+      } else if (!schemaErr && scraper.consecutiveZeroRuns >= 5) {
         alerts.push({
           id: `alert-nojobs-${scraper.id.toLowerCase()}`,
           code: "SOURCE_NO_JOBS",
           severity: "warning",
           source: scraper.id,
-          message: `Scraper ${scraper.name} não encontra nenhuma vaga nova há mais de 24 horas (${scraper.consecutiveZeroRuns} ciclos com 0 vagas).`,
+          message: `Scraper ${scraper.name} acumulou ${scraper.consecutiveZeroRuns} ciclos consecutivos com 0 vagas.`,
           detectedAt: now,
           metadata: {
             consecutiveZeroRuns: scraper.consecutiveZeroRuns,
+            totalJobsCaptured: scraper.totalJobsCaptured,
             lastSuccessAt: scraper.lastSuccessAt,
           },
         });
@@ -401,6 +444,7 @@ export class ScraperHealthService {
    */
   public static reset(): void {
     this.scrapersMap.clear();
+    this.schemaErrorsMap.clear();
     this.isInitialized = false;
     this.initialize();
   }

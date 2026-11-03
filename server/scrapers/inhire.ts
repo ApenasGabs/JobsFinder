@@ -6,6 +6,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
+  normalizeForMatch,
   slugifyInHire,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
@@ -40,7 +41,7 @@ export class InHireScraper implements BaseScraper {
       (c) => c.enabled !== false,
     );
     const keywords = (options.keywords || [])
-      .map((k) => k.toLowerCase().trim())
+      .map((k) => normalizeForMatch(k))
       .filter(Boolean);
 
     const foundJobs: Job[] = [];
@@ -74,7 +75,9 @@ export class InHireScraper implements BaseScraper {
               continue;
 
             const title = item.displayName || "Vaga sem título";
-            const textToMatch = `${title} ${item.location || ""}`.toLowerCase();
+            const textToMatch = normalizeForMatch(
+              `${title} ${item.location || ""}`,
+            );
 
             if (keywords.length > 0) {
               const matches = keywords.some((k) => textToMatch.includes(k));

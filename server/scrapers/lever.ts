@@ -6,6 +6,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
+  normalizeForMatch,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { resilientFetch } from "../utils/fetch.js";
@@ -46,7 +47,7 @@ export class LeverScraper implements BaseScraper {
       (c) => c.enabled !== false,
     );
     const keywords = (options.keywords || [])
-      .map((k) => k.toLowerCase().trim())
+      .map((k) => normalizeForMatch(k))
       .filter(Boolean);
 
     const foundJobs: Job[] = [];
@@ -75,7 +76,7 @@ export class LeverScraper implements BaseScraper {
               const title = item.text || "Vaga sem título";
               const team =
                 item.categories?.team || item.categories?.department || "";
-              const textToMatch = `${title} ${team}`.toLowerCase();
+              const textToMatch = normalizeForMatch(`${title} ${team}`);
 
               if (keywords.length > 0) {
                 const matches = keywords.some((k) => textToMatch.includes(k));

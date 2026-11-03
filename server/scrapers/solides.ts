@@ -12,6 +12,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
+  normalizeForMatch,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { resilientFetch } from "../utils/fetch.js";
@@ -135,7 +136,7 @@ export class SolidesScraper implements BaseScraper {
       return true;
     });
     const keywords = (options.keywords || [])
-      .map((k) => k.toLowerCase().trim())
+      .map((k) => normalizeForMatch(k))
       .filter(Boolean);
 
     const foundJobs: Job[] = [];
@@ -165,8 +166,9 @@ export class SolidesScraper implements BaseScraper {
             const normalized = normalizeSolidesVacancy(raw, company);
             if (!normalized) continue;
 
-            const textToMatch =
-              `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")} ${normalized.description || ""}`.toLowerCase();
+            const textToMatch = normalizeForMatch(
+              `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")} ${normalized.description || ""}`,
+            );
             if (keywords.length > 0) {
               const matches = keywords.some((k) => textToMatch.includes(k));
               if (!matches) continue;

@@ -1,4 +1,5 @@
 import { ConfigService } from "../services/config.js";
+import { ScraperHealthService } from "../services/scraper-health.js";
 import { StorageService } from "../services/storage.js";
 import {
   ContractType,
@@ -10,9 +11,10 @@ import {
 import { resilientFetch } from "../utils/fetch.js";
 import {
   detectContractType,
-  detectSeniority,
+  detectExplicitSeniority,
   detectWorkModel,
   extractStack,
+  matchesSearchKeywords,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { BaseScraper } from "./base.js";
@@ -120,8 +122,9 @@ export function normalizeRecruiteeJob(
   }
   const contractType: ContractType = detectContractType(contractHint, "CLT");
 
-  let seniorityLevel: SeniorityLevel = detectSeniority(title);
-  if (seniorityLevel === "NAO_INFORMADO" && item.experience_code) {
+  const explicitSeniority = detectExplicitSeniority(title);
+  let seniorityLevel: SeniorityLevel = explicitSeniority ?? "PLENO";
+  if (!explicitSeniority && item.experience_code) {
     const exp = item.experience_code.toLowerCase();
     if (exp.includes("intern")) {
       seniorityLevel = "ESTAGIO";
@@ -141,16 +144,18 @@ export function normalizeRecruiteeJob(
   }
 
   const rawDesc = `${item.description || ""} ${item.requirements || ""}`;
-  const cleanDescription = rawDesc
+  const fullCleanDescription = rawDesc
     .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
     .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 1000);
+    .trim();
+  const cleanDescription = fullCleanDescription.slice(0, 1000);
 
   const dept = (item.department || "").trim();
   const tagsText = Array.isArray(item.tags) ? item.tags.join(" ") : "";
   const stack = extractStack(
-    `${title} ${dept} ${tagsText} ${cleanDescription}`,
+    `${title} ${dept} ${tagsText} ${fullCleanDescription}`,
   );
 
   const jobUrl =
@@ -193,7 +198,7 @@ export class RecruiteeScraper implements BaseScraper {
       slug: string;
       link?: string;
       enabled?: boolean;
-    }> = (ConfigService.getConfig() as any).recruiteeCompanies || [];
+    }> = ConfigService.getConfig().recruiteeCompanies || [];
 
     const seenSlugs = new Set<string>();
     const companies = rawCompanies.filter((c) => {
@@ -204,12 +209,12 @@ export class RecruiteeScraper implements BaseScraper {
       return true;
     });
 
-    const keywords = (options.keywords || [])
-      .map((k) => k.toLowerCase().trim())
-      .filter(Boolean);
+    const rawKeywords = options.keywords || [];
 
     const foundJobs: Job[] = [];
     let completedCount = 0;
+    let failedCompanies = 0;
+    let lastCompanyError: Error | null = null;
     const concurrency = options.concurrency || 6;
 
     await runWithConcurrency(companies, concurrency, async (company) => {
@@ -230,34 +235,79 @@ export class RecruiteeScraper implements BaseScraper {
             },
           });
 
-          if (response.ok) {
+          if (!response.ok) {
+            const httpMsg = `Recruitee (${cleanSlug}) retornou HTTP ${response.status}`;
+            ScraperHealthService.recordTermError("RECRUITEE", cleanSlug, httpMsg);
+            failedCompanies++;
+            lastCompanyError = new Error(httpMsg);
+          } else {
             const data = await response.json();
-            const offers: RecruiteeRawJob[] = Array.isArray(data?.offers)
-              ? data.offers
-              : [];
+            if (!data || !Array.isArray(data?.offers)) {
+              const receivedKeys =
+                data && typeof data === "object"
+                  ? Object.keys(data).join(",")
+                  : "non-object";
+              const schemaMsg = `Contrato inesperado na API Recruitee (${cleanSlug}): campo offers ausente ou inválido (keys: ${receivedKeys})`;
+              ScraperHealthService.recordSchemaChange(
+                "RECRUITEE",
+                schemaMsg,
+                cleanSlug,
+              );
+              failedCompanies++;
+              lastCompanyError = new Error(schemaMsg);
+            } else {
+              const offers: RecruiteeRawJob[] = data.offers;
 
-            for (const raw of offers) {
-              const normalized = normalizeRecruiteeJob(raw, {
-                name: company.name,
-                slug: cleanSlug,
-              });
-              if (!normalized) continue;
+              for (const raw of offers) {
+                const normalized = normalizeRecruiteeJob(raw, {
+                  name: company.name,
+                  slug: cleanSlug,
+                });
+                if (!normalized) continue;
 
-              const textToMatch =
-                `${normalized.title} ${normalized.location} ${normalized.stack.join(" ")} ${normalized.description || ""}`.toLowerCase();
-              if (keywords.length > 0) {
-                const matches = keywords.some((k) => textToMatch.includes(k));
-                if (!matches) continue;
+                const fullRawText = `${raw.description || ""} ${raw.requirements || ""}`
+                  .replace(/<[^>]+>/g, " ")
+                  .replace(/&nbsp;/gi, " ")
+                  .replace(/&amp;/gi, "&")
+                  .replace(/\s+/g, " ")
+                  .trim();
+                const tagsText = Array.isArray(raw.tags)
+                  ? raw.tags.join(" ")
+                  : "";
+                const dept = (raw.department || "").trim();
+
+                const textToMatch = [
+                  normalized.title,
+                  dept,
+                  tagsText,
+                  normalized.seniorityLevel,
+                  normalized.contractType,
+                  normalized.location,
+                  normalized.stack.join(" "),
+                  fullRawText,
+                ].join(" ");
+
+                if (
+                  !matchesSearchKeywords(textToMatch, rawKeywords, {
+                    semanticRoleText: `${normalized.title} ${dept}`,
+                  })
+                ) {
+                  continue;
+                }
+
+                const { job, isNew } = StorageService.upsertJob(normalized);
+                if (job.isTech === false) continue;
+
+                foundJobs.push(job);
+                onJobFound(job, isNew);
               }
-
-              const { job, isNew } = StorageService.upsertJob(normalized);
-              foundJobs.push(job);
-              onJobFound(job, isNew);
             }
           }
         }
-      } catch {
-        // Ignora falhas isoladas de endpoints de empresas
+      } catch (err: unknown) {
+        failedCompanies++;
+        lastCompanyError =
+          err instanceof Error ? err : new Error(String(err));
       }
 
       completedCount++;
@@ -270,6 +320,14 @@ export class RecruiteeScraper implements BaseScraper {
         });
       }
     });
+
+    if (
+      companies.length > 0 &&
+      failedCompanies === companies.length &&
+      lastCompanyError
+    ) {
+      throw lastCompanyError;
+    }
 
     return foundJobs;
   }

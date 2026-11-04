@@ -188,14 +188,34 @@ export interface CompanyAuditReport {
 }
 
 export interface CompanyConfig {
+  id?: string;
   name: string;
   link: string;
   slug: string;
   enabled: boolean;
   status?: "healthy" | "broken_link" | "unknown";
+  healthStatus?: "HEALTHY" | "BROKEN" | "WARNING" | "UNKNOWN";
+  failureCount?: number;
+  lastScrapedAt?: string | null;
   lastAuditedAt?: string;
   lastAuditStatus?: number;
   lastAuditError?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MonitoredCompanyRecord {
+  id: string;
+  name: string;
+  ats: string;
+  slug: string;
+  url: string;
+  enabled: boolean;
+  healthStatus: "HEALTHY" | "BROKEN" | "WARNING" | "UNKNOWN";
+  failureCount: number;
+  lastScrapedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AppConfig {

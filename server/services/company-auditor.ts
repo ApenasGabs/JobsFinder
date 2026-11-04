@@ -3,6 +3,7 @@ import { resilientFetch } from "../utils/fetch.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { ConfigService } from "./config.js";
 import { LoggerService } from "./logger.js";
+import { SupabaseSyncService } from "./supabase.js";
 
 export type AtsPlatform =
   | "GUPY"
@@ -491,6 +492,8 @@ export class CompanyAuditorService {
 
               if (result.status === "BROKEN") {
                 comp.status = "broken_link";
+                comp.healthStatus = "BROKEN";
+                comp.failureCount = (comp.failureCount || 0) + 1;
                 if (options?.autoDisableBroken && comp.enabled) {
                   comp.enabled = false;
                   autoDisabledCount++;
@@ -500,6 +503,22 @@ export class CompanyAuditorService {
                 }
               } else if (result.status === "OK") {
                 comp.status = "healthy";
+                comp.healthStatus = "HEALTHY";
+                comp.failureCount = 0;
+              } else {
+                comp.healthStatus = "WARNING";
+                comp.failureCount = (comp.failureCount || 0) + 1;
+              }
+
+              if (SupabaseSyncService.isConfigured()) {
+                void SupabaseSyncService.updateCompanyTelemetry(p, comp.slug, {
+                  enabled: comp.enabled,
+                  healthStatus: comp.healthStatus,
+                  failureCount: comp.failureCount,
+                  lastAuditedAt: nowIso,
+                  lastAuditStatus: result.httpStatus,
+                  lastAuditError: result.error || null,
+                });
               }
 
               if (prevStatus !== comp.status || prevEnabled !== comp.enabled) {
@@ -599,6 +618,11 @@ export class CompanyAuditorService {
     list.push(newCompany);
     ConfigService.updateConfig({ [key]: list });
 
+    if (SupabaseSyncService.isConfigured()) {
+      const row = SupabaseSyncService.mapCompanyToRow(ats, newCompany);
+      void SupabaseSyncService.syncCompaniesBatch([row]);
+    }
+
     LoggerService.info(
       "COMPANY_AUDITOR",
       "COMPANY_ADDED",
@@ -638,6 +662,11 @@ export class CompanyAuditorService {
 
     list[index] = updatedCompany;
     ConfigService.updateConfig({ [key]: list });
+
+    if (SupabaseSyncService.isConfigured()) {
+      const row = SupabaseSyncService.mapCompanyToRow(ats, updatedCompany);
+      void SupabaseSyncService.syncCompaniesBatch([row]);
+    }
 
     LoggerService.info(
       "COMPANY_AUDITOR",

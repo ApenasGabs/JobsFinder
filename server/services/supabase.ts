@@ -1,4 +1,4 @@
-import type { Job } from "../types.js";
+import type { CompanyConfig, Job } from "../types.js";
 import { LoggerService } from "./logger.js";
 
 export interface SupabaseJobRow {
@@ -16,6 +16,24 @@ export interface SupabaseJobRow {
   description: string | null;
   is_tech: boolean;
   scraped_at: string;
+}
+
+export interface SupabaseCompanyRow {
+  id: string;
+  name: string;
+  ats: string;
+  slug: string;
+  url: string;
+  enabled: boolean;
+  status?: string;
+  health_status: string;
+  failure_count: number;
+  last_scraped_at: string | null;
+  last_audited_at?: string | null;
+  last_audit_status?: number | null;
+  last_audit_error?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 /**
@@ -332,6 +350,271 @@ export class SupabaseSyncService {
       newSuggestions,
       topVotedSuggestions,
     };
+  }
+
+  /**
+   * Converte uma empresa configurada localmente para o formato da tabela `public.companies`.
+   */
+  public static mapCompanyToRow(ats: string, company: CompanyConfig): SupabaseCompanyRow {
+    const cleanAts = ats.trim().toUpperCase();
+    const cleanSlug = company.slug.trim().toLowerCase();
+    const cleanUrl = (company.link || "").trim();
+
+    let healthStatus = company.healthStatus || "HEALTHY";
+    if (!company.healthStatus) {
+      if (company.status === "broken_link") healthStatus = "BROKEN";
+      else if (company.status === "unknown") healthStatus = "UNKNOWN";
+      else healthStatus = "HEALTHY";
+    }
+
+    return {
+      id: company.id || `comp-${cleanAts.toLowerCase()}-${cleanSlug}`,
+      name: company.name.trim(),
+      ats: cleanAts,
+      slug: cleanSlug,
+      url: cleanUrl,
+      enabled: company.enabled !== false,
+      status: "MONITORED",
+      health_status: healthStatus,
+      failure_count: typeof company.failureCount === "number" ? company.failureCount : 0,
+      last_scraped_at: company.lastScrapedAt ?? null,
+      last_audited_at: company.lastAuditedAt ?? null,
+      last_audit_status: company.lastAuditStatus ?? null,
+      last_audit_error: company.lastAuditError ?? null,
+    };
+  }
+
+  /**
+   * Converte uma linha da tabela `public.companies` no formato interno `CompanyConfig`.
+   */
+  public static mapRowToCompanyConfig(row: SupabaseCompanyRow): {
+    ats: string;
+    company: CompanyConfig;
+  } {
+    const rawHealth = (row.health_status || "HEALTHY").toUpperCase();
+    const healthStatus: "HEALTHY" | "BROKEN" | "WARNING" | "UNKNOWN" =
+      rawHealth === "BROKEN"
+        ? "BROKEN"
+        : rawHealth === "WARNING"
+          ? "WARNING"
+          : rawHealth === "UNKNOWN"
+            ? "UNKNOWN"
+            : "HEALTHY";
+
+    const status: "healthy" | "broken_link" | "unknown" =
+      healthStatus === "BROKEN"
+        ? "broken_link"
+        : healthStatus === "UNKNOWN"
+          ? "unknown"
+          : "healthy";
+
+    return {
+      ats: (row.ats || "OUTRO").trim().toUpperCase(),
+      company: {
+        id: row.id,
+        name: row.name,
+        slug: row.slug,
+        link: row.url || (row as unknown as { career_url?: string }).career_url || "",
+        enabled: row.enabled !== false,
+        status,
+        healthStatus,
+        failureCount: typeof row.failure_count === "number" ? row.failure_count : 0,
+        lastScrapedAt: row.last_scraped_at ?? null,
+        lastAuditedAt: row.last_audited_at ?? undefined,
+        lastAuditStatus: row.last_audit_status ?? undefined,
+        lastAuditError: row.last_audit_error ?? undefined,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      },
+    };
+  }
+
+  /**
+   * Carrega todas as empresas da tabela `public.companies` no Supabase em lote.
+   */
+  public static async fetchCompanies(): Promise<{
+    success: boolean;
+    rows: SupabaseCompanyRow[];
+    error?: string;
+  }> {
+    const creds = this.getCredentials();
+    if (!creds) {
+      return {
+        success: false,
+        rows: [],
+        error: "Supabase não configurado (SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY ausentes).",
+      };
+    }
+
+    try {
+      const allRows: SupabaseCompanyRow[] = [];
+      const pageSize = 1000;
+      let offset = 0;
+
+      while (true) {
+        const endpoint = `${creds.url}/rest/v1/companies?select=*&order=ats.asc,name.asc&limit=${pageSize}&offset=${offset}`;
+        const response = await fetch(endpoint, {
+          method: "GET",
+          headers: {
+            apikey: creds.key,
+            Authorization: `Bearer ${creds.key}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          return {
+            success: false,
+            rows: [],
+            error: `HTTP ${response.status}: ${errorText}`,
+          };
+        }
+
+        const page = (await response.json()) as SupabaseCompanyRow[];
+        if (!Array.isArray(page) || page.length === 0) {
+          break;
+        }
+
+        allRows.push(...page);
+        if (page.length < pageSize) {
+          break;
+        }
+        offset += pageSize;
+      }
+
+      return { success: true, rows: allRows };
+    } catch (err) {
+      return {
+        success: false,
+        rows: [],
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  }
+
+  /**
+   * Faz upsert de um lote de empresas na tabela `public.companies` do Supabase.
+   */
+  public static async syncCompaniesBatch(
+    rows: SupabaseCompanyRow[],
+  ): Promise<{ success: boolean; count: number; error?: string }> {
+    const creds = this.getCredentials();
+    if (!creds) {
+      return {
+        success: false,
+        count: 0,
+        error: "Supabase não configurado (SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY ausentes).",
+      };
+    }
+
+    if (rows.length === 0) {
+      return { success: true, count: 0 };
+    }
+
+    try {
+      // Deduplica por (ats, slug) e por url para evitar violação de constraints no mesmo lote
+      const bySlugMap = new Map<string, SupabaseCompanyRow>();
+      const byUrlSet = new Set<string>();
+
+      for (const row of rows) {
+        const slugKey = `${row.ats.toUpperCase()}:${row.slug.toLowerCase()}`;
+        let candidateUrl = row.url.trim();
+        const normUrl = candidateUrl.toLowerCase();
+
+        if (byUrlSet.has(normUrl) && !bySlugMap.has(slugKey)) {
+          const sep = candidateUrl.includes("#") ? "-" : "#";
+          candidateUrl = `${candidateUrl}${sep}${row.slug.toLowerCase()}`;
+        }
+
+        byUrlSet.add(candidateUrl.toLowerCase());
+        bySlugMap.set(slugKey, { ...row, url: candidateUrl });
+      }
+
+      const uniqueRows = Array.from(bySlugMap.values());
+      const endpoint = `${creds.url}/rest/v1/companies?on_conflict=ats,slug`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          apikey: creds.key,
+          Authorization: `Bearer ${creds.key}`,
+          "Content-Type": "application/json",
+          Prefer: "resolution=merge-duplicates",
+        },
+        body: JSON.stringify(uniqueRows),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          success: false,
+          count: 0,
+          error: `HTTP ${response.status}: ${errorText}`,
+        };
+      }
+
+      return { success: true, count: uniqueRows.length };
+    } catch (err) {
+      return {
+        success: false,
+        count: 0,
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  }
+
+  /**
+   * Atualiza atomicamente a telemetria de saúde de uma empresa no Supabase.
+   */
+  public static async updateCompanyTelemetry(
+    ats: string,
+    slug: string,
+    telemetry: {
+      enabled?: boolean;
+      healthStatus?: "HEALTHY" | "BROKEN" | "WARNING" | "UNKNOWN";
+      failureCount?: number;
+      lastScrapedAt?: string;
+      lastAuditedAt?: string;
+      lastAuditStatus?: number;
+      lastAuditError?: string | null;
+    },
+  ): Promise<boolean> {
+    const creds = this.getCredentials();
+    if (!creds) {
+      return false;
+    }
+
+    const cleanAts = encodeURIComponent(ats.trim().toUpperCase());
+    const cleanSlug = encodeURIComponent(slug.trim().toLowerCase());
+
+    const payload: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (telemetry.enabled !== undefined) payload.enabled = telemetry.enabled;
+    if (telemetry.healthStatus !== undefined) payload.health_status = telemetry.healthStatus;
+    if (telemetry.failureCount !== undefined) payload.failure_count = telemetry.failureCount;
+    if (telemetry.lastScrapedAt !== undefined) payload.last_scraped_at = telemetry.lastScrapedAt;
+    if (telemetry.lastAuditedAt !== undefined) payload.last_audited_at = telemetry.lastAuditedAt;
+    if (telemetry.lastAuditStatus !== undefined) payload.last_audit_status = telemetry.lastAuditStatus;
+    if (telemetry.lastAuditError !== undefined) payload.last_audit_error = telemetry.lastAuditError;
+
+    try {
+      const endpoint = `${creds.url}/rest/v1/companies?ats=eq.${cleanAts}&slug=eq.${cleanSlug}`;
+      const response = await fetch(endpoint, {
+        method: "PATCH",
+        headers: {
+          apikey: creds.key,
+          Authorization: `Bearer ${creds.key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 }
 

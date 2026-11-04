@@ -43,6 +43,9 @@ app.use(express.json());
 AutoUpdaterService.runStartupCheck();
 
 // Inicializa os serviços centrais
+ConfigService.initializeHotCache().catch((err) => {
+  console.warn("[Server] Falha ao hidratar Hot Cache do Supabase no boot (usando fallback local):", err);
+});
 StorageService.initialize();
 ScraperHealthService.initialize();
 CrawlerService.initialize();
@@ -123,6 +126,20 @@ app.put("/api/config", (req: Request, res: Response) => {
 });
 
 // 2.1 Gestão e Auditoria de Empresas Monitoradas
+app.get("/api/companies/cache", (_req: Request, res: Response) => {
+  res.json(ConfigService.getCacheStats());
+});
+
+app.post("/api/companies/cache/refresh", async (req: Request, res: Response) => {
+  try {
+    const persistToDisk = Boolean(req.body?.persistToDisk);
+    const stats = await ConfigService.initializeHotCache({ persistToDisk });
+    res.json({ success: true, stats });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message || "Erro ao atualizar Hot Cache" });
+  }
+});
+
 app.get("/api/companies/audit", (_req: Request, res: Response) => {
   res.json({
     isAuditing: CompanyAuditorService.isAuditing(),

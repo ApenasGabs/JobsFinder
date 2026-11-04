@@ -13,7 +13,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
-  normalizeForMatch,
+  matchesSearchKeywords,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { BaseScraper } from "./base.js";
@@ -88,7 +88,7 @@ export function parseEightfoldUrl(
       domain: known.domain,
       baseUrl,
       applyApiUrl: `${baseUrl}/api/apply/v2/jobs?domain=${encodeURIComponent(known.domain)}&start=0&num=20`,
-      pcsxApiUrl: `${baseUrl}/api/pcsx/search?domain=${encodeURIComponent(known.domain)}&query=&location=&start=0`,
+      pcsxApiUrl: `${baseUrl}/api/pcsx/search?domain=${encodeURIComponent(known.domain)}&query=software&location=&start=0`,
     };
   }
 
@@ -102,7 +102,7 @@ export function parseEightfoldUrl(
       domain,
       baseUrl,
       applyApiUrl: `${baseUrl}/api/apply/v2/jobs?domain=${encodeURIComponent(domain)}&start=0&num=20`,
-      pcsxApiUrl: `${baseUrl}/api/pcsx/search?domain=${encodeURIComponent(domain)}&query=&location=&start=0`,
+      pcsxApiUrl: `${baseUrl}/api/pcsx/search?domain=${encodeURIComponent(domain)}&query=software&location=&start=0`,
     };
   }
 
@@ -136,7 +136,7 @@ export function parseEightfoldUrl(
     domain,
     baseUrl,
     applyApiUrl: `${baseUrl}/api/apply/v2/jobs?domain=${encodeURIComponent(domain)}&start=0&num=20`,
-    pcsxApiUrl: `${baseUrl}/api/pcsx/search?domain=${encodeURIComponent(domain)}&query=&location=&start=0`,
+    pcsxApiUrl: `${baseUrl}/api/pcsx/search?domain=${encodeURIComponent(domain)}&query=software&location=&start=0`,
   };
 }
 
@@ -273,9 +273,7 @@ export class EightfoldScraper implements BaseScraper {
       return true;
     });
 
-    const keywords = (options.keywords || [])
-      .map((k) => normalizeForMatch(k))
-      .filter(Boolean);
+    const rawKeywords = options.keywords || [];
 
     const foundJobs: Job[] = [];
     let completedCount = 0;
@@ -330,14 +328,28 @@ export class EightfoldScraper implements BaseScraper {
             const normalized = normalizeEightfoldJob(item, company);
             if (!normalized) continue;
 
-            const textToMatch =
-              normalizeForMatch(`${normalized.title} ${normalized.location} ${normalized.stack.join(" ")}`);
-            if (keywords.length > 0) {
-              const matches = keywords.some((k) => textToMatch.includes(k));
-              if (!matches) continue;
+            const dept = (item.department || item.business_unit || "").trim();
+            const textToMatch = [
+              normalized.title,
+              dept,
+              normalized.seniorityLevel,
+              normalized.contractType,
+              normalized.location,
+              normalized.stack.join(" "),
+              normalized.description || "",
+            ].join(" ");
+
+            if (
+              !matchesSearchKeywords(textToMatch, rawKeywords, {
+                semanticRoleText: `${normalized.title} ${dept}`,
+              })
+            ) {
+              continue;
             }
 
             const { job, isNew } = StorageService.upsertJob(normalized);
+            if (job.isTech === false) continue;
+
             foundJobs.push(job);
             onJobFound(job, isNew);
           }

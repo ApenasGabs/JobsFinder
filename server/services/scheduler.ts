@@ -173,6 +173,9 @@ export class SchedulerService {
     const newJobsMap = new Map<string, Job>();
 
     try {
+      // Atualiza o Hot Cache em RAM a partir do Supabase antes do ciclo (fallback automático para search.config.json se offline)
+      await ConfigService.initializeHotCache();
+
       const config = ConfigService.getConfig();
       const options: ScrapeOptions = {
         keywords: config.searchTerms,

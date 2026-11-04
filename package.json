@@ -13,6 +13,7 @@
     "import:sheet": "tsx scripts/import-sheet-companies.ts",
     "import:sheet:docker": "./scripts/run-import-docker.sh",
     "sync:supabase": "npx tsx scripts/sync-supabase.ts",
+    "sync:companies": "npx tsx scripts/sync-companies.ts",
     "preview": "vite preview"
   },
   "dependencies": {

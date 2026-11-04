@@ -1,19 +1,14 @@
 import assert from "node:assert/strict";
+import fs from "fs";
 import { describe, it } from "node:test";
-import path from "path";
-import { fileURLToPath } from "url";
 import {
   extractAtsFromUrl,
   generateCandidateSlugs,
-  normalizeString,
 } from "../server/services/company-finder.js";
 import {
   extractGoogleSheetId,
   SheetImporterService,
 } from "../server/services/sheet-importer.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe("Sheet Importer & Company Finder - Unit Tests", () => {
   describe("extractGoogleSheetId", () => {
@@ -102,8 +97,12 @@ describe("Sheet Importer & Company Finder - Unit Tests", () => {
   });
 
   describe("SheetImporterService Dry Run", () => {
-    it("should parse the local spreadsheet in dry-run mode without modifying config", async () => {
+    it("should parse the local spreadsheet in dry-run mode without modifying config", async (t) => {
       const localFile = "/workspace/busca-vagas/empresas para conferir.xlsx";
+      if (!fs.existsSync(localFile)) {
+        t.skip(`Fixture local ausente no container: ${localFile}`);
+        return;
+      }
       const result = await SheetImporterService.import({
         source: localFile,
         dryRun: true,
@@ -116,8 +115,12 @@ describe("Sheet Importer & Company Finder - Unit Tests", () => {
       assert.equal(result.newAddedCount, 0); // dry-run deve reportar 0 novas adicionadas no config
     });
 
-    it("should parse the centralized spreadsheet correctly ignoring summary tabs", async () => {
+    it("should parse the centralized spreadsheet correctly ignoring summary tabs", async (t) => {
       const centralizedFile = "/workspace/busca-vagas/empresas_carreiras_centralizadas.xlsx";
+      if (!fs.existsSync(centralizedFile)) {
+        t.skip(`Fixture local ausente no container: ${centralizedFile}`);
+        return;
+      }
       const result = await SheetImporterService.import({
         source: centralizedFile,
         dryRun: true,

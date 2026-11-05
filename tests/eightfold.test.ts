@@ -7,7 +7,10 @@ import {
   normalizeEightfoldJob,
   parseEightfoldUrl,
 } from "../server/scrapers/eightfold.js";
+import { ConfigService } from "../server/services/config.js";
 import { TechClassifierService } from "../server/services/classifier.js";
+import { StorageService } from "../server/services/storage.js";
+import { Job } from "../server/types.js";
 import { resilientFetch } from "../server/utils/fetch.js";
 
 const mockEightfoldJobs: EightfoldRawJob[] = [
@@ -61,7 +64,7 @@ describe("Eightfold Scraper & E2E Pipeline", () => {
     assert.equal(meli.domain, "mercadolibre.com");
     assert.equal(
       meli.pcsxApiUrl,
-      "https://mercadolibre.eightfold.ai/api/pcsx/search?domain=mercadolibre.com&query=&location=&start=0",
+      "https://mercadolibre.eightfold.ai/api/pcsx/search?domain=mercadolibre.com&query=software&location=&start=0",
     );
 
     const netflix = parseEightfoldUrl(
@@ -165,6 +168,152 @@ describe("Eightfold Scraper & E2E Pipeline", () => {
         "https://mercadolibre.eightfold.ai/careers/job/44717707",
       ),
     );
+  });
+
+  it("should capture Mercado Livre PCSX and Netflix Apply v2 engineering roles during broad radar sweep and reject non-tech", async () => {
+    const originalFetch = globalThis.fetch;
+    const originalUpsert = StorageService.upsertJob.bind(StorageService);
+    const originalGetConfig = ConfigService.getConfig.bind(ConfigService);
+
+    const baseConfig = originalGetConfig();
+    ConfigService.getConfig = () =>
+      ({
+        ...baseConfig,
+        eightfoldCompanies: [
+          {
+            name: "Mercado Livre",
+            slug: "mercadolibre",
+            link: "https://mercadolibre.eightfold.ai/careers",
+            enabled: true,
+          },
+          {
+            name: "Netflix",
+            slug: "netflix",
+            link: "https://explore.jobs.netflix.net/careers",
+            enabled: true,
+          },
+        ],
+      }) as any;
+
+    StorageService.upsertJob = (jobData: Omit<Job, "id">) => {
+      const isTech = TechClassifierService.isTechSync(jobData.title);
+      return {
+        job: {
+          ...jobData,
+          id: `mock-${jobData.url}`,
+          scrapedAt: new Date().toISOString(),
+          isTech,
+        },
+        isNew: isTech,
+      };
+    };
+
+    const requestedUrls: string[] = [];
+    globalThis.fetch = async (input: string | URL | Request) => {
+      const url = typeof input === "string" ? input : input.toString();
+      requestedUrls.push(url);
+      if (url.includes("mercadolibre.eightfold.ai/api/pcsx/search")) {
+        return new Response(
+          JSON.stringify({
+            data: {
+              positions: [
+                {
+                  id: 44717707,
+                  name: "Software Technical Leader",
+                  department: "IT",
+                  locations: ["São Paulo, Brazil"],
+                  workLocationOption: "hybrid",
+                },
+                {
+                  id: 44717708,
+                  name: "COORDENADOR (A) ADM DE PESSOAL CSC",
+                  department: "HR",
+                  locations: ["São Paulo, Brazil"],
+                },
+              ],
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      if (url.includes("explore.jobs.netflix.net/api/pcsx/search")) {
+        return new Response(JSON.stringify({ data: { positions: [] } }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (url.includes("explore.jobs.netflix.net/api/apply/v2/jobs")) {
+        return new Response(
+          JSON.stringify({
+            positions: [
+              {
+                id: 790298014263,
+                name: "AI Engineer 6 - AI Foundation & Tooling",
+                department: "Data & Insights",
+                location: "Remote, Brazil",
+                work_location_option: "remote",
+              },
+              {
+                id: 790298014264,
+                name: "Security Software Engineer 5",
+                department: "Engineering",
+                location: "Remote, Brazil",
+                work_location_option: "remote",
+              },
+              {
+                id: 790298014265,
+                name: "Software Development Engineer in Test 5",
+                department: "Engineering",
+                location: "Remote, Brazil",
+                work_location_option: "remote",
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      return new Response("{}", { status: 404 });
+    };
+
+    try {
+      const scraper = new EightfoldScraper();
+      const jobs = await scraper.scrape(
+        {
+          keywords: [
+            "java",
+            "react",
+            "node",
+            "typescript",
+            "fullstack",
+            "frontend",
+            "backend",
+            "python",
+            "devops",
+            "estagio",
+            "junior",
+          ],
+          sources: ["EIGHTFOLD"],
+        },
+        () => {},
+      );
+
+      assert.ok(
+        requestedUrls.some((u) =>
+          u.includes("mercadolibre.eightfold.ai/api/pcsx/search?domain=mercadolibre.com&query=software"),
+        ),
+        "Deve consultar PCSX com query=software",
+      );
+      assert.equal(jobs.length, 4);
+      const titles = jobs.map((j) => j.title);
+      assert.ok(titles.includes("Software Technical Leader"));
+      assert.ok(titles.includes("AI Engineer 6 - AI Foundation & Tooling"));
+      assert.ok(titles.includes("Security Software Engineer 5"));
+      assert.ok(titles.includes("Software Development Engineer in Test 5"));
+    } finally {
+      globalThis.fetch = originalFetch;
+      StorageService.upsertJob = originalUpsert;
+      ConfigService.getConfig = originalGetConfig;
+    }
   });
 
   it("should query public Eightfold API resiliently", async () => {

@@ -13,6 +13,7 @@ import {
   detectSeniority,
   detectWorkModel,
   extractStack,
+  matchesSearchKeywords,
   normalizeForMatch,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
@@ -34,7 +35,7 @@ export interface TotvsRawJob {
   isDisabled?: boolean;
 }
 
-const KNOWN_TOTVS_COMPANY_SLUGS: Record<string, string> = {
+export const KNOWN_TOTVS_COMPANY_SLUGS: Record<string, string> = {
   brudam: "brudam",
   "e-inscrição tecnologia e inovação": "einscricao",
   "estuda.com": "estuda",
@@ -252,13 +253,22 @@ export class TotvsScraper implements BaseScraper {
       seenSlugs.add(cleanSlug);
 
       const resolvedName =
-        cleanSlug === "vempratotvs" && vempratotvsCount > 1 ? "TOTVS" : c.name;
+        cleanSlug === "vempratotvs" &&
+        (vempratotvsCount > 1 || nameKey !== "totvs")
+          ? "TOTVS"
+          : c.name;
       companies.push({ name: resolvedName, slug: cleanSlug });
     }
 
-    const keywords = (options.keywords || [])
-      .map((k) => normalizeForMatch(k))
-      .filter(Boolean);
+    if (
+      rawCompanies.some((c) => c.enabled !== false) &&
+      !seenSlugs.has("vempratotvs")
+    ) {
+      seenSlugs.add("vempratotvs");
+      companies.unshift({ name: "TOTVS", slug: "vempratotvs" });
+    }
+
+    const rawKeywords = options.keywords || [];
 
     const foundJobs: Job[] = [];
     let completedCount = 0;
@@ -287,14 +297,28 @@ export class TotvsScraper implements BaseScraper {
             const normalized = normalizeTotvsJob(raw, company);
             if (!normalized) continue;
 
-            const textToMatch =
-              normalizeForMatch(`${normalized.title} ${normalized.location} ${normalized.stack.join(" ")}`);
-            if (keywords.length > 0) {
-              const matches = keywords.some((k) => textToMatch.includes(k));
-              if (!matches) continue;
+            const dept = decodeTotvsHtmlEntities(
+              raw.departmentName || "",
+            ).trim();
+            const pos = decodeTotvsHtmlEntities(raw.positionName || "").trim();
+            const textToMatch = [
+              normalized.title,
+              dept,
+              pos,
+              normalized.location,
+              normalized.stack.join(" "),
+            ].join(" ");
+            if (
+              !matchesSearchKeywords(textToMatch, rawKeywords, {
+                semanticRoleText: `${normalized.title} ${dept} ${pos}`,
+              })
+            ) {
+              continue;
             }
 
             const { job, isNew } = StorageService.upsertJob(normalized);
+            if (job.isTech === false) continue;
+
             foundJobs.push(job);
             onJobFound(job, isNew);
           }

@@ -7402,129 +7402,57 @@
   ],
   "totvsCompanies": [
     {
-      "name": "Brudam",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Bulla",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Deskfy",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "E-inscrição Tecnologia e Inovação",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Estuda.com",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "FF Solutions a Symetri Company",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Fucape Business School",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "HSystem",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Hyperflow",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Lemit Brasil",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Morada.ai",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "SG VIAGENS E TURISMO",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Spark",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Starbem",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Techfin ERP Finance - uma empresa TOTVS e Itaú",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
       "name": "TOTVS",
       "slug": "vempratotvs",
       "link": "https://atracaodetalentos.totvs.app/vempratotvs",
       "enabled": true
     },
     {
-      "name": "TOTVS Linx",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "name": "Brudam",
+      "slug": "brudam",
+      "link": "https://atracaodetalentos.totvs.app/brudam",
+      "enabled": true
+    },
+    {
+      "name": "E-inscrição Tecnologia e Inovação",
+      "slug": "einscricao",
+      "link": "https://atracaodetalentos.totvs.app/einscricao",
+      "enabled": true
+    },
+    {
+      "name": "Estuda.com",
+      "slug": "estuda",
+      "link": "https://atracaodetalentos.totvs.app/estuda",
+      "enabled": true
+    },
+    {
+      "name": "FF Solutions a Symetri Company",
+      "slug": "ffsolutions",
+      "link": "https://atracaodetalentos.totvs.app/ffsolutions",
+      "enabled": true
+    },
+    {
+      "name": "HSystem",
+      "slug": "hsystem",
+      "link": "https://atracaodetalentos.totvs.app/hsystem",
+      "enabled": true
+    },
+    {
+      "name": "Morada.ai",
+      "slug": "moradaai",
+      "link": "https://atracaodetalentos.totvs.app/moradaai",
+      "enabled": true
+    },
+    {
+      "name": "Starbem",
+      "slug": "starbem",
+      "link": "https://atracaodetalentos.totvs.app/starbem",
       "enabled": true
     },
     {
       "name": "Universo E-commerce",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Watch Brasil",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "Watch TV",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
-      "enabled": true
-    },
-    {
-      "name": "WiFeed",
-      "slug": "vempratotvs",
-      "link": "https://atracaodetalentos.totvs.app/vempratotvs",
+      "slug": "universoecommerce",
+      "link": "https://atracaodetalentos.totvs.app/universoecommerce",
       "enabled": true
     }
   ],

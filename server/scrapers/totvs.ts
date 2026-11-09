@@ -1,6 +1,11 @@
-import { ConfigService } from "../services/config.js";
+import {
+  ConfigService,
+  KNOWN_TOTVS_COMPANY_SLUGS,
+  normalizeTotvsCompanyList,
+} from "../services/config.js";
 import { StorageService } from "../services/storage.js";
 import {
+  CompanyConfig,
   ContractType,
   Job,
   ScrapeOptions,
@@ -14,10 +19,11 @@ import {
   detectWorkModel,
   extractStack,
   matchesSearchKeywords,
-  normalizeForMatch,
 } from "../utils/normalizer.js";
 import { runWithConcurrency } from "../utils/pool.js";
 import { BaseScraper } from "./base.js";
+
+export { KNOWN_TOTVS_COMPANY_SLUGS, normalizeTotvsCompanyList };
 
 export interface TotvsRawJob {
   id?: string;
@@ -34,17 +40,6 @@ export interface TotvsRawJob {
   companyName?: string;
   isDisabled?: boolean;
 }
-
-export const KNOWN_TOTVS_COMPANY_SLUGS: Record<string, string> = {
-  brudam: "brudam",
-  "e-inscrição tecnologia e inovação": "einscricao",
-  "estuda.com": "estuda",
-  "ff solutions a symetri company": "ffsolutions",
-  hsystem: "hsystem",
-  "morada.ai": "moradaai",
-  starbem: "starbem",
-  "universo e-commerce": "universoecommerce",
-};
 
 export function decodeTotvsHtmlEntities(text: string): string {
   if (!text) return "";
@@ -219,54 +214,12 @@ export class TotvsScraper implements BaseScraper {
       percent?: number;
     }) => void,
   ): Promise<Job[]> {
-    const rawCompanies: Array<{
-      name: string;
-      slug: string;
-      link?: string;
-      enabled?: boolean;
-    }> = ((ConfigService.getConfig() as any).totvsCompanies || []);
-
-    const seenSlugs = new Set<string>();
-    const companies: Array<{ name: string; slug: string }> = [];
-
-    const vempratotvsCount = rawCompanies.filter(
-      (c) =>
-        c.enabled !== false &&
-        (c.slug || "").trim().toLowerCase() === "vempratotvs",
-    ).length;
-
-    for (const c of rawCompanies) {
-      if (c.enabled === false) continue;
-      let cleanSlug = (c.slug || "")
-        .trim()
-        .toLowerCase()
-        .replace(/^https?:\/\/atracaodetalentos\.totvs\.app\//i, "")
-        .replace(/\/.*$/, "");
-      if (!cleanSlug) continue;
-
-      const nameKey = (c.name || "").trim().toLowerCase();
-      if (cleanSlug === "vempratotvs" && KNOWN_TOTVS_COMPANY_SLUGS[nameKey]) {
-        cleanSlug = KNOWN_TOTVS_COMPANY_SLUGS[nameKey];
-      }
-
-      if (seenSlugs.has(cleanSlug)) continue;
-      seenSlugs.add(cleanSlug);
-
-      const resolvedName =
-        cleanSlug === "vempratotvs" &&
-        (vempratotvsCount > 1 || nameKey !== "totvs")
-          ? "TOTVS"
-          : c.name;
-      companies.push({ name: resolvedName, slug: cleanSlug });
-    }
-
-    if (
-      rawCompanies.some((c) => c.enabled !== false) &&
-      !seenSlugs.has("vempratotvs")
-    ) {
-      seenSlugs.add("vempratotvs");
-      companies.unshift({ name: "TOTVS", slug: "vempratotvs" });
-    }
+    const rawCompanies: CompanyConfig[] =
+      ConfigService.getConfig().totvsCompanies || [];
+    const companies: Array<{ name: string; slug: string }> =
+      normalizeTotvsCompanyList(rawCompanies)
+        .filter((c) => c.enabled !== false)
+        .map((c) => ({ name: c.name, slug: c.slug }));
 
     const rawKeywords = options.keywords || [];
 

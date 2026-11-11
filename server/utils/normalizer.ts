@@ -118,6 +118,21 @@ export const SEMANTIC_TECH_TERMS = [
   "seguranca da informacao",
   "site reliability",
   "network services specialist",
+  "application developer",
+  "application consultant",
+  "package consultant",
+  "software development",
+  "technical specialist",
+  "it specialist",
+  "infrastructure specialist",
+  "systems programmer",
+  "mainframe",
+  "automation engineer",
+  "quality engineer",
+  "test specialist",
+  "data & analytics",
+  "data analytics",
+  "analista de sistemas",
 ];
 
 export function matchesSearchKeywords(

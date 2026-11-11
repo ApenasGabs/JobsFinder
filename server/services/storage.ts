@@ -105,7 +105,7 @@ export class StorageService {
     const isTech =
       jobData.isTech !== undefined
         ? jobData.isTech
-        : TechClassifierService.isTechSync(jobData.title);
+        : TechClassifierService.isTechSync({ ...jobData, id } as Job);
 
     if (!isTech) {
       // Descarta vagas comprovadamente fora da área de Tecnologia/TI

@@ -9,8 +9,10 @@ import {
   TotvsScraper,
 } from "../server/scrapers/totvs.js";
 import { TechClassifierService } from "../server/services/classifier.js";
+import { ConfigService } from "../server/services/config.js";
 import { ScraperHealthService } from "../server/services/scraper-health.js";
 import { resilientFetch } from "../server/utils/fetch.js";
+import { matchesSearchKeywords } from "../server/utils/normalizer.js";
 
 const mockTotvsJobs: TotvsRawJob[] = [
   {
@@ -193,5 +195,157 @@ describe("TOTVS ATS Scraper & E2E Pipeline", () => {
     assert.ok(digest, "Digest deve ser gerado com sucesso para vagas da TOTVS");
     assert.equal(digest.includedIds.length, 2);
     assert.ok(digest.text.includes("TOTVS"));
+  });
+
+  it("should preserve canonical vempratotvs portal when Brudam is remapped and match semantic TOTVS roles", async () => {
+    const hydrated = ConfigService.applyRowsToHotCache(
+      [
+        {
+          id: "comp-totvs-vempratotvs",
+          name: "Brudam",
+          ats: "TOTVS",
+          slug: "vempratotvs",
+          url: "https://atracaodetalentos.totvs.app/vempratotvs",
+          enabled: true,
+          health_status: "HEALTHY",
+          failure_count: 0,
+          last_scraped_at: null,
+        },
+      ],
+      false,
+    );
+
+    const totvsList = hydrated.totvsCompanies || [];
+    assert.ok(
+      totvsList.some((c) => c.slug === "vempratotvs" && c.name === "TOTVS"),
+      "Hot cache deve garantir a presença do portal principal vempratotvs (TOTVS)",
+    );
+    assert.ok(
+      totvsList.some((c) => c.slug === "brudam" && c.name === "Brudam"),
+      "Hot cache deve remapear Brudam para seu slug dedicado brudam",
+    );
+
+    const broadRadarKeywords = [
+      "java",
+      "react",
+      "node",
+      "typescript",
+      "fullstack",
+      "frontend",
+      "backend",
+      "python",
+      "devops",
+      "estagio",
+      "junior",
+    ];
+
+    const cloudIaRaw: TotvsRawJob = {
+      id: "cloud-ia-1",
+      code: "12901",
+      title: "[CLOUD] ESPECIALISTA DE DESENVOLVIMENTO CLOUD - IA",
+      departmentName: "PA - CLOUD - IA",
+      positionName: "ESPECIALISTA II DE DESENVOLVIMENTO CLOUD",
+      hideLocation: "True",
+      remoteString: "Remoto",
+    };
+    const cloudNorm = normalizeTotvsJob(cloudIaRaw, {
+      name: "TOTVS",
+      slug: "vempratotvs",
+    })!;
+    assert.equal(
+      matchesSearchKeywords(
+        `${cloudNorm.title} ${cloudIaRaw.departmentName} ${cloudIaRaw.positionName}`,
+        broadRadarKeywords,
+        {
+          semanticRoleText: `${cloudNorm.title} ${cloudIaRaw.departmentName} ${cloudIaRaw.positionName}`,
+        },
+      ),
+      true,
+      "Deve capturar vagas de Desenvolvimento Cloud / IA no radar amplo",
+    );
+  });
+
+  it("should normalize full URLs, unaccented company names and deduplicate correctly in normalizeTotvsCompanyList", () => {
+    const rawList = [
+      {
+        name: "E-inscricao Tecnologia e Inovacao",
+        slug: "https://atracaodetalentos.totvs.app/vempratotvs",
+        link: "https://atracaodetalentos.totvs.app/vempratotvs",
+        enabled: true,
+      },
+      {
+        name: "Morada AI",
+        slug: "vempratotvs",
+        link: "https://atracaodetalentos.totvs.app/vempratotvs",
+        enabled: true,
+      },
+      {
+        name: "Brudam",
+        slug: "brudam",
+        link: "https://atracaodetalentos.totvs.app/brudam",
+        enabled: true,
+      },
+    ];
+
+    const normalized = ConfigService.applyRowsToHotCache(
+      rawList.map((item, idx) => ({
+        id: `comp-${idx}`,
+        name: item.name,
+        ats: "TOTVS",
+        slug: item.slug,
+        url: item.link,
+        enabled: true,
+        health_status: "HEALTHY",
+        failure_count: 0,
+        last_scraped_at: null,
+      })),
+      false,
+    ).totvsCompanies || [];
+
+    const einscricao = normalized.find((c) => c.slug === "einscricao");
+    assert.ok(einscricao, "Deve normalizar slug para einscricao mesmo com URL completa e sem acentos");
+    assert.equal(einscricao.link, "https://atracaodetalentos.totvs.app/einscricao");
+
+    const morada = normalized.find((c) => c.slug === "moradaai");
+    assert.ok(morada, "Deve normalizar slug para moradaai");
+
+    const totvsCanonical = normalized.find((c) => c.slug === "vempratotvs");
+    assert.ok(totvsCanonical, "Deve garantir portal canônico vempratotvs");
+    assert.equal(totvsCanonical.name, "TOTVS");
+  });
+
+  it("should match additional semantic TOTVS engineering roles (Engenharia de Dados, Arquitetura, Analista QA)", () => {
+    const broadRadarKeywords = [
+      "java",
+      "react",
+      "node",
+      "typescript",
+      "fullstack",
+      "frontend",
+      "backend",
+      "python",
+      "devops",
+      "estagio",
+      "junior",
+    ];
+
+    const sampleRoles = [
+      "[Tech] Especialista em Engenharia de Dados",
+      "[Tech] Especialista em Arquitetura de Software - Angular/Java",
+      "[Tech] Especialista em Arquitetura de Soluções - Cloud",
+      "[Testes] Analista QA Pleno",
+      "[Tech] Téc. Desenv de Software",
+    ];
+
+    for (const role of sampleRoles) {
+      const matches = matchesSearchKeywords(role, broadRadarKeywords, {
+        semanticRoleText: role,
+      });
+      assert.strictEqual(
+        matches,
+        true,
+        `Cargo "${role}" deve dar match semântico no radar amplo`,
+      );
+    }
   });
 });

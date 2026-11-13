@@ -35,6 +35,81 @@ export const ATS_CONFIG_KEYS: Record<string, keyof AppConfig> = {
   SELECTY: "selectyCompanies",
 };
 
+export const KNOWN_TOTVS_COMPANY_SLUGS: Record<string, string> = {
+  brudam: "brudam",
+  "e-inscrição tecnologia e inovação": "einscricao",
+  "e-inscricao tecnologia e inovacao": "einscricao",
+  "estuda.com": "estuda",
+  "ff solutions a symetri company": "ffsolutions",
+  "ff solutions": "ffsolutions",
+  hsystem: "hsystem",
+  "morada.ai": "moradaai",
+  "morada ai": "moradaai",
+  starbem: "starbem",
+  "universo e-commerce": "universoecommerce",
+  "universo ecommerce": "universoecommerce",
+};
+
+export function normalizeTotvsCompanyList(list: CompanyConfig[]): CompanyConfig[] {
+  const result: CompanyConfig[] = [];
+  const seenSlugs = new Set<string>();
+
+  for (const comp of list) {
+    let cleanSlug = (comp.slug || "")
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\/atracaodetalentos\.totvs\.app\//i, "")
+      .replace(/\/.*$/, "");
+    const nameKey = (comp.name || "").trim().toLowerCase();
+    const unaccentedNameKey = nameKey
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    if (
+      cleanSlug === "vempratotvs" &&
+      (KNOWN_TOTVS_COMPANY_SLUGS[nameKey] ||
+        KNOWN_TOTVS_COMPANY_SLUGS[unaccentedNameKey])
+    ) {
+      cleanSlug =
+        KNOWN_TOTVS_COMPANY_SLUGS[nameKey] ||
+        KNOWN_TOTVS_COMPANY_SLUGS[unaccentedNameKey];
+    }
+
+    if (!cleanSlug || seenSlugs.has(cleanSlug)) continue;
+    seenSlugs.add(cleanSlug);
+
+    const normalizedName =
+      cleanSlug === "vempratotvs" && nameKey !== "totvs" ? "TOTVS" : comp.name;
+    const normalizedLink =
+      cleanSlug !== (comp.slug || "").trim().toLowerCase()
+        ? `https://atracaodetalentos.totvs.app/${cleanSlug}`
+        : comp.link;
+
+    result.push({
+      ...comp,
+      name: normalizedName,
+      slug: cleanSlug,
+      link: normalizedLink,
+    });
+  }
+
+  if (list.length > 0 && !seenSlugs.has("vempratotvs")) {
+    result.unshift({
+      id: "comp-totvs-vempratotvs",
+      name: "TOTVS",
+      slug: "vempratotvs",
+      link: "https://atracaodetalentos.totvs.app/vempratotvs",
+      enabled: true,
+      status: "healthy",
+      healthStatus: "HEALTHY",
+      failureCount: 0,
+      lastScrapedAt: null,
+    });
+  }
+
+  return result;
+}
+
 export interface CacheStats {
   source: "supabase" | "local_fallback";
   lastHydratedAt: string | null;
@@ -70,7 +145,11 @@ export class ConfigService {
     try {
       if (fs.existsSync(this.configFilePath)) {
         const raw = fs.readFileSync(this.configFilePath, "utf-8");
-        return JSON.parse(raw) as AppConfig;
+        const parsed = JSON.parse(raw) as AppConfig;
+        if (parsed.totvsCompanies) {
+          parsed.totvsCompanies = normalizeTotvsCompanyList(parsed.totvsCompanies);
+        }
+        return parsed;
       }
     } catch (err) {
       console.error("[ConfigService] Erro ao carregar config local:", err);
@@ -171,8 +250,10 @@ export class ConfigService {
 
     const updated: AppConfig = { ...current };
     for (const [key, list] of Object.entries(grouped)) {
-      list.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
-      (updated as unknown as Record<string, unknown>)[key] = list;
+      const finalList =
+        key === "totvsCompanies" ? normalizeTotvsCompanyList(list) : list;
+      finalList.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+      (updated as unknown as Record<string, unknown>)[key] = finalList;
     }
 
     this.cachedConfig = updated;
@@ -195,7 +276,9 @@ export class ConfigService {
     const seenUrls = new Set<string>();
 
     for (const [ats, key] of Object.entries(ATS_CONFIG_KEYS)) {
-      const list = (cfg[key] as CompanyConfig[] | undefined) || [];
+      const rawList = (cfg[key] as CompanyConfig[] | undefined) || [];
+      const list =
+        key === "totvsCompanies" ? normalizeTotvsCompanyList(rawList) : rawList;
       for (const comp of list) {
         if (!comp || !comp.slug || !comp.name) continue;
         const row = SupabaseSyncService.mapCompanyToRow(ats, comp);

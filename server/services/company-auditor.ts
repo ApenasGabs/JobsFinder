@@ -17,6 +17,19 @@ export type AtsPlatform =
   | "SMARTRECRUITERS"
   | "TOTVS";
 
+const ALL_ATS_PLATFORMS: readonly AtsPlatform[] = [
+  "GUPY",
+  "GREENHOUSE",
+  "LEVER",
+  "ASHBY",
+  "WORKABLE",
+  "INHIRE",
+  "SOLIDES",
+  "QUICKIN",
+  "SMARTRECRUITERS",
+  "TOTVS",
+];
+
 export interface VerifyResult {
   ok: boolean;
   httpStatus?: number;
@@ -33,23 +46,21 @@ export class CompanyAuditorService {
 
   public static normalizeAts(ats: string): AtsPlatform | null {
     const upper = ats.trim().toUpperCase();
-    if (
-      [
-        "GUPY",
-        "GREENHOUSE",
-        "LEVER",
-        "ASHBY",
-        "WORKABLE",
-        "INHIRE",
-        "SOLIDES",
-        "QUICKIN",
-        "SMARTRECRUITERS",
-        "TOTVS",
-      ].includes(upper)
-    ) {
+    if ((ALL_ATS_PLATFORMS as readonly string[]).includes(upper)) {
       return upper as AtsPlatform;
     }
     return null;
+  }
+
+  private static isTotvsNotFoundRedirect(
+    ats: AtsPlatform,
+    response: Response,
+  ): boolean {
+    return (
+      ats === "TOTVS" &&
+      typeof response.url === "string" &&
+      response.url.includes("status=404")
+    );
   }
 
   public static getConfigKeyForAts(ats: AtsPlatform): keyof AppConfig {
@@ -192,7 +203,7 @@ export class CompanyAuditorService {
     if (!ats) {
       return {
         ok: false,
-        message: `Plataforma ATS inválida: "${atsInput}". Suportadas: GUPY, GREENHOUSE, LEVER, ASHBY, WORKABLE, INHIRE, SOLIDES, QUICKIN, SMARTRECRUITERS, TOTVS.`,
+        message: `Plataforma ATS inválida: "${atsInput}". Suportadas: ${ALL_ATS_PLATFORMS.join(", ")}.`,
         checkedUrl: "",
         durationMs: 0,
       };
@@ -212,13 +223,15 @@ export class CompanyAuditorService {
       });
 
       const durationMs = Date.now() - start;
+      const totvsRedirect404 = this.isTotvsNotFoundRedirect(ats, response);
 
-      if (response.status === 404 || response.status === 410) {
+      if (response.status === 404 || response.status === 410 || totvsRedirect404) {
+        const effectiveStatus = totvsRedirect404 ? 404 : response.status;
         return {
           ok: false,
-          httpStatus: response.status,
-          error: `HTTP ${response.status} Not Found`,
-          message: `Empresa não encontrada no ${ats} (HTTP ${response.status}). Verifique o slug ou se o portal foi migrado/desativado.`,
+          httpStatus: effectiveStatus,
+          error: `HTTP ${effectiveStatus} Not Found`,
+          message: `Empresa não encontrada no ${ats} (HTTP ${effectiveStatus}). Verifique o slug ou se o portal foi migrado/desativado.`,
           checkedUrl: endpoint.url,
           durationMs,
         };
@@ -315,16 +328,18 @@ export class CompanyAuditorService {
       });
 
       const durationMs = Date.now() - start;
+      const totvsRedirect404 = this.isTotvsNotFoundRedirect(ats, response);
 
-      if (response.status === 404 || response.status === 410) {
+      if (response.status === 404 || response.status === 410 || totvsRedirect404) {
+        const effectiveStatus = totvsRedirect404 ? 404 : response.status;
         return {
           ats,
           name: company.name,
           slug: company.slug,
           link: company.link,
           status: "BROKEN",
-          httpStatus: response.status,
-          error: `HTTP ${response.status} - Portal ou endpoint não encontrado`,
+          httpStatus: effectiveStatus,
+          error: `HTTP ${effectiveStatus} - Portal ou endpoint não encontrado`,
           checkedUrl: endpoint.url,
           durationMs,
         };
@@ -445,16 +460,7 @@ export class CompanyAuditorService {
 
       const platforms: AtsPlatform[] = targetAts
         ? [targetAts]
-        : [
-            "GUPY",
-            "GREENHOUSE",
-            "LEVER",
-            "ASHBY",
-            "WORKABLE",
-            "INHIRE",
-            "SOLIDES",
-            "QUICKIN",
-          ];
+        : [...ALL_ATS_PLATFORMS];
 
       for (const p of platforms) {
         const key = this.getConfigKeyForAts(p);

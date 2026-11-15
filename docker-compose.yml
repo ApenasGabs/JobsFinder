@@ -1,7 +1,10 @@
 services:
   # Aplicação Central (Crawler Engine + Scheduler 24/7 + Bot WhatsApp + Dashboard Web)
   s-job-crawler:
-    build: .
+    build:
+      context: .
+      args:
+        BUILD_SHA: ${BUILD_SHA:-unknown}
     container_name: s-job-crawler
     restart: unless-stopped
     logging:

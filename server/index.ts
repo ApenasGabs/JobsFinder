@@ -116,6 +116,9 @@ app.get("/api/config", (_req: Request, res: Response) => {
 
 app.put("/api/config", async (req: Request, res: Response) => {
   try {
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      return res.status(400).json({ error: "Payload de configuração inválido" });
+    }
     const updated = ConfigService.updateConfig(req.body);
     // Reinicia o agendador se a frequência do cron mudou
     SchedulerService.initialize();
@@ -151,8 +154,14 @@ app.post("/api/companies/cache/sync", async (req: Request, res: Response) => {
             persistToDisk: Boolean(req.body?.persistToDisk),
           })
         : ConfigService.getCacheStats();
-    res.json({
-      success: syncResult.failedBatches === 0 && !syncResult.error,
+    const ok = syncResult.failedBatches === 0 && !syncResult.error;
+    const statusCode = ok
+      ? 200
+      : syncResult.error === "Supabase não configurado."
+        ? 503
+        : 502;
+    res.status(statusCode).json({
+      success: ok,
       sync: syncResult,
       stats,
     });

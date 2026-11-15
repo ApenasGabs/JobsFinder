@@ -104,6 +104,103 @@ describe("CompanyAuditorService - Unit Tests", () => {
     });
   });
 
+  describe("TOTVS redirect 404 & auditAll coverage", () => {
+    it("should treat TOTVS HTTP 200 redirected to ?status=404 as 404 / BROKEN in verifySingle and auditCompany", async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () => {
+        const res = new Response("<html>Not found</html>", {
+          status: 200,
+          headers: { "content-type": "text/html" },
+        });
+        Object.defineProperty(res, "url", {
+          value: "https://atracaodetalentos.totvs.app/?status=404",
+        });
+        return res;
+      };
+
+      try {
+        const verifyRes = await CompanyAuditorService.verifySingle(
+          "TOTVS",
+          "nonexistent-slug-12345",
+        );
+        assert.equal(verifyRes.ok, false);
+        assert.equal(verifyRes.httpStatus, 404);
+        assert.ok(verifyRes.error?.includes("404"));
+
+        const auditRes = await CompanyAuditorService.auditCompany("TOTVS", {
+          name: "Inexistente",
+          slug: "nonexistent-slug-12345",
+          link: "https://atracaodetalentos.totvs.app/nonexistent-slug-12345",
+          enabled: true,
+        });
+        assert.equal(auditRes.status, "BROKEN");
+        assert.equal(auditRes.httpStatus, 404);
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it("should include TOTVS companies when auditAll is invoked without ats filter", async () => {
+      const originalFetch = globalThis.fetch;
+      const originalGetConfig = ConfigService.getConfig;
+      const originalUpdateConfig = ConfigService.updateConfig;
+      const checkedUrls: string[] = [];
+
+      ConfigService.getConfig = () => ({
+        searchTerms: [],
+        seniorityLevels: [],
+        contractTypes: [],
+        sources: [],
+        gupyCompanies: [],
+        greenhouseCompanies: [],
+        leverCompanies: [],
+        ashbyCompanies: [],
+        workableCompanies: [],
+        inhireCompanies: [],
+        solidesCompanies: [],
+        quickinCompanies: [],
+        smartrecruitersCompanies: [],
+        totvsCompanies: [
+          {
+            name: "TOTVS",
+            slug: "vempratotvs",
+            link: "https://atracaodetalentos.totvs.app/vempratotvs",
+            enabled: true,
+          },
+        ],
+      });
+      ConfigService.updateConfig = (patch) => ({
+        ...ConfigService.getConfig(),
+        ...patch,
+      });
+      globalThis.fetch = async (input) => {
+        const url = typeof input === "string" ? input : input.toString();
+        checkedUrls.push(url);
+        const res = new Response("<html>OK</html>", {
+          status: 200,
+          headers: { "content-type": "text/html" },
+        });
+        Object.defineProperty(res, "url", { value: url });
+        return res;
+      };
+
+      try {
+        const report = await CompanyAuditorService.auditAll();
+        assert.equal(report.totalChecked, 1);
+        assert.equal(report.healthyCount, 1);
+        assert.equal(report.results[0].ats, "TOTVS");
+        assert.equal(report.results[0].slug, "vempratotvs");
+        assert.ok(
+          checkedUrls.includes("https://atracaodetalentos.totvs.app/vempratotvs"),
+        );
+      } finally {
+        globalThis.fetch = originalFetch;
+        ConfigService.getConfig = originalGetConfig;
+        ConfigService.updateConfig = originalUpdateConfig;
+      }
+    });
+  });
+
   describe("Company Management CRUD", () => {
     const testSlug = "kraken-test-company";
 

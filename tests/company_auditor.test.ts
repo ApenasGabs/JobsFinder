@@ -14,6 +14,7 @@ describe("CompanyAuditorService - Unit Tests", () => {
       assert.equal(CompanyAuditorService.normalizeAts("ASHBY"), "ASHBY");
       assert.equal(CompanyAuditorService.normalizeAts("workable"), "WORKABLE");
       assert.equal(CompanyAuditorService.normalizeAts("inhire"), "INHIRE");
+      assert.equal(CompanyAuditorService.normalizeAts("totvs"), "TOTVS");
     });
 
     it("should return null for unsupported ATS platforms", () => {
@@ -23,6 +24,18 @@ describe("CompanyAuditorService - Unit Tests", () => {
   });
 
   describe("getEndpoint", () => {
+    it("should format correct TOTVS portal endpoint", () => {
+      const ep1 = CompanyAuditorService.getEndpoint("TOTVS", "vempratotvs");
+      assert.equal(ep1.url, "https://atracaodetalentos.totvs.app/vempratotvs");
+      assert.equal(ep1.method, "GET");
+
+      const ep2 = CompanyAuditorService.getEndpoint(
+        "TOTVS",
+        "estuda",
+        "https://atracaodetalentos.totvs.app/estuda/",
+      );
+      assert.equal(ep2.url, "https://atracaodetalentos.totvs.app/estuda");
+    });
     it("should format correct Greenhouse API endpoint", () => {
       const ep = CompanyAuditorService.getEndpoint("GREENHOUSE", "agibank");
       assert.equal(ep.url, "https://boards-api.greenhouse.io/v1/boards/agibank/jobs");

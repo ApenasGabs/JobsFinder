@@ -114,12 +114,13 @@ app.get("/api/config", (_req: Request, res: Response) => {
   res.json(ConfigService.getConfig());
 });
 
-app.put("/api/config", (req: Request, res: Response) => {
+app.put("/api/config", async (req: Request, res: Response) => {
   try {
     const updated = ConfigService.updateConfig(req.body);
     // Reinicia o agendador se a frequência do cron mudou
     SchedulerService.initialize();
-    res.json({ success: true, config: updated });
+    const supabaseSync = await ConfigService.syncConfigPatchToSupabase(req.body);
+    res.json({ success: true, config: updated, supabaseSync });
   } catch (err) {
     res.status(400).json({ error: "Erro ao atualizar configuração" });
   }
@@ -137,6 +138,27 @@ app.post("/api/companies/cache/refresh", async (req: Request, res: Response) => 
     res.json({ success: true, stats });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message || "Erro ao atualizar Hot Cache" });
+  }
+});
+
+app.post("/api/companies/cache/sync", async (req: Request, res: Response) => {
+  try {
+    const source = req.body?.source === "disk" ? "disk" : "memory";
+    const syncResult = await ConfigService.syncAllCompaniesToSupabase({ source });
+    const stats =
+      syncResult.failedBatches === 0 && req.body?.refresh !== false
+        ? await ConfigService.initializeHotCache({
+            persistToDisk: Boolean(req.body?.persistToDisk),
+          })
+        : ConfigService.getCacheStats();
+    res.json({
+      success: syncResult.failedBatches === 0 && !syncResult.error,
+      sync: syncResult,
+      stats,
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro ao sincronizar empresas com Supabase";
+    res.status(500).json({ success: false, error: message });
   }
 });
 

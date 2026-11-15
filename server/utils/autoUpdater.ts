@@ -51,19 +51,23 @@ export class AutoUpdaterService {
       this.ensureSafeDirectory();
       return this.runGit("rev-parse HEAD", 5000);
     } catch {
-      return "unknown";
+      return this.getBuiltSha() || "unknown";
     }
   }
 
   public static getBuiltSha(): string | null {
     try {
       if (fs.existsSync(BUILD_SHA_FILE)) {
-        return fs.readFileSync(BUILD_SHA_FILE, "utf-8").trim() || null;
+        const fileSha = fs.readFileSync(BUILD_SHA_FILE, "utf-8").trim();
+        if (fileSha && fileSha !== "unknown") {
+          return fileSha;
+        }
       }
     } catch {
       // ignore
     }
-    return null;
+    const envSha = process.env.APP_BUILD_SHA?.trim();
+    return envSha && envSha !== "unknown" ? envSha : null;
   }
 
   public static writeBuiltSha(sha: string): void {

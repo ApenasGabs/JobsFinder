@@ -14,7 +14,8 @@ export type AtsPlatform =
   | "INHIRE"
   | "SOLIDES"
   | "QUICKIN"
-  | "SMARTRECRUITERS";
+  | "SMARTRECRUITERS"
+  | "TOTVS";
 
 export interface VerifyResult {
   ok: boolean;
@@ -43,6 +44,7 @@ export class CompanyAuditorService {
         "SOLIDES",
         "QUICKIN",
         "SMARTRECRUITERS",
+        "TOTVS",
       ].includes(upper)
     ) {
       return upper as AtsPlatform;
@@ -70,6 +72,8 @@ export class CompanyAuditorService {
         return "quickinCompanies";
       case "SMARTRECRUITERS":
         return "smartrecruitersCompanies";
+      case "TOTVS":
+        return "totvsCompanies";
     }
   }
 
@@ -166,6 +170,16 @@ export class CompanyAuditorService {
           headers: defaultHeaders,
         };
       }
+      case "TOTVS": {
+        const portalUrl = link?.trim()
+          ? link.replace(/\/$/, "")
+          : `https://atracaodetalentos.totvs.app/${cleanSlug}`;
+        return {
+          url: portalUrl,
+          method: "GET",
+          headers: defaultHeaders,
+        };
+      }
     }
   }
 
@@ -178,7 +192,7 @@ export class CompanyAuditorService {
     if (!ats) {
       return {
         ok: false,
-        message: `Plataforma ATS inválida: "${atsInput}". Suportadas: GUPY, GREENHOUSE, LEVER, ASHBY, WORKABLE, INHIRE.`,
+        message: `Plataforma ATS inválida: "${atsInput}". Suportadas: GUPY, GREENHOUSE, LEVER, ASHBY, WORKABLE, INHIRE, SOLIDES, QUICKIN, SMARTRECRUITERS, TOTVS.`,
         checkedUrl: "",
         durationMs: 0,
       };

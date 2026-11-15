@@ -14,6 +14,9 @@ RUN yarn build
 # Estágio 2: Imagem final de Produção ultra-leve
 FROM node:22-alpine
 
+ARG BUILD_SHA=unknown
+ENV APP_BUILD_SHA=$BUILD_SHA
+
 WORKDIR /app
 
 # Instala git para suporte ao AutoUpdater no boot/restart
@@ -37,8 +40,9 @@ COPY server ./server
 COPY config ./config
 COPY --from=builder /app/dist ./dist
 
-# Garante a existência dos diretórios de persistência
-RUN mkdir -p /app/data /app/auth_baileys
+# Garante a existência dos diretórios de persistência e registra BUILD_SHA quando informado
+RUN mkdir -p /app/data /app/auth_baileys && \
+  if [ "$BUILD_SHA" != "unknown" ] && [ -n "$BUILD_SHA" ]; then printf '%s' "$BUILD_SHA" > /app/dist/.build-sha; fi
 
 EXPOSE 3001
 

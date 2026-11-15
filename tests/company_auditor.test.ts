@@ -14,6 +14,7 @@ describe("CompanyAuditorService - Unit Tests", () => {
       assert.equal(CompanyAuditorService.normalizeAts("ASHBY"), "ASHBY");
       assert.equal(CompanyAuditorService.normalizeAts("workable"), "WORKABLE");
       assert.equal(CompanyAuditorService.normalizeAts("inhire"), "INHIRE");
+      assert.equal(CompanyAuditorService.normalizeAts("totvs"), "TOTVS");
     });
 
     it("should return null for unsupported ATS platforms", () => {
@@ -23,6 +24,18 @@ describe("CompanyAuditorService - Unit Tests", () => {
   });
 
   describe("getEndpoint", () => {
+    it("should format correct TOTVS portal endpoint", () => {
+      const ep1 = CompanyAuditorService.getEndpoint("TOTVS", "vempratotvs");
+      assert.equal(ep1.url, "https://atracaodetalentos.totvs.app/vempratotvs");
+      assert.equal(ep1.method, "GET");
+
+      const ep2 = CompanyAuditorService.getEndpoint(
+        "TOTVS",
+        "estuda",
+        "https://atracaodetalentos.totvs.app/estuda/",
+      );
+      assert.equal(ep2.url, "https://atracaodetalentos.totvs.app/estuda");
+    });
     it("should format correct Greenhouse API endpoint", () => {
       const ep = CompanyAuditorService.getEndpoint("GREENHOUSE", "agibank");
       assert.equal(ep.url, "https://boards-api.greenhouse.io/v1/boards/agibank/jobs");
@@ -88,6 +101,103 @@ describe("CompanyAuditorService - Unit Tests", () => {
       const audit = await CompanyAuditorService.auditCompany("GUPY", comp);
       assert.equal(audit.status, "BROKEN");
       assert.equal(audit.httpStatus, 404);
+    });
+  });
+
+  describe("TOTVS redirect 404 & auditAll coverage", () => {
+    it("should treat TOTVS HTTP 200 redirected to ?status=404 as 404 / BROKEN in verifySingle and auditCompany", async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () => {
+        const res = new Response("<html>Not found</html>", {
+          status: 200,
+          headers: { "content-type": "text/html" },
+        });
+        Object.defineProperty(res, "url", {
+          value: "https://atracaodetalentos.totvs.app/?status=404",
+        });
+        return res;
+      };
+
+      try {
+        const verifyRes = await CompanyAuditorService.verifySingle(
+          "TOTVS",
+          "nonexistent-slug-12345",
+        );
+        assert.equal(verifyRes.ok, false);
+        assert.equal(verifyRes.httpStatus, 404);
+        assert.ok(verifyRes.error?.includes("404"));
+
+        const auditRes = await CompanyAuditorService.auditCompany("TOTVS", {
+          name: "Inexistente",
+          slug: "nonexistent-slug-12345",
+          link: "https://atracaodetalentos.totvs.app/nonexistent-slug-12345",
+          enabled: true,
+        });
+        assert.equal(auditRes.status, "BROKEN");
+        assert.equal(auditRes.httpStatus, 404);
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it("should include TOTVS companies when auditAll is invoked without ats filter", async () => {
+      const originalFetch = globalThis.fetch;
+      const originalGetConfig = ConfigService.getConfig;
+      const originalUpdateConfig = ConfigService.updateConfig;
+      const checkedUrls: string[] = [];
+
+      ConfigService.getConfig = () => ({
+        searchTerms: [],
+        seniorityLevels: [],
+        contractTypes: [],
+        sources: [],
+        gupyCompanies: [],
+        greenhouseCompanies: [],
+        leverCompanies: [],
+        ashbyCompanies: [],
+        workableCompanies: [],
+        inhireCompanies: [],
+        solidesCompanies: [],
+        quickinCompanies: [],
+        smartrecruitersCompanies: [],
+        totvsCompanies: [
+          {
+            name: "TOTVS",
+            slug: "vempratotvs",
+            link: "https://atracaodetalentos.totvs.app/vempratotvs",
+            enabled: true,
+          },
+        ],
+      });
+      ConfigService.updateConfig = (patch) => ({
+        ...ConfigService.getConfig(),
+        ...patch,
+      });
+      globalThis.fetch = async (input) => {
+        const url = typeof input === "string" ? input : input.toString();
+        checkedUrls.push(url);
+        const res = new Response("<html>OK</html>", {
+          status: 200,
+          headers: { "content-type": "text/html" },
+        });
+        Object.defineProperty(res, "url", { value: url });
+        return res;
+      };
+
+      try {
+        const report = await CompanyAuditorService.auditAll();
+        assert.equal(report.totalChecked, 1);
+        assert.equal(report.healthyCount, 1);
+        assert.equal(report.results[0].ats, "TOTVS");
+        assert.equal(report.results[0].slug, "vempratotvs");
+        assert.ok(
+          checkedUrls.includes("https://atracaodetalentos.totvs.app/vempratotvs"),
+        );
+      } finally {
+        globalThis.fetch = originalFetch;
+        ConfigService.getConfig = originalGetConfig;
+        ConfigService.updateConfig = originalUpdateConfig;
+      }
     });
   });
 

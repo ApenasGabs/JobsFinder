@@ -265,17 +265,20 @@ export class ConfigService {
   }
 
   /**
-   * Extrai todas as empresas atualmente em memória para linhas compatíveis com `public.companies`.
+   * Extrai empresas das chaves ATS informadas (ou todas, por padrão) para linhas compatíveis com `public.companies`.
    */
-  public static extractAllCompaniesAsRows(
+  public static extractCompaniesRowsForKeys(
+    keys?: Array<keyof AppConfig>,
     configInput?: AppConfig,
   ): SupabaseCompanyRow[] {
     const cfg = configInput || this.getConfig();
+    const allowedKeys = keys ? new Set(keys) : null;
     const rows: SupabaseCompanyRow[] = [];
     const seenSlugKeys = new Set<string>();
     const seenUrls = new Set<string>();
 
     for (const [ats, key] of Object.entries(ATS_CONFIG_KEYS)) {
+      if (allowedKeys && !allowedKeys.has(key)) continue;
       const rawList = (cfg[key] as CompanyConfig[] | undefined) || [];
       const list =
         key === "totvsCompanies" ? normalizeTotvsCompanyList(rawList) : rawList;
@@ -304,6 +307,15 @@ export class ConfigService {
     }
 
     return rows;
+  }
+
+  /**
+   * Extrai todas as empresas atualmente em memória para linhas compatíveis com `public.companies`.
+   */
+  public static extractAllCompaniesAsRows(
+    configInput?: AppConfig,
+  ): SupabaseCompanyRow[] {
+    return this.extractCompaniesRowsForKeys(undefined, configInput);
   }
 
   public static getCacheStats(): CacheStats {
@@ -344,10 +356,95 @@ export class ConfigService {
 
   public static updateConfig(newConfig: Partial<AppConfig>): AppConfig {
     const current = this.getConfig();
-    const updated = { ...current, ...newConfig };
+    const normalizedPatch: Partial<AppConfig> = { ...newConfig };
+    if (Array.isArray(normalizedPatch.totvsCompanies)) {
+      normalizedPatch.totvsCompanies = normalizeTotvsCompanyList(
+        normalizedPatch.totvsCompanies,
+      );
+    }
+    const updated = { ...current, ...normalizedPatch };
     this.cachedConfig = updated;
     this.saveConfigToDisk(updated);
     return updated;
+  }
+
+  /**
+   * Sincroniza com o Supabase apenas as listas de empresas presentes em um patch de configuração.
+   */
+  public static async syncConfigPatchToSupabase(
+    patch: Partial<AppConfig>,
+    batchSize = 200,
+  ): Promise<{ attempted: boolean; synced: number; failedBatches: number; error?: string }> {
+    const atsKeySet = new Set<keyof AppConfig>(Object.values(ATS_CONFIG_KEYS));
+    const patchedKeys = (Object.keys(patch) as Array<keyof AppConfig>).filter(
+      (k) => atsKeySet.has(k) && Array.isArray(patch[k]),
+    );
+
+    if (patchedKeys.length === 0 || !SupabaseSyncService.isConfigured()) {
+      return { attempted: false, synced: 0, failedBatches: 0 };
+    }
+
+    const rows = this.extractCompaniesRowsForKeys(patchedKeys);
+    return this.pushRowsInBatches(rows, batchSize);
+  }
+
+  /**
+   * Envia todas as empresas (da memória ou do search.config.json em disco) para `public.companies` no Supabase.
+   */
+  public static async syncAllCompaniesToSupabase(options?: {
+    source?: "memory" | "disk";
+    batchSize?: number;
+  }): Promise<{ total: number; synced: number; failedBatches: number; error?: string }> {
+    if (!SupabaseSyncService.isConfigured()) {
+      return {
+        total: 0,
+        synced: 0,
+        failedBatches: 0,
+        error: "Supabase não configurado.",
+      };
+    }
+
+    const sourceConfig =
+      options?.source === "disk" ? this.loadLocalConfigFromDisk() : this.getConfig();
+    const rows = this.extractAllCompaniesAsRows(sourceConfig);
+    const pushResult = await this.pushRowsInBatches(rows, options?.batchSize || 200);
+    return {
+      total: rows.length,
+      synced: pushResult.synced,
+      failedBatches: pushResult.failedBatches,
+      error: pushResult.error,
+    };
+  }
+
+  private static async pushRowsInBatches(
+    rows: SupabaseCompanyRow[],
+    batchSize = 200,
+  ): Promise<{ attempted: boolean; synced: number; failedBatches: number; error?: string }> {
+    if (rows.length === 0) {
+      return { attempted: true, synced: 0, failedBatches: 0 };
+    }
+
+    let synced = 0;
+    let failedBatches = 0;
+    let lastError: string | undefined;
+
+    for (let i = 0; i < rows.length; i += batchSize) {
+      const batch = rows.slice(i, i + batchSize);
+      const res = await SupabaseSyncService.syncCompaniesBatch(batch);
+      if (res.success) {
+        synced += res.count;
+      } else {
+        failedBatches++;
+        lastError = res.error;
+      }
+    }
+
+    return {
+      attempted: true,
+      synced,
+      failedBatches,
+      error: lastError,
+    };
   }
 
   /**

@@ -284,4 +284,70 @@ describe("ConfigService & Supabase Hybrid Hot Cache (#19)", () => {
     assert.ok(sql.includes("UNIQUE (url)"));
     assert.ok(sql.includes("ENABLE ROW LEVEL SECURITY"));
   });
+
+  it("should normalize totvsCompanies on updateConfig and sync patched ATS companies to Supabase", async () => {
+    process.env.SUPABASE_URL = "https://mock.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "mock-service-role-key";
+
+    let upsertedRows: SupabaseCompanyRow[] = [];
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const urlStr = String(input);
+      if (init?.method === "POST" && urlStr.includes("on_conflict=ats,slug")) {
+        upsertedRows = JSON.parse(String(init.body));
+        return new Response(JSON.stringify(upsertedRows), { status: 201 });
+      }
+      return new Response(JSON.stringify([]), { status: 200 });
+    }) as typeof globalThis.fetch;
+
+    const patch = {
+      totvsCompanies: [
+        {
+          name: "Brudam",
+          slug: "vempratotvs",
+          link: "https://atracaodetalentos.totvs.app/vempratotvs",
+          enabled: true,
+        },
+        {
+          name: "Estuda.com",
+          slug: "estuda",
+          link: "https://atracaodetalentos.totvs.app/estuda",
+          enabled: true,
+        },
+      ],
+    };
+
+    const updated = ConfigService.updateConfig(patch);
+    assert.equal(updated.totvsCompanies?.length, 3);
+    assert.deepEqual(
+      updated.totvsCompanies?.map((c) => c.slug),
+      ["vempratotvs", "brudam", "estuda"],
+    );
+
+    const syncRes = await ConfigService.syncConfigPatchToSupabase(patch);
+    assert.equal(syncRes.attempted, true);
+    assert.equal(syncRes.failedBatches, 0);
+    assert.equal(syncRes.synced, 3);
+    assert.deepEqual(
+      upsertedRows.map((r) => `${r.ats}:${r.slug}`),
+      ["TOTVS:vempratotvs", "TOTVS:brudam", "TOTVS:estuda"],
+    );
+  });
+
+  it("should sync all companies from disk to Supabase via syncAllCompaniesToSupabase", async () => {
+    process.env.SUPABASE_URL = "https://mock.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "mock-service-role-key";
+
+    const pushedSlugs: string[] = [];
+    globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const body = init?.body ? (JSON.parse(String(init.body)) as SupabaseCompanyRow[]) : [];
+      for (const r of body) pushedSlugs.push(`${r.ats}:${r.slug}`);
+      return new Response(JSON.stringify(body), { status: 201 });
+    }) as typeof globalThis.fetch;
+
+    const result = await ConfigService.syncAllCompaniesToSupabase({ source: "disk" });
+    assert.equal(result.total, 3);
+    assert.equal(result.synced, 3);
+    assert.equal(result.failedBatches, 0);
+    assert.deepEqual(pushedSlugs, ["GUPY:cielo", "GUPY:pagseguro", "GREENHOUSE:agibank"]);
+  });
 });
